@@ -24,11 +24,6 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	return r
 }
 
-func (r *Rocket) MountNative(route string, handle func(http.ResponseWriter, *http.Request)) *Rocket {
-	http.HandleFunc(route, handle)
-	return r
-}
-
 func (r *Rocket) Launch() {
 	http.HandleFunc("/", r.handler)
 	log.Fatal(http.ListenAndServe(r.port, nil))
