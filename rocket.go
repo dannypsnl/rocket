@@ -1,7 +1,9 @@
 package rocket
 
 import (
+	"log"
 	"net/http"
+
 	"rocket/routes"
 )
 
@@ -20,7 +22,7 @@ func (r *Rocket) MountNative(route string, handle func(http.ResponseWriter, *htt
 }
 
 func (r *Rocket) Launch() {
-	http.ListenAndServe(r.port, nil)
+	log.Fatal(http.ListenAndServe(r.port, nil))
 }
 
 func Ignite(port string) *Rocket {
