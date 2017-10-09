@@ -15,6 +15,9 @@ type Rocket struct {
 
 func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	// TODO: 驗證url之後再綁定，因為url可能含有參數
+	// '/:id' is params in url.
+	// '/*filepath' is params about filepath.
+	// '/home, data' is params from post method.
 	r.handlers[route+h.Route] = h
 	return r
 }
