@@ -14,7 +14,7 @@ import (
 ```go
 const hello = routes.Handler {
     Route: "",
-    Do:    func() string {
+    Do:    func(...interface{}) string {
         return "Hello!!!"
     },
 }
