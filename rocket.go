@@ -1,19 +1,27 @@
 package rocket
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"rocket/routes"
 )
 
+func (rk *Rocket) handler(w http.ResponseWriter, r *http.Request) {
+	h := rk.routes[r.URL.Path]
+	fmt.Fprintf(w, "%s", h.Do())
+}
+
 type Rocket struct {
-	port string
+	port   string
+	routes map[string]routes.Handler
 }
 
 func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	// TODO: 驗證url之後再綁定，因為url可能含有參數
-	http.HandleFunc(route+h.Route, h.Handle)
+	r.routes[route+h.Route] = h
+	//http.HandleFunc(route+h.Route, h.Handle)
 	return r
 }
 
@@ -23,11 +31,13 @@ func (r *Rocket) MountNative(route string, handle func(http.ResponseWriter, *htt
 }
 
 func (r *Rocket) Launch() {
+	http.HandleFunc("/", r.handler)
 	log.Fatal(http.ListenAndServe(r.port, nil))
 }
 
 func Ignite(port string) *Rocket {
 	return &Rocket{
-		port: port,
+		port:   port,
+		routes: make(map[string]routes.Handler),
 	}
 }

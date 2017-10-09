@@ -23,6 +23,6 @@ func main() {
 	rocket.
 		Ignite(":8080").
 		Mount("/hello", hello).
-		MountNative("/", IndexHandler).
+		MountNative("/home", IndexHandler).
 		Launch()
 }
