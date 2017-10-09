@@ -14,10 +14,6 @@ var hello = routes.Handler{
 	},
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hello index")
-}
-
 func main() {
 	fmt.Println("GO web rocket!!!")
 	rocket.
