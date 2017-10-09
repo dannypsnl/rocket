@@ -12,6 +12,7 @@ type Rocket struct {
 }
 
 func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
+	// TODO: 驗證url之後再綁定，因為url可能含有參數
 	http.HandleFunc(route+h.Route, h.Handle)
 	return r
 }
