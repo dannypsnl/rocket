@@ -2,9 +2,9 @@ package rocket
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"rocket/routes"
 )
@@ -51,31 +51,13 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 }
 
 func (rk *Rocket) Launch() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		match := "/"
-		var paramsPart string
-		for _, m := range rk.matchs {
-			if strings.HasPrefix(r.URL.Path, m) {
-				match = m
-				paramsPart = r.URL.Path[len(m):]
-				break
-			}
-		}
-		var params []string
-		for _, param := range strings.Split(paramsPart, "/") {
-			if strings.Compare(param, "") != 0 {
-				params = append(params, param)
-			}
-		}
-		h := rk.handlers[match]
-
-		Context := make(map[string]string)
-		for i, param := range h.Params {
-			Context[param] = params[i]
-		}
-		fmt.Fprintf(w, h.Do(Context))
-	})
-	log.Fatal(http.ListenAndServe(rk.port, nil))
+	server := &http.Server{
+		Addr:         rk.port,
+		Handler:      rk,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	server.ListenAndServe()
 }
 
 func Ignite(port string) *Rocket {
@@ -83,4 +65,29 @@ func Ignite(port string) *Rocket {
 		port:     port,
 		handlers: make(map[string]routes.Handler),
 	}
+}
+
+func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	match := "/"
+	var paramsPart string
+	for _, m := range rk.matchs {
+		if strings.HasPrefix(r.URL.Path, m) {
+			match = m
+			paramsPart = r.URL.Path[len(m):]
+			break
+		}
+	}
+	var params []string
+	for _, param := range strings.Split(paramsPart, "/") {
+		if strings.Compare(param, "") != 0 {
+			params = append(params, param)
+		}
+	}
+	h := rk.handlers[match]
+
+	Context := make(map[string]string)
+	for i, param := range h.Params {
+		Context[param] = params[i]
+	}
+	fmt.Fprintf(w, h.Do(Context))
 }
