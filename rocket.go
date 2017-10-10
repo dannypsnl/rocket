@@ -35,7 +35,7 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 		}
 		if r == '*' {
 			match = route[:i-1]
-			params = append(params, route[i+1:])
+			params = append(params, route[i:])
 			break
 		}
 		if i == len(route)-1 {
@@ -73,24 +73,28 @@ func Ignite(port string) *Rocket {
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var match string
 	var paramsPart string
-	for _, m := range rk.matchs {
+	for _, m := range rk.matchs { // rk.matchs are those static routes
 		if strings.HasPrefix(r.URL.Path, m) {
 			match = m
 			paramsPart = r.URL.Path[len(m):]
 			break
 		}
 	}
-	var params []string
-	for _, param := range strings.Split(paramsPart, "/") {
-		if strings.Compare(param, "") != 0 {
-			params = append(params, param)
+	h := rk.handlers[match]
+	Context := make(map[string]string)
+	if strings.HasPrefix(h.Params[0], "*") {
+		Context[h.Params[0][1:]] = paramsPart
+	} else {
+		var params []string
+		for _, param := range strings.Split(paramsPart, "/") {
+			if strings.Compare(param, "") != 0 {
+				params = append(params, param)
+			}
+		}
+		for i, param := range h.Params {
+			Context[param] = params[i]
 		}
 	}
-	h := rk.handlers[match]
 
-	Context := make(map[string]string)
-	for i, param := range h.Params {
-		Context[param] = params[i]
-	}
 	fmt.Fprintf(w, h.Do(Context))
 }
