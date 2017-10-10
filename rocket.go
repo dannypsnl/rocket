@@ -14,10 +14,27 @@ type Rocket struct {
 }
 
 func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
+	open := false
+	start := -1
+	s := ""
 	// TODO: 驗證url之後再綁定，因為url可能含有參數
 	// '/:id' is params in url.
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
+	for i, r := range route {
+		if r == ':' {
+			open = true
+			start = i + 1
+		}
+		if open {
+			fmt.Println("%s", string(r))
+			if r == '/' || i == len(route)-1 {
+				s = route[start : i+1]
+				open = false
+			}
+		}
+	}
+	fmt.Println(s)
 	r.handlers[route+h.Route] = h
 	return r
 }

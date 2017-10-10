@@ -17,6 +17,6 @@ func main() {
 	fmt.Println("GO web rocket!!!")
 	rocket.
 		Ignite(":8080").
-		Mount("/hello", hello).
+		Mount("/hello/:name", hello).
 		Launch()
 }
