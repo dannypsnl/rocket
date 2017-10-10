@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"rocket/routes"
 )
 
 type Rocket struct {
 	port     string
+	matchs   []string
 	handlers map[string]routes.Handler
 }
 
@@ -43,14 +45,24 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 		}
 	}
 	h.Params = params
+	r.matchs = append(r.matchs, match)
 	r.handlers[match] = h
 	return r
 }
 
 func (rk *Rocket) Launch() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		h := rk.handlers[r.URL.Path]
-		fmt.Fprintf(w, "%v", h.Params)
+		match := "/"
+		var paramsPart string
+		for _, m := range rk.matchs {
+			if strings.HasPrefix(r.URL.Path, m) {
+				match = m
+				paramsPart = r.URL.Path[len(m):]
+				break
+			}
+		}
+		h := rk.handlers[match]
+		fmt.Fprintf(w, "%v\t%v", h.Params, paramsPart)
 		fmt.Fprintf(w, h.Do())
 	})
 	log.Fatal(http.ListenAndServe(rk.port, nil))
