@@ -24,12 +24,13 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 		if r == ':' || r == '*' {
 			start = i + 1
 		}
-		if r == '/' || i == len(route)-1 {
-			// Get param setting string.
+		if i == len(route)-1 {
 			s = route[start : i+1]
-			if r == '/' {
-				s = route[start:i]
-			}
+			fmt.Println(s)
+		}
+		if r == '/' {
+			// Get param setting string.
+			s = route[start:i]
 			fmt.Println(s)
 		}
 	}
