@@ -62,7 +62,7 @@ func (rk *Rocket) Launch() {
 			}
 		}
 		h := rk.handlers[match]
-		fmt.Fprintf(w, "%v\t%v", h.Params, paramsPart)
+		fmt.Fprintf(w, "%v\t%v\n", h.Params, paramsPart)
 		fmt.Fprintf(w, h.Do())
 	})
 	log.Fatal(http.ListenAndServe(rk.port, nil))
