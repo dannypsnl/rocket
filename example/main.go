@@ -7,16 +7,16 @@ import (
 )
 
 var hello = routes.Handler{
-	Route: "",
-	Do: func(...interface{}) string {
-		return "Hello"
+	Route: "/:name/:age",
+	Do: func(Context map[string]string) string {
+		return fmt.Sprintf("Hello, %s.\nYour age is %s", Context["name"], Context["age"])
 	},
 }
 
 var src = routes.Handler{
-	Route: "",
-	Do: func(...interface{}) string {
-		return "Hi"
+	Route: "/*filepath",
+	Do: func(Context map[string]string) string {
+		return fmt.Sprintf("filepath: %s", Context["filepath"])
 	},
 }
 
@@ -24,8 +24,7 @@ func main() {
 	fmt.Println("GO web rocket!!!")
 	rocket.
 		Ignite(":8080").
-		Mount("/hello/:name/:age", hello).
-		Mount("/hi/danny/:age", hello).
-		Mount("/src/*filepath", src).
+		Mount("/hello", hello).
+		Mount("/src", src).
 		Launch()
 }
