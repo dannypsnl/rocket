@@ -13,7 +13,7 @@ import (
 ```go
 import "fmt"
 
-const hello = rocket.Handler {
+var hello = rocket.Handler {
     Route: "/:name/:age",
     Do:    func(Context map[string]string) string {
         return fmt.Sprintf("Hello, %s\nYour age is %s", Context["name"], Context["age"])
