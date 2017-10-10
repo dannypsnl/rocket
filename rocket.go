@@ -18,6 +18,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	match := ""
 
 	firstTime := true
+	open := false
 	start := 0
 	var params []string
 	// '/:id' is params in url.
@@ -30,16 +31,18 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 				firstTime = false
 			}
 			start = i + 1
+			open = true
 		}
 		if i == len(route)-1 {
 			params = append(params, route[start:i+1])
 		}
-		if r == '/' {
+		if r == '/' && open {
 			// Get param setting string.
 			params = append(params, route[start:i])
+			open = false
 		}
 	}
-	h.Match = params
+	h.Params = params
 	r.handlers[match] = h
 	return r
 }
@@ -47,7 +50,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 func (rk *Rocket) Launch() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		h := rk.handlers[r.URL.Path]
-		fmt.Fprintf(w, "%v", h.Match)
+		fmt.Fprintf(w, "%v", h.Params)
 		fmt.Fprintf(w, h.Do())
 	})
 	log.Fatal(http.ListenAndServe(rk.port, nil))

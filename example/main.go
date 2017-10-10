@@ -25,6 +25,7 @@ func main() {
 	rocket.
 		Ignite(":8080").
 		Mount("/hello/:name/:age", hello).
+		Mount("/hi/danny/:age", hello).
 		Mount("/src/*filepath", src).
 		Launch()
 }
