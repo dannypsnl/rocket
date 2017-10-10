@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type Rocket struct {
-	server   *http.Server
+	port     string
 	matchs   []string
 	handlers map[string]Handler
 }
@@ -54,17 +53,13 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 }
 
 func (rk *Rocket) Launch() {
-	rk.server.Handler = rk
-	rk.server.ListenAndServe()
+	http.HandleFunc("/", rk.ServeHTTP)
+	http.ListenAndServe(rk.port, nil)
 }
 
 func Ignite(port string) *Rocket {
 	return &Rocket{
-		server: &http.Server{
-			Addr:         port,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 10 * time.Second,
-		},
+		port:     port,
 		handlers: make(map[string]Handler),
 	}
 }
