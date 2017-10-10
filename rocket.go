@@ -19,8 +19,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 
 	firstTime := true
 	start := 0
-	s := ""
-	// TODO: 驗證url之後再綁定，因為url可能含有參數
+	var params []string
 	// '/:id' is params in url.
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
@@ -33,13 +32,11 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 			start = i + 1
 		}
 		if i == len(route)-1 {
-			s = route[start : i+1]
-			fmt.Println(s)
+			params = append(params, route[start:i+1])
 		}
 		if r == '/' {
 			// Get param setting string.
-			s = route[start:i]
-			fmt.Println(s)
+			params = append(params, route[start:i])
 		}
 	}
 	r.handlers[match] = h
