@@ -9,7 +9,6 @@ import (
 
 type Rocket struct {
 	server   *http.Server
-	port     string
 	matchs   []string
 	handlers map[string]Handler
 }
@@ -55,18 +54,17 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 }
 
 func (rk *Rocket) Launch() {
-	rk.server = &http.Server{
-		Addr:         rk.port,
-		Handler:      rk,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	rk.server.Handler = rk
 	rk.server.ListenAndServe()
 }
 
 func Ignite(port string) *Rocket {
 	return &Rocket{
-		port:     port,
+		server: &http.Server{
+			Addr:         port,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		},
 		handlers: make(map[string]Handler),
 	}
 }
