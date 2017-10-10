@@ -1,5 +1,5 @@
 # rocket
-This pkg is a web framework.
+A web framework.
 ## Install
 Use your go get.
 ## Usage
