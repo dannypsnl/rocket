@@ -27,15 +27,18 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 			start = i + 1
 		}
 		if open {
-			fmt.Println("%s", string(r))
+			//fmt.Println("%s", string(r))
 			if r == '/' || i == len(route)-1 {
 				// Get param setting string.
 				s = route[start : i+1]
+				if r == '/' {
+					s = route[start:i]
+				}
+				fmt.Println(s)
 				open = false
 			}
 		}
 	}
-	fmt.Println(s)
 	r.handlers[route+h.Route] = h
 	return r
 }
