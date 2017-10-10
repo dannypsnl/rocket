@@ -3,17 +3,16 @@ package main
 import (
 	"fmt"
 	"rocket"
-	"rocket/routes"
 )
 
-var hello = routes.Handler{
+var hello = rocket.Handler{
 	Route: "/:name/:age",
 	Do: func(Context map[string]string) string {
 		return fmt.Sprintf("Hello, %s.\nYour age is %s", Context["name"], Context["age"])
 	},
 }
 
-var src = routes.Handler{
+var src = rocket.Handler{
 	Route: "/*filepath",
 	Do: func(Context map[string]string) string {
 		return fmt.Sprintf("filepath: %s", Context["filepath"])

@@ -1,4 +1,4 @@
-package routes
+package rocket
 
 type Handler struct {
 	Route  string

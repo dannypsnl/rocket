@@ -5,17 +5,15 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"rocket/routes"
 )
 
 type Rocket struct {
 	port     string
 	matchs   []string
-	handlers map[string]routes.Handler
+	handlers map[string]Handler
 }
 
-func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
+func (r *Rocket) Mount(route string, h Handler) *Rocket {
 	route += h.Route
 	match := ""
 
@@ -63,7 +61,7 @@ func (rk *Rocket) Launch() {
 func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:     port,
-		handlers: make(map[string]routes.Handler),
+		handlers: make(map[string]Handler),
 	}
 }
 
