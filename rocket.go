@@ -14,6 +14,10 @@ type Rocket struct {
 }
 
 func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
+	route += h.Route
+	match := ""
+
+	firstTime := true
 	start := 0
 	s := ""
 	// TODO: 驗證url之後再綁定，因為url可能含有參數
@@ -22,6 +26,10 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	// '/home, data' is params from post method.
 	for i, r := range route {
 		if r == ':' || r == '*' {
+			if firstTime {
+				match = route[:i-1]
+				firstTime = false
+			}
 			start = i + 1
 		}
 		if i == len(route)-1 {
@@ -34,7 +42,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 			fmt.Println(s)
 		}
 	}
-	r.handlers[route+h.Route] = h
+	r.handlers[match] = h
 	return r
 }
 
