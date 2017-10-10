@@ -39,6 +39,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 			params = append(params, route[start:i])
 		}
 	}
+	h.Match = params
 	r.handlers[match] = h
 	return r
 }
@@ -46,6 +47,7 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 func (rk *Rocket) Launch() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		h := rk.handlers[r.URL.Path]
+		fmt.Fprintf(w, "%v", h.Match)
 		fmt.Fprintf(w, h.Do())
 	})
 	log.Fatal(http.ListenAndServe(rk.port, nil))
