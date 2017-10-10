@@ -22,13 +22,14 @@ func (r *Rocket) Mount(route string, h routes.Handler) *Rocket {
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
 	for i, r := range route {
-		if r == ':' {
+		if r == ':' || r == '*' {
 			open = true
 			start = i + 1
 		}
 		if open {
 			fmt.Println("%s", string(r))
 			if r == '/' || i == len(route)-1 {
+				// Get param setting string.
 				s = route[start : i+1]
 				open = false
 			}
