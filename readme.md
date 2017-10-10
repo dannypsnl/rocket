@@ -7,14 +7,13 @@ Use your go get.
 ```go
 import (
     "rocket"
-    "rocket/routes"
 )
 ```
 #### Create Handler
 ```go
 import "fmt"
 
-const hello = routes.Handler {
+const hello = rocket.Handler {
     Route: "/:name/:age",
     Do:    func(Context map[string]string) string {
         return fmt.Sprintf("Hello, %s\nYour age is %s", Context["name"], Context["age"])
