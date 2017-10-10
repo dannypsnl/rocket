@@ -25,13 +25,18 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
 	for i, r := range route {
-		if r == ':' || r == '*' {
+		if r == ':' {
 			if firstTime {
 				match = route[:i-1]
 				firstTime = false
 			}
 			start = i + 1
 			open = true
+		}
+		if r == '*' {
+			match = route[:i-1]
+			params = append(params, route[i+1:])
+			break
 		}
 		if i == len(route)-1 {
 			params = append(params, route[start:i+1])
