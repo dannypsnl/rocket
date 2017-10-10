@@ -68,7 +68,7 @@ func Ignite(port string) *Rocket {
 }
 
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	match := "/"
+	var match string
 	var paramsPart string
 	for _, m := range rk.matchs {
 		if strings.HasPrefix(r.URL.Path, m) {
