@@ -71,10 +71,8 @@ func (rk *Rocket) Launch() {
 
 		Context := make(map[string]string)
 		for i, param := range h.Params {
-			fmt.Fprintf(w, "%v\n", param)
 			Context[param] = params[i]
 		}
-		fmt.Fprintf(w, "%v\t%v\t%v\n", h.Params, params, Context)
 		fmt.Fprintf(w, h.Do(Context))
 	})
 	log.Fatal(http.ListenAndServe(rk.port, nil))
