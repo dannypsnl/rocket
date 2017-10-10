@@ -8,6 +8,7 @@ import (
 )
 
 type Rocket struct {
+	server   *http.Server
 	port     string
 	matchs   []string
 	handlers map[string]Handler
@@ -54,13 +55,13 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 }
 
 func (rk *Rocket) Launch() {
-	server := &http.Server{
+	rk.server = &http.Server{
 		Addr:         rk.port,
 		Handler:      rk,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	server.ListenAndServe()
+	rk.server.ListenAndServe()
 }
 
 func Ignite(port string) *Rocket {
