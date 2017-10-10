@@ -2,6 +2,7 @@ package rocket
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -54,7 +55,7 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 
 func (rk *Rocket) Launch() {
 	http.HandleFunc("/", rk.ServeHTTP)
-	http.ListenAndServe(rk.port, nil)
+	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
 func Ignite(port string) *Rocket {
