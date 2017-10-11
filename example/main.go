@@ -14,6 +14,18 @@ var hello = rocket.Handler{
 	},
 }
 
+var index = rocket.Handler{
+	Route: "",
+	Do: func(Context map[string]string) string {
+		path := "./static/index.html"
+		buf, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return string(buf)
+	},
+}
+
 var src = rocket.Handler{
 	Route: "/*filepath",
 	Do: func(Context map[string]string) string {
@@ -31,6 +43,7 @@ func main() {
 	rocket.
 		Ignite(":8080").
 		Mount("/hello", hello).
+		Mount("/", index).
 		Mount("/", src).
 		Launch()
 }
