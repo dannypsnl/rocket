@@ -17,7 +17,7 @@ var hello = rocket.Handler{
 var src = rocket.Handler{
 	Route: "/*filepath",
 	Do: func(Context map[string]string) string {
-		path := "./example/static/" + Context["filepath"]
+		path := "./static/" + Context["filepath"]
 		buf, err := ioutil.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
