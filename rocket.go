@@ -13,17 +13,14 @@ type Rocket struct {
 	handlers map[string]Handler
 }
 
-func (r *Rocket) Mount(route string, h Handler) *Rocket {
-	route += h.Route
+func split(route string) (string, []string) {
 	match := ""
 
 	firstTime := true
 	open := false
 	start := 0
+
 	var params []string
-	// '/:id' is params in url.
-	// '/*filepath' is params about filepath.
-	// '/home, data' is params from post method.
 	for i, r := range route {
 		if r == ':' {
 			if firstTime {
@@ -47,6 +44,15 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 			open = false
 		}
 	}
+	return match, params
+}
+
+func (r *Rocket) Mount(route string, h Handler) *Rocket {
+	route += h.Route
+	// '/:id' is params in url.
+	// '/*filepath' is params about filepath.
+	// '/home, data' is params from post method.
+	match, params := split(route)
 	h.Params = params
 	r.matchs = append(r.matchs, match)
 	r.handlers[match] = h
