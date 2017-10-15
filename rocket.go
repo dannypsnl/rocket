@@ -18,6 +18,7 @@ func split(route string) (string, []string) {
 
 	firstTime := true
 	open := false
+	neveropen := true
 	start := 0
 
 	var params []string
@@ -29,6 +30,7 @@ func split(route string) (string, []string) {
 			}
 			start = i + 1
 			open = true
+			neveropen = false
 		}
 		if r == '*' {
 			match = route[:i-1]
@@ -36,9 +38,13 @@ func split(route string) (string, []string) {
 			break
 		}
 		if i == len(route)-1 {
-			params = append(params, route[start:i+1])
+			if neveropen {
+				match = route
+			} else {
+				params = append(params, route[start:i+1])
+			}
 		}
-		if r == '/' && open {
+		if open && r == '/' {
 			// Get param setting string.
 			params = append(params, route[start:i])
 			open = false
