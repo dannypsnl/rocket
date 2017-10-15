@@ -59,7 +59,7 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
 	match, params := split(route)
-	h.Params = params
+	h.params = params
 	r.matchs = append(r.matchs, match)
 	r.handlers[match] = h
 	return r
@@ -89,8 +89,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	h := rk.handlers[match]
 	Context := make(map[string]string)
-	if strings.HasPrefix(h.Params[0], "*") {
-		Context[h.Params[0][1:]] = paramsPart
+	if strings.HasPrefix(h.params[0], "*") {
+		Context[h.params[0][1:]] = paramsPart
 	} else {
 		var params []string
 		for _, param := range strings.Split(paramsPart, "/") {
@@ -98,7 +98,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				params = append(params, param)
 			}
 		}
-		for i, param := range h.Params {
+		for i, param := range h.params {
 			Context[param] = params[i]
 		}
 	}
