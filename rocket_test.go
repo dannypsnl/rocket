@@ -15,4 +15,6 @@ func SplitContext(t *testing.T, route string, expectedMatch string, lengthOfPara
 func TestSplit(t *testing.T) {
 	SplitContext(t, "/", "/", 0)
 	SplitContext(t, "/home/:name", "/home", 1)
+	SplitContext(t, "/home/:name/age/:age", "/home", 2)
+	SplitContext(t, "/home/dan/*name", "/home/dan", 1)
 }
