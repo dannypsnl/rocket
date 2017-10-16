@@ -6,7 +6,7 @@ import (
 )
 
 func SplitContext(t *testing.T, route string, expectedMatch string, lengthOfParamsExpected int, id int) {
-	match, params := splitMountUrl2(route)
+	match, params := splitMountUrl(route)
 	if match != expectedMatch {
 		t.Error(`Number`, id, `match should be '`, expectedMatch, `', but is `, match)
 	}
