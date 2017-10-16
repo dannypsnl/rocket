@@ -1,6 +1,9 @@
 package rocket
 
-import "testing"
+import (
+	"regexp"
+	"testing"
+)
 
 func SplitContext(t *testing.T, route string, expectedMatch string, lengthOfParamsExpected int) {
 	match, params := split(route)
@@ -17,4 +20,14 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/home/:name", "/home", 1)
 	SplitContext(t, "/home/:name/age/:age", "/home", 2)
 	SplitContext(t, "/home/dan/*name", "/home/dan", 1)
+}
+func TestRegex(t *testing.T) {
+	legalCharsInUrl := "[a-zA-Z0-9-_]+"
+	r, _ := regexp.Compile("/home/" + legalCharsInUrl + "/src")
+	if !r.MatchString("/home/dan/src") {
+		t.Error("fail")
+	}
+	if r.MatchString("/home/dan/20/src") {
+		t.Error("fail")
+	}
 }
