@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/dannypsnl/rocket"
 	"io/ioutil"
 	"log"
-	"rocket"
 )
 
 var hello = rocket.Handler{

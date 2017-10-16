@@ -6,7 +6,7 @@ Use your go get.
 #### Import
 ```go
 import (
-    "rocket"
+    "github.com/dannypsnl/rocket"
 )
 ```
 #### Create Handler
