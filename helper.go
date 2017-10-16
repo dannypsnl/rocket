@@ -1,6 +1,6 @@
 package rocket
 
-func split(route string) (string, []string) {
+func splitMountUrl(route string) (string, []string) {
 	match := ""
 
 	firstTime := true

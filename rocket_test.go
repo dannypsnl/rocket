@@ -6,7 +6,7 @@ import (
 )
 
 func SplitContext(t *testing.T, route string, expectedMatch string, lengthOfParamsExpected int, id int) {
-	match, params := split(route)
+	match, params := splitMountUrl(route)
 	if match != expectedMatch {
 		t.Error(`Number`, id, `match should be '`, expectedMatch, `', but is `, match)
 	}
@@ -19,6 +19,7 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/", "/", 0, 0)
 	SplitContext(t, "/home/:name", "/home/*", 1, 1)
 	SplitContext(t, "/home/:name/age/:age", "/home/*/age/*", 2, 2)
+	SplitContext(t, "/home/:name/:age", "/home/*/*", 2, 2)
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 

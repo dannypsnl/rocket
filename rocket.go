@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 	// '/:id' is params in url.
 	// '/*filepath' is params about filepath.
 	// '/home, data' is params from post method.
-	match, params := split(route)
+	match, params := splitMountUrl(route)
 	h.params = params
 	r.matchs = append(r.matchs, match)
 	r.handlers[match] = h
@@ -39,29 +40,31 @@ func Ignite(port string) *Rocket {
 
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var match string
-	var paramsPart string
+	var rqUrl string
 	for _, m := range rk.matchs { // rk.matchs are those static routes
-		if strings.HasPrefix(r.URL.Path, m) {
+		reg, _ := regexp.Compile(m)
+		if reg.MatchString(r.URL.Path) {
 			match = m
-			paramsPart = r.URL.Path[len(m):]
+			rqUrl = r.URL.Path
 			break
 		}
 	}
 	h := rk.handlers[match]
+	matchEls := strings.Split(match, "/")
 	Context := make(map[string]string)
-	if strings.HasPrefix(h.params[0], "*") {
-		Context[h.params[0][1:]] = paramsPart
-	} else {
-		var params []string
-		for _, param := range strings.Split(paramsPart, "/") {
-			if strings.Compare(param, "") != 0 {
-				params = append(params, param)
-			}
-		}
-		for i, param := range h.params {
-			Context[param] = params[i]
+	splitRqUrl := strings.Split(rqUrl, "/")
+	fmt.Fprintf(w, "%#v\t%#v\t%#v%#v\n", matchEls, splitRqUrl, rqUrl, match)
+	j := 0
+	for i, p := range splitRqUrl {
+		if matchEls[i] == "*" {
+			Context[h.params[j]] = p
+			j++
+		} else if matchEls[i] == ".*?" {
+			Context[h.params[j]] = strings.Join(splitRqUrl[i:], "/")
+			break
 		}
 	}
+	fmt.Fprintf(w, "%#v\t%#v\n", Context, h.params)
 
 	fmt.Fprintf(w, h.Do(Context))
 }
