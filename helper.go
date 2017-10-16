@@ -20,7 +20,7 @@ func split(route string) (string, []string) {
 			neveropen = false
 		}
 		if r == '*' {
-			match = route[:i-1]
+			match = route[:i-1] + "/.*?"
 			params = append(params, route[i:])
 			break
 		}
@@ -28,13 +28,21 @@ func split(route string) (string, []string) {
 			if neveropen {
 				match = route
 			} else {
+				match += "/*"
 				params = append(params, route[start:i+1])
 			}
 		}
 		if open && r == '/' {
 			// Get param setting string.
+			match += "/*"
+			if i != len(route)-1 {
+				match += "/"
+			}
 			params = append(params, route[start:i])
 			open = false
+		}
+		if !open && r != '/' {
+			match += string(route[i])
 		}
 	}
 	return match, params
