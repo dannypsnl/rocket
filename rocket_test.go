@@ -24,10 +24,11 @@ func TestSplit(t *testing.T) {
 func TestRegex(t *testing.T) {
 	legalCharsInUrl := "[a-zA-Z0-9-_]+"
 	r, _ := regexp.Compile("/home/" + legalCharsInUrl + "/src")
-	if !r.MatchString("/home/dan/src") {
+	r2, _ := regexp.Compile("/home/*/src")
+	if !r.MatchString("/home/dan/src") && !r2.MatchString("/home/dan/src") {
 		t.Error("fail")
 	}
-	if r.MatchString("/home/dan/20/src") {
+	if r.MatchString("/home/dan/20/src") && r2.MatchString("/home/dan/20/src") {
 		t.Error("fail")
 	}
 }
