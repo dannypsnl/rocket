@@ -29,7 +29,7 @@ func (rk *Rocket) Launch() {
 }
 
 func (rk *Rocket) Dump() {
-	fmt.Printf("match: %#v\n", rk.matchs)
+	fmt.Printf("matchs: %#v\n", rk.matchs)
 	fmt.Printf("handlers: %#v\n", rk.handlers)
 }
 
@@ -49,8 +49,13 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				match = m
 				break
 			}
+		} else {
+			if m == r.URL.Path {
+				match = m
+			}
 		}
 	}
+	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
 	h := rk.handlers[match]
 	matchEls := strings.Split(match, "/")
 	Context := make(map[string]string)

@@ -8,8 +8,7 @@ import (
 var hello = rocket.Handler{
 	Route: "/:name/age/:age",
 	Do: func(Context map[string]string) string {
-		return fmt.Sprintf("Hello, %s.\nYour age is %s\n", "danny", "20") +
-			fmt.Sprintf("Hello, %s.\nYour age is %s", Context["name"], Context["age"])
+		return fmt.Sprintf("Hello, %s.\nYour age is %s\n", Context["name"], Context["age"])
 	},
 }
 
@@ -30,8 +29,8 @@ func main() {
 	fmt.Println("GO web rocket!!!")
 	rocket.
 		Ignite(":8080").
-		Mount("/", index).
-		Mount("/", static).
 		Mount("/hello", hello).
+		Mount("/", static).
+		Mount("/", index).
 		Launch()
 }
