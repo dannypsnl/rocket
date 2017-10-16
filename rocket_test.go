@@ -24,7 +24,7 @@ func TestSplit(t *testing.T) {
 }
 
 var hello = Handler{
-	Route: "/name/:name/age/:age",
+	Route: "/:name/age/:age",
 	Do: func(map[string]string) string {
 		return "hello"
 	},
@@ -34,15 +34,7 @@ func TestRegex(t *testing.T) {
 	rk := Ignite(":8080").
 		Mount("/hello", hello)
 	r, _ := regexp.Compile(rk.matchs[0])
-	if !r.MatchString("/hello/name/dan/age/20") {
+	if !r.MatchString("/hello/dan/age/20") {
 		t.Error("Match should success, but it is ", rk.matchs[0])
-	}
-	r, _ = regexp.Compile("/home/" + legalCharsInUrl + "/src")
-	r2, _ := regexp.Compile("/home/*/src")
-	if !r.MatchString("/home/dan/src") && !r2.MatchString("/home/dan/src") {
-		t.Error("fail")
-	}
-	if r.MatchString("/home/dan/20/src") && r2.MatchString("/home/dan/20/src") {
-		t.Error("fail")
 	}
 }

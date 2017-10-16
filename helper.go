@@ -2,7 +2,7 @@ package rocket
 
 import "strings"
 
-const legalCharsInUrl = "[a-zA-Z0-9-_]+"
+const legalCharsInUrl = "([a-zA-Z0-9-_]+)"
 
 func splitMountUrl(route string) (string, []string) {
 	var match string

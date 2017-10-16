@@ -43,10 +43,12 @@ func Ignite(port string) *Rocket {
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var match string
 	for _, m := range rk.matchs { // rk.matchs are those static routes
-		reg, _ := regexp.Compile(m)
-		if reg.MatchString(r.URL.Path) {
-			match = m
-			break
+		if m != "/" {
+			matched, err := regexp.MatchString(m, r.URL.Path)
+			if matched && err == nil {
+				match = m
+				break
+			}
 		}
 	}
 	h := rk.handlers[match]
@@ -55,7 +57,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	splitRqUrl := strings.Split(r.URL.Path, "/")
 	j := 0
 	for i, p := range splitRqUrl {
-		if matchEls[i] == "*" {
+		if matchEls[i] == legalCharsInUrl {
 			Context[h.params[j]] = p
 			j++
 		} else if matchEls[i] == ".*?" {
