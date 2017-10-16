@@ -17,15 +17,27 @@ func SplitContext(t *testing.T, route string, expectedMatch string, lengthOfPara
 
 func TestSplit(t *testing.T) {
 	SplitContext(t, "/", "/", 0, 0)
-	SplitContext(t, "/home/:name", "/home/*", 1, 1)
-	SplitContext(t, "/home/:name/age/:age", "/home/*/age/*", 2, 2)
-	SplitContext(t, "/home/:name/:age", "/home/*/*", 2, 2)
+	SplitContext(t, "/home/:name", "/home/"+legalCharsInUrl, 1, 1)
+	SplitContext(t, "/home/:name/age/:age", "/home/"+legalCharsInUrl+"/age/"+legalCharsInUrl, 2, 2)
+	SplitContext(t, "/home/:name/:age", "/home/"+legalCharsInUrl+"/"+legalCharsInUrl, 2, 2)
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 
+var hello = Handler{
+	Route: "/name/:name/age/:age",
+	Do: func(map[string]string) string {
+		return "hello"
+	},
+}
+
 func TestRegex(t *testing.T) {
-	legalCharsInUrl := "[a-zA-Z0-9-_]+"
-	r, _ := regexp.Compile("/home/" + legalCharsInUrl + "/src")
+	rk := Ignite(":8080").
+		Mount("/hello", hello)
+	r, _ := regexp.Compile(rk.matchs[0])
+	if !r.MatchString("/hello/name/dan/age/20") {
+		t.Error("Match should success, but it is ", rk.matchs[0])
+	}
+	r, _ = regexp.Compile("/home/" + legalCharsInUrl + "/src")
 	r2, _ := regexp.Compile("/home/*/src")
 	if !r.MatchString("/home/dan/src") && !r2.MatchString("/home/dan/src") {
 		t.Error("fail")
