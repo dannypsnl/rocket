@@ -22,12 +22,11 @@ func splitMountUrl(route string) (string, []string) {
 		if r == '*' {
 			match = route[:i-1] + "/.*?"
 			params = append(params, route[i:])
+			neveropen = false
 			break
 		}
 		if i == len(route)-1 {
-			if neveropen {
-				match = route
-			} else {
+			if !neveropen {
 				match += "/*"
 				params = append(params, route[start:i+1])
 			}
@@ -44,6 +43,9 @@ func splitMountUrl(route string) (string, []string) {
 		if !open && r != '/' {
 			match += string(route[i])
 		}
+	}
+	if neveropen {
+		match = route
 	}
 	return match, params
 }
