@@ -55,8 +55,9 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var match string
 	for _, m := range rk.matchs { // rk.matchs are those static routes
 		if m == "/" {
-			if m == r.URL.Path {
+			if r.URL.Path == "/" {
 				match = m
+				break
 			}
 		} else {
 			matched, err := regexp.MatchString(m, r.URL.Path)
