@@ -25,7 +25,7 @@ func TestSplit(t *testing.T) {
 
 var hello = Handler{
 	Route: "/:name/age/:age",
-	Do: func(map[string]string) string {
+	Do: func(Context) string {
 		return "hello"
 	},
 }
