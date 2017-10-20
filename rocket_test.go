@@ -57,3 +57,27 @@ func TestContextType(t *testing.T) {
 		t.Error("Alias of map should workable, Context>name is ", ctx["name"])
 	}
 }
+
+type response struct {
+	contentType string
+	messages    []string
+}
+
+type ResponseBuilder struct {
+	contentType string
+	messages    []string
+}
+
+func (rb *ResponseBuilder) Done() response {
+	return response{
+		contentType: rb.contentType,
+		messages:    rb.messages,
+	}
+}
+
+func TestResponseBuilder(t *testing.T) {
+	rb := ResponseBuilder{}
+	if rb.Done().contentType != "" {
+		t.Error("ResponseBuilder should had nothing.")
+	}
+}
