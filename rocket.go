@@ -24,6 +24,9 @@ type Rocket struct {
 }
 
 func (r *Rocket) Mount(route string, h Handler) *Rocket {
+	if !verifyBase(route) {
+		panic("Base route can not contain dynamic route.")
+	}
 	route += h.Route
 	match, params := splitMountUrl(route)
 	h.params = params

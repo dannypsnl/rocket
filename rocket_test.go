@@ -38,3 +38,15 @@ func TestRegex(t *testing.T) {
 		t.Error("Match should success, but it is ", rk.matchs[0])
 	}
 }
+
+func TestVerifyBase(t *testing.T) {
+	test_strs := []string{
+		"/*path",
+		"/hello/:name",
+	}
+	for _, str := range test_strs {
+		if verifyBase(str) {
+			t.Error("Base route should not contain dynamic part.")
+		}
+	}
+}

@@ -1,6 +1,9 @@
 package rocket
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 const legalCharsInUrl = "([a-zA-Z0-9-_]+)"
 
@@ -26,4 +29,12 @@ func splitMountUrl(route string) (string, []string) {
 		match = "/"
 	}
 	return match, params
+}
+
+func verifyBase(route string) bool {
+	r, _ := regexp.Compile(".*?[:*].*?")
+	if r.MatchString(route) {
+		return false
+	}
+	return true
 }
