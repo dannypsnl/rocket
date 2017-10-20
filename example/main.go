@@ -21,7 +21,7 @@ var index = rocket.Handler{
 var static = rocket.Handler{
 	Route: "/*path",
 	Do: func(Context map[string]string) string {
-		return "Home"
+		return "static/" + Context["path"]
 	},
 }
 
