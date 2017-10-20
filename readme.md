@@ -18,8 +18,8 @@ import "fmt"
 
 var hello = rocket.Handler {
     Route: "/:name/age/:age",
-    Do:    func(context map[string]string) string {
-        return fmt.Sprintf("Hello, %s\nYour age is %s", context["name"], context["age"])
+    Do:    func(ctx rocket.Context) string {
+        return fmt.Sprintf("Hello, %s\nYour age is %s", ctx["name"], ctx["age"])
     },
 }
 ```
