@@ -1,7 +1,8 @@
 # rocket
-A web framework.
+Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
 ## Install
-Use your go get.
+Use go get.
+`go get github.com/dannypsnl/rocket`
 ## Usage
 #### Import
 ```go
@@ -15,15 +16,18 @@ import "fmt"
 
 var hello = rocket.Handler {
     Route: "/:name/:age",
-    Do:    func(Context map[string]string) string {
-        return fmt.Sprintf("Hello, %s\nYour age is %s", Context["name"], Context["age"])
+    Do:    func(context map[string]string) string {
+        return fmt.Sprintf("Hello, %s\nYour age is %s", context["name"], context["age"])
     },
 }
 ```
 - Handler.Route is a suffix for routing.
+- context help you get parameters those you interest in request URL.
 #### Mount and Start
 ```go
 rocket.Ignite(":8080").
+    Mount("/", index).
+    Mount("/*path", static).
     Mount("/hello", hello).
     Launch() // Start Serve
 ```
