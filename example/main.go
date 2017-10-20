@@ -29,8 +29,8 @@ func main() {
 	fmt.Println("GO web rocket!!!")
 	rocket.
 		Ignite(":8080").
-		Mount("/hello", hello).
-		Mount("/", static).
 		Mount("/", index).
+		Mount("/", static).
+		Mount("/hello", hello).
 		Launch()
 }

@@ -5,8 +5,17 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 )
+
+type matchArray []string
+
+func (ma matchArray) Len() int      { return len(ma) }
+func (ma matchArray) Swap(i, j int) { ma[i], ma[j] = ma[j], ma[i] }
+func (ma matchArray) Less(i, j int) bool {
+	return len(strings.Split(ma[i], "/")) > len(strings.Split(ma[j], "/"))
+}
 
 type Rocket struct {
 	port     string
@@ -24,11 +33,13 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 }
 
 func (rk *Rocket) Launch() {
+	sort.Sort(matchArray(rk.matchs))
 	http.HandleFunc("/", rk.ServeHTTP)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
 func (rk *Rocket) Dump() {
+	sort.Sort(matchArray(rk.matchs))
 	fmt.Printf("matchs: %#v\n", rk.matchs)
 	fmt.Printf("handlers: %#v\n", rk.handlers)
 }
