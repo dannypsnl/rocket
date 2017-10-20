@@ -4,6 +4,8 @@ Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenit
 Use go get.
 `go get github.com/dannypsnl/rocket`
 ## Usage
+### example
+You can find example at example folder.
 #### Import
 ```go
 import (
@@ -15,7 +17,7 @@ import (
 import "fmt"
 
 var hello = rocket.Handler {
-    Route: "/:name/:age",
+    Route: "/:name/age/:age",
     Do:    func(context map[string]string) string {
         return fmt.Sprintf("Hello, %s\nYour age is %s", context["name"], context["age"])
     },
@@ -25,7 +27,7 @@ var hello = rocket.Handler {
 - context help you get parameters those you interest in request URL.
 #### Mount and Start
 ```go
-rocket.Ignite(":8080").
+rocket.Ignite(":8080"). // Setting port
     Mount("/", index).
     Mount("/*path", static).
     Mount("/hello", hello).
