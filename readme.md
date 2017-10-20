@@ -1,7 +1,7 @@
 # rocket
 Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
 ## Install
-Use go get.
+Use go get.  
 `go get github.com/dannypsnl/rocket`
 ## Usage
 ### example
