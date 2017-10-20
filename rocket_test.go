@@ -50,3 +50,10 @@ func TestVerifyBase(t *testing.T) {
 		}
 	}
 }
+
+func TestContextType(t *testing.T) {
+	ctx := Context{"name": "danny"}
+	if ctx["name"] != "danny" {
+		t.Error("Alias of map should workable, Context>name is ", ctx["name"])
+	}
+}
