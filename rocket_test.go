@@ -69,15 +69,29 @@ type ResponseBuilder struct {
 }
 
 func (rb *ResponseBuilder) Done() response {
+	defer func() {
+		rb.contentType = ""
+		rb.messages = []string{}
+	}()
 	return response{
 		contentType: rb.contentType,
 		messages:    rb.messages,
 	}
 }
 
+func (rb *ResponseBuilder) ContentType(contentType string) *ResponseBuilder {
+	rb.contentType = contentType
+	return rb
+}
+
 func TestResponseBuilder(t *testing.T) {
 	rb := ResponseBuilder{}
 	if rb.Done().contentType != "" {
 		t.Error("ResponseBuilder should had nothing.")
+	}
+	rb.ContentType("brbrbr")
+
+	if rb.Done().contentType != "brbrbr" {
+		t.Error("ContentType should be brbrbr, but is ", rb.Done().contentType)
 	}
 }
