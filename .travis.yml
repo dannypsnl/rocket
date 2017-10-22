@@ -10,7 +10,7 @@ go_import_path:
   - github.com/dannypsnl/rocket
 
 script:
-  - go test ./...
+  - go test
 
 deploy:
   on:
