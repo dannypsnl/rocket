@@ -1,6 +1,6 @@
 package rocket
 
-type response struct {
+type Response struct {
 	contentType string
 	messages    []string
 }
@@ -10,12 +10,12 @@ type ResponseBuilder struct {
 	messages    []string
 }
 
-func (rb *ResponseBuilder) Done() response {
+func (rb *ResponseBuilder) Done() Response {
 	defer func() {
 		rb.contentType = ""
 		rb.messages = []string{}
 	}()
-	return response{
+	return Response{
 		contentType: rb.contentType,
 		messages:    rb.messages,
 	}
