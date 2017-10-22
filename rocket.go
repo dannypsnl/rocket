@@ -86,5 +86,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// So, at next API, we will get rocket.Response object.
+	// TODO: resolve rocket.Response type.
 	fmt.Fprintf(w, h.Do(Context))
 }
