@@ -2,32 +2,32 @@ package main
 
 import (
 	"fmt"
-	"github.com/dannypsnl/rocket"
+	rk "github.com/dannypsnl/rocket"
 )
 
-var hello = rocket.Handler{
+var hello = rk.Handler{
 	Route: "/:name/age/:age",
-	Do: func(ctx rocket.Context) string {
-		return fmt.Sprintf("Hello, %s.\nYour age is %s\n", ctx["name"], ctx["age"])
+	Do: func(ctx rk.Context) rk.Response {
+		return "hello"
 	},
 }
 
-var index = rocket.Handler{
-	Do: func(ctx rocket.Context) string {
-		return "Home"
+var index = rk.Handler{
+	Do: func(ctx rk.Context) rk.Response {
+		return "index"
 	},
 }
 
-var static = rocket.Handler{
+var static = rk.Handler{
 	Route: "/*path",
-	Do: func(ctx rocket.Context) string {
-		return "static/" + ctx["path"]
+	Do: func(ctx rk.Context) rk.Response {
+		return "static"
 	},
 }
 
 func main() {
 	fmt.Println("GO web rocket!!!")
-	rocket.
+	rk.
 		Ignite(":8080").
 		Mount("/", index).
 		Mount("/", static).

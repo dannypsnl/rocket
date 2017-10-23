@@ -25,7 +25,7 @@ func TestSplit(t *testing.T) {
 
 var hello = Handler{
 	Route: "/:name/age/:age",
-	Do: func(Context) string {
+	Do: func(Context) Response {
 		return "hello"
 	},
 }
@@ -55,17 +55,5 @@ func TestContextType(t *testing.T) {
 	ctx := Context{"name": "danny"}
 	if ctx["name"] != "danny" {
 		t.Error("Alias of map should workable, Context>name is ", ctx["name"])
-	}
-}
-
-func TestResponseBuilder(t *testing.T) {
-	rb := ResponseBuilder{}
-	if rb.Done().contentType != "" {
-		t.Error("ResponseBuilder should had nothing.")
-	}
-	rb.ContentType("brbrbr")
-
-	if rb.Done().contentType != "brbrbr" {
-		t.Error("ContentType should be brbrbr, but is ", rb.Done().contentType)
 	}
 }
