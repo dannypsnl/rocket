@@ -23,7 +23,7 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 
-var hello = Handler{
+var hello = &Handler{
 	Route: "/:name/age/:age",
 	Do: func(Context) Response {
 		return "hello"

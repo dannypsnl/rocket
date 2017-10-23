@@ -23,7 +23,7 @@ type Rocket struct {
 	handlers map[string]Handler
 }
 
-func (r *Rocket) Mount(route string, h Handler) *Rocket {
+func (r *Rocket) Mount(route string, h *Handler) *Rocket {
 	if !verifyBase(route) {
 		panic("Base route can not contain dynamic route.")
 	}
@@ -31,7 +31,7 @@ func (r *Rocket) Mount(route string, h Handler) *Rocket {
 	match, params := splitMountUrl(route)
 	h.params = params
 	r.matchs = append(r.matchs, match)
-	r.handlers[match] = h
+	r.handlers[match] = *h
 	return r
 }
 

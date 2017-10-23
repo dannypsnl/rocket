@@ -5,20 +5,17 @@ import (
 	rk "github.com/dannypsnl/rocket"
 )
 
-var hello = rk.Handler{
-	Route: "/:name/age/:age",
-	Do: func(ctx rk.Context) rk.Response {
-		return "hello"
-	},
-}
+var hello = rk.Get("/:name/age/:age", func(ctx rk.Context) rk.Response {
+	return "hello"
+})
 
-var index = rk.Handler{
+var index = &rk.Handler{
 	Do: func(ctx rk.Context) rk.Response {
 		return "index"
 	},
 }
 
-var static = rk.Handler{
+var static = &rk.Handler{
 	Route: "/*path",
 	Do: func(ctx rk.Context) rk.Response {
 		return "static"
