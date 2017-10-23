@@ -18,7 +18,7 @@ import "fmt"
 
 var hello = &rk.Handler {
     Route: "/:name/age/:age",
-    Do:    func(ctx rocket.Context) string {
+    Do:    func(ctx rocket.Context) rk.Response {
         return fmt.Sprintf("Hello, %s\nYour age is %s", ctx["name"], ctx["age"])
     },
 }
