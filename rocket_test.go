@@ -23,12 +23,9 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 
-var hello = &Handler{
-	Route: "/:name/age/:age",
-	Do: func(Context) Response {
-		return "hello"
-	},
-}
+var hello = Get("/:name/age/:age", func(Context) Response {
+	return "hello"
+})
 
 func TestRegex(t *testing.T) {
 	rk := Ignite(":8080").

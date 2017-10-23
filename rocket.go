@@ -20,14 +20,14 @@ func (ma matchArray) Less(i, j int) bool {
 type Rocket struct {
 	port     string
 	matchs   []string
-	handlers map[string]Handler
+	handlers map[string]handler
 }
 
-func (r *Rocket) Mount(route string, h *Handler) *Rocket {
+func (r *Rocket) Mount(route string, h *handler) *Rocket {
 	if !verifyBase(route) {
 		panic("Base route can not contain dynamic route.")
 	}
-	route += h.Route
+	route += h.route
 	match, params := splitMountUrl(route)
 	h.params = params
 	r.matchs = append(r.matchs, match)
@@ -50,7 +50,7 @@ func (rk *Rocket) Dump() {
 func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:     port,
-		handlers: make(map[string]Handler),
+		handlers: make(map[string]handler),
 	}
 }
 
@@ -88,6 +88,6 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// So, at next API, we will get rocket.Response object.
 	// TODO: resolve rocket.Response type.
-	response := h.Do(Context)
+	response := h.do(Context)
 	fmt.Fprintf(w, "%s", response)
 }

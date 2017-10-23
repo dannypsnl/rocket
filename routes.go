@@ -1,14 +1,14 @@
 package rocket
 
-type Handler struct {
-	Route  string
+type handler struct {
+	route  string
 	params []string // Never custom it. It only for rocket inside.
-	Do     func(Context) Response
+	do     func(Context) Response
 }
 
-func Get(route string, do func(Context) Response) *Handler {
-	return &Handler{
-		Route: route,
-		Do:    do,
+func Get(route string, do func(Context) Response) *handler {
+	return &handler{
+		route: route,
+		do:    do,
 	}
 }
