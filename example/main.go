@@ -17,6 +17,10 @@ var static = rk.Get("/*path", func(ctx rk.Context) rk.Response {
 	return "static"
 })
 
+var API = rk.Post("/", func(ctx rk.Context) rk.Response {
+	return "API"
+})
+
 func main() {
 	fmt.Println("GO web rocket!!!")
 	rk.
@@ -24,5 +28,6 @@ func main() {
 		Mount("/", index).
 		Mount("/", static).
 		Mount("/hello", hello).
+		Mount("/api", API).
 		Launch()
 }
