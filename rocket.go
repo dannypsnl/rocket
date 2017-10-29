@@ -21,6 +21,7 @@ func (ma matchArray) Less(i, j int) bool {
 type Rocket struct {
 	port     string
 	gets     []string
+	posts    []string
 	handlers map[string]handler
 }
 
