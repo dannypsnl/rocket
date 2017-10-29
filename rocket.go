@@ -57,7 +57,7 @@ func Ignite(port string) *Rocket {
 }
 
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	match, err := rk.foundMatch(r)
+	match, err := rk.foundMatch(r.URL.Path, r.Method)
 	if err != nil {
 		fmt.Fprintf(w, "404 not found\n")
 	}
@@ -81,18 +81,30 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", response)
 }
 
-func (rk *Rocket) foundMatch(r *http.Request) (string, error) {
-	for _, m := range rk.gets { // rk.gets are those static routes
+func (rk *Rocket) foundMatch(path string, method string) (string, error) {
+	matchs := rk.methodMatchs(method)
+	for _, m := range *matchs { // rk.gets are those static routes
 		if m == "/" {
-			if r.URL.Path == "/" {
+			if path == "/" {
 				return m, nil
 			}
 		} else {
-			matched, err := regexp.MatchString(m, r.URL.Path)
+			matched, err := regexp.MatchString(m, path)
 			if matched && err == nil {
 				return m, nil
 			}
 		}
 	}
 	return "", errors.New("404")
+}
+
+func (rk *Rocket) methodMatchs(method string) *[]string {
+	switch method {
+	case "GET":
+		return &rk.gets
+	case "POST":
+		return &rk.posts
+	default:
+		panic("No handle this kind method yet!")
+	}
 }
