@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -53,22 +54,25 @@ func Ignite(port string) *Rocket {
 		handlers: make(map[string]handler),
 	}
 }
-
-func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var match string
+func (rk *Rocket) foundMatch(r *http.Request) (string, error) {
 	for _, m := range rk.gets { // rk.gets are those static routes
 		if m == "/" {
 			if r.URL.Path == "/" {
-				match = m
-				break
+				return m, nil
 			}
 		} else {
 			matched, err := regexp.MatchString(m, r.URL.Path)
 			if matched && err == nil {
-				match = m
-				break
+				return m, nil
 			}
 		}
+	}
+	return "", errors.New("404")
+}
+func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	match, err := rk.foundMatch(r)
+	if err != nil {
+		fmt.Fprintf(w, "404 not found\n")
 	}
 	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
 	h := rk.handlers[match]
