@@ -20,16 +20,17 @@ var hello = rk.Get("/name/:name/age/:age", func(ctx rk.Context) rk.Response {
     return fmt.Sprintf("Hello, %s.\nYour age is %s.", ctx["name"], ctx["age"])
 })
 
-var index = rk.Get("/", func(ctx rk.Context) rk.Response {
-    return "index"
-})
-
 var static = rk.Get("/*path", func(ctx rk.Context) rk.Response {
     return "static"
+})
+
+var API = rk.Post("/", func(ctx rk.Context) rk.Response {
+    return "Something..."
 })
 ```
 - First argument of handler creator function is a suffix for routing.
 - context help you get parameters those you interest in request URL.
+- Get, Post function match http method.
 #### Mount and Start
 ```go
 rocket.Ignite(":8080"). // Setting port
