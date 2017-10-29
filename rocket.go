@@ -32,7 +32,8 @@ func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	route += h.route
 	match, params := splitMountUrl(route)
 	h.params = params
-	rk.gets = append(rk.gets, match)
+	matchs := rk.methodMatchs(h.method)
+	*matchs = append(*matchs, match)
 	rk.handlers[match] = *h
 	return rk
 }
