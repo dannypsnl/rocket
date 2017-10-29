@@ -14,3 +14,11 @@ func Get(route string, do func(Context) Response) *handler {
 		method: "GET",
 	}
 }
+
+func Post(route string, do func(Context) Response) *handler {
+	return &handler{
+		route:  route,
+		do:     do,
+		method: "POST",
+	}
+}
