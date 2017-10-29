@@ -30,9 +30,9 @@ var hello = Get("/:name/age/:age", func(Context) Response {
 func TestRegex(t *testing.T) {
 	rk := Ignite(":8080").
 		Mount("/hello", hello)
-	r, _ := regexp.Compile(rk.matchs[0])
+	r, _ := regexp.Compile(rk.gets[0])
 	if !r.MatchString("/hello/dan/age/20") {
-		t.Error("Match should success, but it is ", rk.matchs[0])
+		t.Error("Match should success, but it is ", rk.gets[0])
 	}
 }
 

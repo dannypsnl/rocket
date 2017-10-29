@@ -19,7 +19,7 @@ func (ma matchArray) Less(i, j int) bool {
 
 type Rocket struct {
 	port     string
-	matchs   []string
+	gets     []string
 	handlers map[string]handler
 }
 
@@ -30,20 +30,20 @@ func (r *Rocket) Mount(route string, h *handler) *Rocket {
 	route += h.route
 	match, params := splitMountUrl(route)
 	h.params = params
-	r.matchs = append(r.matchs, match)
+	r.gets = append(r.gets, match)
 	r.handlers[match] = *h
 	return r
 }
 
 func (rk *Rocket) Launch() {
-	sort.Sort(matchArray(rk.matchs))
+	sort.Sort(matchArray(rk.gets))
 	http.HandleFunc("/", rk.ServeHTTP)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
 func (rk *Rocket) Dump() {
-	sort.Sort(matchArray(rk.matchs))
-	fmt.Printf("matchs: %#v\n", rk.matchs)
+	sort.Sort(matchArray(rk.gets))
+	fmt.Printf("gets: %#v\n", rk.gets)
 	fmt.Printf("handlers: %#v\n", rk.handlers)
 }
 
@@ -56,7 +56,7 @@ func Ignite(port string) *Rocket {
 
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var match string
-	for _, m := range rk.matchs { // rk.matchs are those static routes
+	for _, m := range rk.gets { // rk.gets are those static routes
 		if m == "/" {
 			if r.URL.Path == "/" {
 				match = m
