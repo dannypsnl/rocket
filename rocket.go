@@ -22,6 +22,8 @@ type Rocket struct {
 	port     string
 	gets     []string
 	posts    []string
+	puts     []string
+	deletes  []string
 	handlers map[string]handler
 }
 
@@ -105,6 +107,10 @@ func (rk *Rocket) methodMatchs(method string) *[]string {
 		return &rk.gets
 	case "POST":
 		return &rk.posts
+	case "PUT":
+		return &rk.puts
+	case "DELETE":
+		return &rk.deletes
 	default:
 		panic("No handle this kind method yet!")
 	}

@@ -22,3 +22,17 @@ func Post(route string, do func(Context) Response) *handler {
 		method: "POST",
 	}
 }
+func Put(route string, do func(Context) Response) *handler {
+	return &handler{
+		route:  route,
+		do:     do,
+		method: "PUT",
+	}
+}
+func Delete(route string, do func(Context) Response) *handler {
+	return &handler{
+		route:  route,
+		do:     do,
+		method: "DELETE",
+	}
+}
