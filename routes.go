@@ -7,6 +7,7 @@ type handler struct {
 	method string
 }
 
+// Get return a get handler.
 func Get(route string, do func(Context) Response) *handler {
 	return &handler{
 		route:  route,
@@ -15,6 +16,7 @@ func Get(route string, do func(Context) Response) *handler {
 	}
 }
 
+// Post return a post handler.
 func Post(route string, do func(Context) Response) *handler {
 	return &handler{
 		route:  route,
@@ -22,6 +24,8 @@ func Post(route string, do func(Context) Response) *handler {
 		method: "POST",
 	}
 }
+
+// Put return a put handler.
 func Put(route string, do func(Context) Response) *handler {
 	return &handler{
 		route:  route,
@@ -29,6 +33,8 @@ func Put(route string, do func(Context) Response) *handler {
 		method: "PUT",
 	}
 }
+
+// Delete return delete handler.
 func Delete(route string, do func(Context) Response) *handler {
 	return &handler{
 		route:  route,

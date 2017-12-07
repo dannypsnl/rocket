@@ -18,6 +18,7 @@ func (ma matchArray) Less(i, j int) bool {
 	return len(strings.Split(ma[i], "/")) > len(strings.Split(ma[j], "/"))
 }
 
+// Rocket is our service.
 type Rocket struct {
 	port     string
 	gets     []string
@@ -27,6 +28,7 @@ type Rocket struct {
 	handlers map[string]handler
 }
 
+// Mount add handler into our service.
 func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	if !verifyBase(route) {
 		panic("Base route can not contain dynamic route.")
@@ -40,18 +42,21 @@ func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	return rk
 }
 
+// Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
 	sort.Sort(matchArray(rk.gets))
 	http.HandleFunc("/", rk.ServeHTTP)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
+// Dump print info of our service.
 func (rk *Rocket) Dump() {
 	sort.Sort(matchArray(rk.gets))
 	fmt.Printf("gets: %#v\n", rk.gets)
 	fmt.Printf("handlers: %#v\n", rk.handlers)
 }
 
+// Ignite initial service by port.
 func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:     port,
@@ -59,6 +64,7 @@ func Ignite(port string) *Rocket {
 	}
 }
 
+// ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	match, err := rk.foundMatch(r.URL.Path, r.Method)
 	if err != nil {
