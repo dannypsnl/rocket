@@ -62,3 +62,26 @@ func TestContextType(t *testing.T) {
 		t.Error("Alias of map should workable, Context>name is ", ctx["name"])
 	}
 }
+
+func TestMethodMatchs(t *testing.T) {
+	rk := Ignite(":8080").
+		Mount("/", hello)
+	if rk.methodMatchs("GET") != &rk.gets {
+		t.Error("get fail;")
+	}
+	if rk.methodMatchs("POST") != &rk.posts {
+		t.Error("post fail;")
+	}
+	if rk.methodMatchs("PUT") != &rk.puts {
+		t.Error("put fail;")
+	}
+	if rk.methodMatchs("DELETE") != &rk.deletes {
+		t.Error("delete fail;")
+	}
+	defer func() {
+		if p := recover(); p == nil {
+			t.Error(`wrong method didn't crash the rocket`)
+		}
+	}()
+	rk.methodMatchs("ADD")
+}
