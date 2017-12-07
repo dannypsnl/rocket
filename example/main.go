@@ -6,7 +6,7 @@ import (
 )
 
 var hello = rk.Get("/:name/age/:age", func(ctx rk.Context) rk.Response {
-	return "hello"
+	return rk.Response(fmt.Sprintf("Hello %s, your age is %s\n", ctx["name"], ctx["age"]))
 })
 
 var index = rk.Get("/", func(ctx rk.Context) rk.Response {
