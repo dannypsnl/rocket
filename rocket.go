@@ -45,7 +45,7 @@ func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 // Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
 	sort.Sort(matchArray(rk.gets))
-	http.HandleFunc("/", rk.ServeHTTP)
+	http.HandleFunc("/", rk.serveLoop)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
@@ -60,6 +60,7 @@ func (rk *Rocket) Dump() {
 // Ignite initial service by port.
 func Ignite(port string) *Rocket {
 	hs := make(map[string]map[string]handler)
+	// Initial internal map
 	hs["GET"] = make(map[string]handler)
 	hs["POST"] = make(map[string]handler)
 	hs["PUT"] = make(map[string]handler)
@@ -71,7 +72,7 @@ func Ignite(port string) *Rocket {
 }
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
-func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
 	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
 	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
 	if err != nil {
