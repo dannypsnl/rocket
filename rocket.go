@@ -67,11 +67,11 @@ func Ignite(port string) *Rocket {
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
+	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
 	if err != nil {
 		fmt.Fprintf(w, "404 not found\n")
 		return // If 404, we don't need to do others things anymore
 	}
-	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
 	Context := make(map[string]string)
 	matchEls := strings.Split(match, "/")
 	splitRqUrl := strings.Split(r.URL.Path, "/")
