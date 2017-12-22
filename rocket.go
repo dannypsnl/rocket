@@ -66,14 +66,14 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	match, err := rk.foundMatch(r.URL.Path, r.Method)
+	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
 	if err != nil {
 		fmt.Fprintf(w, "404 not found\n")
+		return // If 404, we don't need to do others things anymore
 	}
 	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
-	h := rk.handlers[match]
-	matchEls := strings.Split(match, "/")
 	Context := make(map[string]string)
+	matchEls := strings.Split(match, "/")
 	splitRqUrl := strings.Split(r.URL.Path, "/")
 	j := 0
 	for i, p := range splitRqUrl {
@@ -90,21 +90,21 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", response)
 }
 
-func (rk *Rocket) foundMatch(path string, method string) (string, error) {
+func (rk *Rocket) foundMatch(path string, method string) (handler, string, error) {
 	matchs := rk.methodMatchs(method)
 	for _, m := range *matchs { // rk.gets are those static routes
 		if m == "/" {
 			if path == "/" {
-				return m, nil
+				return rk.handlers[m], m, nil
 			}
 		} else {
 			matched, err := regexp.MatchString(m, path)
 			if matched && err == nil {
-				return m, nil
+				return rk.handlers[m], m, nil
 			}
 		}
 	}
-	return "", errors.New("404")
+	return handler{}, "", errors.New("404")
 }
 
 func (rk *Rocket) methodMatchs(method string) *[]string {
