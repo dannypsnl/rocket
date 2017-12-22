@@ -25,7 +25,7 @@ type Rocket struct {
 	posts    []string
 	puts     []string
 	deletes  []string
-	handlers map[string]handler
+	handlers map[string]map[string]handler
 }
 
 // Mount add handler into our service.
@@ -38,7 +38,7 @@ func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	h.params = params
 	matchs := rk.methodMatchs(h.method)
 	*matchs = append(*matchs, match)
-	rk.handlers[match] = *h
+	rk.handlers[h.method][match] = *h
 	return rk
 }
 
@@ -59,9 +59,14 @@ func (rk *Rocket) Dump() {
 
 // Ignite initial service by port.
 func Ignite(port string) *Rocket {
+	hs := make(map[string]map[string]handler)
+	hs["GET"] = make(map[string]handler)
+	hs["POST"] = make(map[string]handler)
+	hs["PUT"] = make(map[string]handler)
+	hs["DELETE"] = make(map[string]handler)
 	return &Rocket{
 		port:     port,
-		handlers: make(map[string]handler),
+		handlers: hs,
 	}
 }
 
@@ -96,12 +101,12 @@ func (rk *Rocket) foundMatch(path string, method string) (handler, string, error
 	for _, m := range *matchs { // rk.gets are those static routes
 		if m == "/" {
 			if path == "/" {
-				return rk.handlers[m], m, nil
+				return rk.handlers[method][m], m, nil
 			}
 		} else {
 			matched, err := regexp.MatchString(m, path)
 			if matched && err == nil {
-				return rk.handlers[m], m, nil
+				return rk.handlers[method][m], m, nil
 			}
 		}
 	}
