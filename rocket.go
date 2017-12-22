@@ -50,6 +50,7 @@ func (rk *Rocket) Launch() {
 }
 
 // Dump print info of our service.
+// FIXME: Prepare to Drop, use String is better to test and more suit idiom of Go
 func (rk *Rocket) Dump() {
 	sort.Sort(matchArray(rk.gets))
 	fmt.Printf("gets: %#v\n", rk.gets)
