@@ -48,3 +48,4 @@ rocket.Ignite(":8080"). // Setting port
 - Mount receive a prefix route and a routes.Handler to handle route.
 ##### Note
 - Base route can't put parameters part. That is illegal route.
+- You can use fmt.Print to get serialize state of rocket. Because I implement String method for it.
