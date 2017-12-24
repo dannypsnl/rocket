@@ -63,21 +63,41 @@ func TestContextType(t *testing.T) {
 	}
 }
 
+func TestFoundMatch(t *testing.T) {
+	rk := Ignite(":8080").
+		Mount("/", hello)
+	_, match, err := rk.foundMatch("/danny/age/20", "GET")
+	if err != nil {
+		t.Error(`404, but have this handler, bug`)
+	}
+	//if &h != hello {
+	//t.Error(`handler different`)
+	//}
+	if match != "/"+legalCharsInUrl+"/age/"+legalCharsInUrl {
+		t.Error(`We have a incorrect match URL generator`)
+	}
+}
+
 func TestMethodMatchs(t *testing.T) {
 	rk := Ignite(":8080").
 		Mount("/", hello)
 	if rk.methodMatchs("GET") != &rk.gets {
-		t.Error("get fail;")
+		t.Error("get fail")
 	}
 	if rk.methodMatchs("POST") != &rk.posts {
-		t.Error("post fail;")
+		t.Error("post fail")
 	}
 	if rk.methodMatchs("PUT") != &rk.puts {
-		t.Error("put fail;")
+		t.Error("put fail")
 	}
 	if rk.methodMatchs("DELETE") != &rk.deletes {
-		t.Error("delete fail;")
+		t.Error("delete fail")
 	}
+}
+
+func TestWrongMatchCausePanic(t *testing.T) {
+	rk := Ignite(":8080").
+		Mount("/", hello)
 	defer func() {
 		if p := recover(); p == nil {
 			t.Error(`wrong method didn't crash the rocket`)
