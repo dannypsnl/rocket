@@ -49,16 +49,15 @@ func (rk *Rocket) Launch() {
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
-// Dump print info of our service.
-// FIXME: Prepare to Drop, use String is better to test and more suit idiom of Go
-func (rk *Rocket) Dump() {
+// String serialize info of our service.
+func (rk *Rocket) String() string {
 	sort.Sort(matchArray(rk.gets))
-	fmt.Printf("gets: %#v\n", rk.gets)
-	fmt.Printf("handlers: %#v\n", rk.handlers)
+	return fmt.Sprintf("gets: %#v\n", rk.gets) + fmt.Sprintf("handlers: %#v\n", rk.handlers)
 }
 
 // Ignite initial service by port.
 func Ignite(port string) *Rocket {
+	// TODO: Should use *handler
 	hs := make(map[string]map[string]handler)
 	// Initial internal map
 	hs["GET"] = make(map[string]handler)
