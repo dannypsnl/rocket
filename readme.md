@@ -1,7 +1,7 @@
 # rocket
 [![Build Status](https://travis-ci.org/dannypsnl/rocket.svg?branch=master)](https://travis-ci.org/dannypsnl/rocket)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dannypsnl/rocket)](https://goreportcard.com/report/github.com/dannypsnl/rocket)
-[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/rocket/badge.svg)](https://coveralls.io/github/dannypsnl/rocket)
+[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/rocket/badge.svg?branch=master)](https://coveralls.io/github/dannypsnl/rocket?branch=master)
 [![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)<br>
 Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
 ## Install
