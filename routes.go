@@ -7,38 +7,30 @@ type handler struct {
 	method string
 }
 
+func handlerByMethod(route *string, do func(Context) Response, method string) *handler {
+	return &handler{
+		route:  *route,
+		do:     do,
+		method: method,
+	}
+}
+
 // Get return a get handler.
 func Get(route string, do func(Context) Response) *handler {
-	return &handler{
-		route:  route,
-		do:     do,
-		method: "GET",
-	}
+	return handlerByMethod(&route, do, "GET")
 }
 
 // Post return a post handler.
 func Post(route string, do func(Context) Response) *handler {
-	return &handler{
-		route:  route,
-		do:     do,
-		method: "POST",
-	}
+	return handlerByMethod(&route, do, "POST")
 }
 
 // Put return a put handler.
 func Put(route string, do func(Context) Response) *handler {
-	return &handler{
-		route:  route,
-		do:     do,
-		method: "PUT",
-	}
+	return handlerByMethod(&route, do, "PUT")
 }
 
 // Delete return delete handler.
 func Delete(route string, do func(Context) Response) *handler {
-	return &handler{
-		route:  route,
-		do:     do,
-		method: "DELETE",
-	}
+	return handlerByMethod(&route, do, "DELETE")
 }
