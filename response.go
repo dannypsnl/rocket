@@ -1,3 +1,3 @@
 package rocket
 
-type Response string
+type Res string

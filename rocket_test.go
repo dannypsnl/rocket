@@ -23,7 +23,7 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 
-var hello = Get("/:name/age/:age", func(Context) Response {
+var hello = Get("/:name/age/:age", func(Context) Res {
 	return "hello"
 })
 
