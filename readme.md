@@ -20,15 +20,15 @@ import (
 ```go
 import "fmt"
 
-var hello = rk.Get("/name/:name/age/:age", func(ctx rk.Context) rk.Res {
+var hello = rk.Get("/name/:name/age/:age", func(ctx rk.Ctx) rk.Res {
     return fmt.Sprintf("Hello, %s.\nYour age is %s.", ctx["name"], ctx["age"])
 })
 
-var static = rk.Get("/*path", func(ctx rk.Context) rk.Res {
+var static = rk.Get("/*path", func(ctx rk.Ctx) rk.Res {
     return "static"
 })
 
-var API = rk.Post("/", func(ctx rk.Context) rk.Res {
+var API = rk.Post("/", func(ctx rk.Ctx) rk.Res {
     return "Something..."
 })
 ```
