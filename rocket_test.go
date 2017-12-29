@@ -23,7 +23,7 @@ func TestSplit(t *testing.T) {
 	SplitContext(t, "/home/dan/*name", "/home/dan/.*?", 1, 3)
 }
 
-var hello = Get("/:name/age/:age", func(Context) Res {
+var hello = Get("/:name/age/:age", func(Ctx) Res {
 	return "hello"
 })
 
@@ -57,7 +57,7 @@ func TestVerifyBase(t *testing.T) {
 }
 
 func TestContextType(t *testing.T) {
-	ctx := Context{"name": "danny"}
+	ctx := Ctx{"name": "danny"}
 	if ctx["name"] != "danny" {
 		t.Error("Alias of map should workable, Context>name is ", ctx["name"])
 	}

@@ -7,7 +7,7 @@ type handler struct {
 	method string
 }
 
-type handleMethod func(Context) Res
+type handleMethod func(Ctx) Res
 
 func handlerByMethod(route *string, do handleMethod, method string) *handler {
 	return &handler{

@@ -5,19 +5,19 @@ import (
 	rk "github.com/dannypsnl/rocket"
 )
 
-var hello = rk.Get("/:name/age/:age", func(ctx rk.Context) rk.Res {
+var hello = rk.Get("/:name/age/:age", func(ctx rk.Ctx) rk.Res {
 	return rk.Res(fmt.Sprintf("Hello %s, your age is %s\n", ctx["name"], ctx["age"]))
 })
 
-var index = rk.Get("/", func(ctx rk.Context) rk.Res {
+var index = rk.Get("/", func(ctx rk.Ctx) rk.Res {
 	return "index"
 })
 
-var static = rk.Get("/*path", func(ctx rk.Context) rk.Res {
+var static = rk.Get("/*path", func(ctx rk.Ctx) rk.Res {
 	return "static"
 })
 
-var API = rk.Post("/", func(ctx rk.Context) rk.Res {
+var API = rk.Post("/", func(ctx rk.Ctx) rk.Res {
 	return "API"
 })
 
