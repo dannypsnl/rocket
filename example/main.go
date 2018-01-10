@@ -9,6 +9,14 @@ var hello = rk.Get("/:name/age/:age", func(ctx rk.Ctx) rk.Res {
 	return rk.Res(fmt.Sprintf("Hello %s, your age is %s\n", ctx["name"], ctx["age"]))
 })
 
+var getDate = rk.Get("/date/:date", func(ctx rk.Ctx) rk.Res {
+	return rk.Res(fmt.Sprintf("Time is %s\n", ctx["date"]))
+})
+
+var getDateCopy = rk.Get("/date/20", func(ctx rk.Ctx) rk.Res {
+	return rk.Res(fmt.Sprintf("Time is 20. Yeee!!!!!!!!!\n"))
+})
+
 var index = rk.Get("/", func(ctx rk.Ctx) rk.Res {
 	return "index"
 })
@@ -27,6 +35,8 @@ func main() {
 		Ignite(":8080").
 		Mount("/", index).
 		Mount("/", static).
+		Mount("/", getDateCopy).
+		Mount("/", getDate).
 		Mount("/hello", hello).
 		Mount("/api", API).
 		Launch()
