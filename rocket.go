@@ -59,7 +59,7 @@ func (rk *Rocket) String() string {
 func Ignite(port string) *Rocket {
 	// TODO: Should use *handler
 	hs := make(map[string]map[string]handler)
-	// Initial internal map
+	// Initial internal method map
 	hs["GET"] = make(map[string]handler)
 	hs["POST"] = make(map[string]handler)
 	hs["PUT"] = make(map[string]handler)
