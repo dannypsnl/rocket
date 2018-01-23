@@ -70,7 +70,7 @@ func Ignite(port string) *Rocket {
 	}
 }
 
-// ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
+// serveLoop is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
 	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
 	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
