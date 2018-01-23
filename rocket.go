@@ -70,17 +70,10 @@ func Ignite(port string) *Rocket {
 	}
 }
 
-// serveLoop is prepare for http server trait, but the plan change, it need a new name.
-func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
-	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
-	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
-	if err != nil {
-		fmt.Fprintf(w, "404 not found\n")
-		return // If 404, we don't need to do others things anymore
-	}
+func getContext(h handler, match, path string) map[string]string {
 	Context := make(map[string]string)
 	matchEls := strings.Split(match, "/")
-	splitRqUrl := strings.Split(r.URL.Path, "/")
+	splitRqUrl := strings.Split(path, "/")
 	j := 0
 	for i, p := range splitRqUrl {
 		if matchEls[i] == legalCharsInUrl {
@@ -91,8 +84,19 @@ func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	return Context
+}
 
-	response := h.do(Context)
+// serveLoop is prepare for http server trait, but the plan change, it need a new name.
+func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
+	h, match, err := rk.foundMatch(r.URL.Path, r.Method)
+	fmt.Printf("Rquest URL: %#v\n", r.URL.Path)
+	if err != nil {
+		fmt.Fprintf(w, "404 not found\n")
+		return // If 404, we don't need to do others things anymore
+	}
+
+	response := h.do(getContext(h, match, r.URL.Path))
 	fmt.Fprintf(w, "%s", response)
 }
 
