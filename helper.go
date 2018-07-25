@@ -35,7 +35,7 @@ func verifyBase(route string) bool {
 	r, _ := regexp.Compile(".*?[:*].*?")
 	// Contains : part will Match, it can be on a Base Route
 	if r.MatchString(route) {
-		return false
+		panic("Base route can not contain dynamic route.")
 	}
 	return true
 }

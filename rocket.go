@@ -30,9 +30,8 @@ type Rocket struct {
 
 // Mount add handler into our service.
 func (rk *Rocket) Mount(route string, h *handler) *Rocket {
-	if !verifyBase(route) {
-		panic("Base route can not contain dynamic route.")
-	}
+	verifyBase(route)
+
 	route += h.route
 	match, params := splitMountUrl(route)
 	h.params = params

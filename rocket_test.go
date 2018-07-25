@@ -42,18 +42,15 @@ func TestVerifyBase(t *testing.T) {
 		"/hello/:name",
 	}
 	for _, str := range test_strs {
-		if verifyBase(str) {
-			t.Error("Base route should not contain dynamic part.")
-		}
+		func(str string) {
+			defer func() {
+				if p := recover(); p == nil {
+					t.Error("Invalid route didn't panic the program")
+				}
+			}()
+			verifyBase(str)
+		}(str)
 	}
-	defer func() {
-		if p := recover(); p == nil {
-			t.Error("Invalid route didn't panic the program")
-		}
-	}()
-	// Make sure error base route will crash.
-	Ignite(":8080").
-		Mount("/home/:tabs", hello)
 }
 
 func TestContextType(t *testing.T) {
