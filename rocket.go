@@ -16,11 +16,16 @@ type Rocket struct {
 func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	verifyBase(route)
 
+	rs := strings.Split(route+h.route, "/")
+
 	root := rk.handlers[h.method]
 	nexts := root.Children
-	for _, r := range strings.Split(route+h.route, "/") {
+	for i, r := range rs {
 		if nexts == nil {
 			r := &Route{Value: r}
+			if i == len(rs)-1 {
+				r.Matched = h
+			}
 			nexts = []*Route{r}
 		} else {
 			for _, next := range nexts {
