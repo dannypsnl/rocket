@@ -9,7 +9,7 @@ go_import_path: github.com/dannypsnl/rocket
 # in the next version of Go. Don't worry! Later we declare that test runs
 # are allowed to fail on Go tip.
 go:
-  - 1.9
+  - 1.10
   - tip
 
 # Skip the install step. Don't `go get` dependencies. Only build with the
@@ -37,7 +37,6 @@ before_script:
 # script always run to completion (set +e). All of these code checks are must haves
 # in a modern Go project.
 script:
-  - test -z $(gofmt -s -l $GO_FILES)         # Fail if a .go file hasn't been formatted with gofmt
   - vgo test -v -covermode=count -coverprofile=coverage.out
   - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken=GjQK0BGauZnfE8HOxsg4OaFIcYdtAxkcd
   - $COVERALLS_TOKEN

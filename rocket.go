@@ -3,7 +3,6 @@ package rocket
 import (
 	"log"
 	"net/http"
-	"strings"
 )
 
 // Rocket is our service.
@@ -16,25 +15,8 @@ type Rocket struct {
 func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	verifyBase(route)
 
-	rs := strings.Split(route+h.route, "/")
+	rk.handlers[h.method].AddHandlerTo(route+h.route, h)
 
-	root := rk.handlers[h.method]
-	nexts := root.Children
-	for i, r := range rs {
-		if nexts == nil {
-			r := &Route{Value: r}
-			if i == len(rs)-1 {
-				r.Matched = h
-			}
-			nexts = []*Route{r}
-		} else {
-			for _, next := range nexts {
-				if next.Value == r {
-					nexts = next.Children
-				}
-			}
-		}
-	}
 	return rk
 }
 
