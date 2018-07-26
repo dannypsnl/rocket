@@ -8,9 +8,9 @@ import (
 func Test_route(t *testing.T) {
 	assert := assert.NewTester(t)
 
-	r := NewRoute("/")
+	r := NewRoute()
 	handler := &handler{route: "/world"}
-	r.AddHandlerTo("/hello", handler)
+	r.AddHandlerTo("/hello"+handler.route, handler)
 
-	assert.Eq(len(r.Children), 1)
+	assert.Eq(r.Children["hello"].Children["world"].Matched.route, "/world")
 }

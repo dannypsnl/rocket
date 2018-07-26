@@ -30,10 +30,10 @@ func (rk *Rocket) Launch() {
 func Ignite(port string) *Rocket {
 	hs := make(map[string]*Route)
 	// Initial internal method map
-	hs["GET"] = &Route{Value: "/"}
-	hs["POST"] = &Route{Value: "/"}
-	hs["PUT"] = &Route{Value: "/"}
-	hs["DELETE"] = &Route{Value: "/"}
+	hs["GET"] = &Route{}
+	hs["POST"] = &Route{}
+	hs["PUT"] = &Route{}
+	hs["DELETE"] = &Route{}
 	return &Rocket{
 		port:     port,
 		handlers: hs,
