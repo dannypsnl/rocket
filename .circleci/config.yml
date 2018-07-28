@@ -1,0 +1,19 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  test:
+    docker:
+      - image: golang:1.10.3-alpine3.8
+    working_directory: /go/src/github.com/dannypsnl/rocket
+    steps:
+      - checkout
+      - run: go get -u golang.org/x/vgo
+      - run: vgo test -v ./...
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
