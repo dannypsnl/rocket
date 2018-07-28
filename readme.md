@@ -1,22 +1,28 @@
 # rocket
-[![Build Status](https://travis-ci.org/dannypsnl/rocket.svg?branch=master)](https://travis-ci.org/dannypsnl/rocket)
+
+[![CircleCI](https://circleci.com/gh/dannypsnl/rocket.svg?style=svg)](https://circleci.com/gh/dannypsnl/rocket)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dannypsnl/rocket)](https://goreportcard.com/report/github.com/dannypsnl/rocket)
 [![Coverage Status](https://coveralls.io/repos/github/dannypsnl/rocket/badge.svg?branch=master)](https://coveralls.io/github/dannypsnl/rocket?branch=master)
-[![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)<br>
+[![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)
+
 Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
+
 ## Install
-Use go get.<br>
+
 `go get github.com/dannypsnl/rocket`
+
 ## Usage
-### example
-You can find example at example folder.
+
 #### Import
+
 ```go
 import (
     rk "github.com/dannypsnl/rocket"
 )
 ```
+
 #### Create Handler
+
 ```go
 import "fmt"
 
@@ -32,10 +38,13 @@ var API = rk.Post("/", func(ctx rk.Ctx) rk.Res {
     return "Something..."
 })
 ```
+
 - First argument of handler creator function is a suffix for routing.
 - context help you get parameters those you interest in request URL.
 - Get, Post function match http method.
+
 #### Mount and Start
+
 ```go
 rocket.Ignite(":8080"). // Setting port
     Mount("/", index).
@@ -43,9 +52,11 @@ rocket.Ignite(":8080"). // Setting port
     Mount("/hello", hello).
     Launch() // Start Serve
 ```
+
 - func Ignite get a string to describe port.
 - Launch start the server.
 - Mount receive a prefix route and a routes.Handler to handle route.
+
 ##### Note
+
 - Base route can't put parameters part. That is illegal route.
-- You can use fmt.Print to get serialize state of rocket. Because I implement String method for it.
