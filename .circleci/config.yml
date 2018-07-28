@@ -13,6 +13,7 @@ jobs:
       - run: apk add build-base
       - run: go get -u golang.org/x/vgo
       - run: CC=gcc vgo test -v -cover
+      - run: bash <(curl -s https://codecov.io/bash)
 
 workflows:
   version: 2
