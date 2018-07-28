@@ -42,4 +42,5 @@ func Ignite(port string) *Rocket {
 
 // serveLoop is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
+	//h := rk.handlers[r.Method].matching(r.URL)
 }

@@ -35,3 +35,18 @@ func (r *Route) AddHandlerTo(route string, h *handler) {
 	}
 	nexts[rs[len(rs)-1]].Matched = h
 }
+
+func (r *Route) matching(url string) *handler {
+	rs := strings.Split(url, "/")[1:]
+
+	nexts := r.Children
+	i := 0
+	for i < len(rs)-1 {
+		rrr := rs[i]
+		if _, ok := nexts[rrr]; ok {
+			nexts = nexts[rrr].Children
+			i++
+		}
+	}
+	return nexts[rs[len(rs)-1]].Matched
+}
