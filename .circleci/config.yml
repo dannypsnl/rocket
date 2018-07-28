@@ -11,10 +11,8 @@ jobs:
       - checkout
       - run: apk add git
       - run: apk add build-base
-      - run: apk add bash
       - run: go get -u golang.org/x/vgo
       - run: CC=gcc vgo test -v -cover
-      - run: /bin/bash <(curl -s https://codecov.io/bash)
 
 workflows:
   version: 2
