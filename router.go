@@ -21,32 +21,32 @@ func NewRoute() *Route {
 func (r *Route) AddHandlerTo(route string, h *handler) {
 	rs := strings.Split(route, "/")[1:]
 
-	nexts := r.Children
+	next := r.Children
 	i := 0
 	for i < len(rs) {
 		rrr := rs[i]
-		if _, ok := nexts[rrr]; !ok {
-			nexts[rrr] = NewRoute()
+		if _, ok := next[rrr]; !ok {
+			next[rrr] = NewRoute()
 			i++
 		}
 		if i != len(rs) {
-			nexts = nexts[rrr].Children
+			next = next[rrr].Children
 		}
 	}
-	nexts[rs[len(rs)-1]].Matched = h
+	next[rs[len(rs)-1]].Matched = h
 }
 
 func (r *Route) matching(url string) *handler {
 	rs := strings.Split(url, "/")[1:]
 
-	nexts := r.Children
+	next := r.Children
 	i := 0
 	for i < len(rs)-1 {
 		rrr := rs[i]
-		if _, ok := nexts[rrr]; ok {
-			nexts = nexts[rrr].Children
+		if _, ok := next[rrr]; ok {
+			next = next[rrr].Children
 			i++
 		}
 	}
-	return nexts[rs[len(rs)-1]].Matched
+	return next[rs[len(rs)-1]].Matched
 }
