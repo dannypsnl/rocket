@@ -3,20 +3,20 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 
-defaults: &defaults
+base_env: &base_env
   working_directory: /go/src/github.com/dannypsnl/rocket
   docker:
     - image: golang:1.10.3-alpine3.8
 
 jobs:
   base:
-    <<: *defaults
+    <<: *base_env
     steps:
       - run: apk add git
       - run: apk add build-base
       - run: go get -u golang.org/x/vgo
   test:
-    <<: *defaults
+    <<: *base_env
     steps:
       - checkout
       - run: CC=gcc vgo test -v -cover
