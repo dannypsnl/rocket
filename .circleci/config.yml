@@ -12,6 +12,9 @@ jobs:
   base:
     <<: *base_env
     steps:
+      - persist_to_workspace:
+          root: /
+          paths: go/bin
       - run: apk add git
       - run: apk add build-base
       - run: go get -u golang.org/x/vgo
@@ -19,6 +22,7 @@ jobs:
     <<: *base_env
     steps:
       - checkout
+      - run: ls -la /go/bin
       - run: CC=gcc vgo test -v -cover
 
 workflows:
