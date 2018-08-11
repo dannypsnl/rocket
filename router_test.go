@@ -1,20 +1,33 @@
 package rocket
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/dannypsnl/assert"
 )
 
-func Test_route(t *testing.T) {
+type User struct {
+	Id string `route:"id"`
+}
+
+func TestRoute(t *testing.T) {
 	assert := assert.NewTester(t)
 
+	route := "/world/:id"
+	handler := handlerByMethod(&route, func(u *User) string {
+		return u.Id
+	}, "GET")
+
 	r := NewRoute()
-	handler := &handler{route: "/world"}
 	r.AddHandlerTo("/hello"+handler.route, handler)
 
-	assert.Eq(r.Children["hello"].Children["world"].Matched.route, "/world")
+	h := r.matching("/hello/world/0")
 
-	h := r.matching("/hello/world")
-	assert.Eq(h.route, "/world")
+	u := &User{Id: "0"}
+	result := h.do.Call([]reflect.Value{
+		reflect.ValueOf(u),
+	})[0]
+
+	assert.Eq(result.Interface(), "0")
 }

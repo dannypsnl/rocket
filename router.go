@@ -39,14 +39,29 @@ func (r *Route) AddHandlerTo(route string, h *handler) {
 func (r *Route) matching(url string) *handler {
 	rs := strings.Split(url, "/")[1:]
 
+	useToMatch := make([]string, 0)
 	next := r.Children
 	i := 0
-	for i < len(rs)-1 {
+	for i < len(rs) {
 		rrr := rs[i]
 		if _, ok := next[rrr]; ok {
-			next = next[rrr].Children
+			useToMatch = append(useToMatch, rrr)
 			i++
+			if i != len(rs) {
+				next = next[rrr].Children
+			}
+		} else {
+			for route, _ := range next {
+				if route[0] == ':' {
+					useToMatch = append(useToMatch, route)
+					i++
+					if i != len(rs) {
+						next = next[route].Children
+					}
+					break
+				}
+			}
 		}
 	}
-	return next[rs[len(rs)-1]].Matched
+	return next[useToMatch[len(useToMatch)-1]].Matched
 }
