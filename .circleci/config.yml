@@ -9,15 +9,12 @@ base_env: &base_env
     - image: golang:1.10.3-alpine3.8
 
 jobs:
-  base:
-    <<: *base_env
-    steps:
-      - run: apk add git
-      - run: apk add build-base
   test:
     <<: *base_env
     steps:
       - checkout
+      - run: apk add git
+      - run: apk add build-base
       - run: go get -u golang.org/x/vgo
       - run: CC=gcc vgo test -v -cover
 
@@ -25,7 +22,4 @@ workflows:
   version: 2
   test:
     jobs:
-      - base
-      - test:
-          requires:
-            - base
+      - test
