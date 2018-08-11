@@ -2,20 +2,30 @@
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
+
+defaults: &defaults
+  working_directory: /go/src/github.com/dannypsnl/rocket
+  docker:
+    - image: golang:1.10.3-alpine3.8
+
 jobs:
-  test:
-    docker:
-      - image: golang:1.10.3-alpine3.8
-    working_directory: /go/src/github.com/dannypsnl/rocket
+  base:
+    <<: *defaults
     steps:
-      - checkout
       - run: apk add git
       - run: apk add build-base
-      - run: go get -u golang.org/x/vgo
+      - run: go get -u golang.org/vgo
+  test:
+    <<: *defaults
+    steps:
+      - checkout
       - run: CC=gcc vgo test -v -cover
 
 workflows:
   version: 2
   test:
     jobs:
-      - test
+      - base
+      - test:
+          requires:
+            - base
