@@ -14,7 +14,7 @@ jobs:
     steps:
       - run: apk add git
       - run: apk add build-base
-      - run: go get -u golang.org/vgo
+      - run: go get -u golang.org/x/vgo
   test:
     <<: *defaults
     steps:
