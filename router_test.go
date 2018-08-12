@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/dannypsnl/assert"
@@ -21,17 +20,6 @@ func TestRoute(t *testing.T) {
 
 	r := NewRoute()
 	r.AddHandlerTo("/hello"+handler.route, handler)
-
-	t.Run("Matching", func(t *testing.T) {
-		h := r.matching("/hello/world/0")
-
-		u := &User{Id: "0"}
-		result := h.do.Call([]reflect.Value{
-			reflect.ValueOf(u),
-		})[0]
-
-		assert.Eq(result.Interface(), "0")
-	})
 
 	t.Run("Call", func(t *testing.T) {
 		actual := r.Call("/hello/world/0")

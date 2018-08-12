@@ -21,9 +21,9 @@ func NewRoute() *Route {
 }
 
 func (r *Route) Call(url string) string {
-	handler := r.matching(url)
-
 	rs := strings.Split(url, "/")[1:]
+
+	handler := r.matching(rs)
 
 	contextType := handler.do.Type().In(0)
 	context := reflect.New(contextType.Elem())
@@ -31,7 +31,8 @@ func (r *Route) Call(url string) string {
 	hrs := strings.Split(handler.route, "/")[1:]
 	for idx, route := range hrs {
 		if route[0] == ':' {
-			context.Elem().Field(handler.params[idx]).Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
+			context.Elem().Field(handler.params[idx]).
+				Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
 		}
 	}
 
@@ -58,9 +59,7 @@ func (r *Route) AddHandlerTo(route string, h *handler) {
 	next[rs[len(rs)-1]].Matched = h
 }
 
-func (r *Route) matching(url string) *handler {
-	rs := strings.Split(url, "/")[1:]
-
+func (r *Route) matching(rs []string) *handler {
 	useToMatch := make([]string, 0)
 	next := r.Children
 	i := 0
