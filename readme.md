@@ -16,6 +16,8 @@ Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenit
 #### Import
 
 ```go
+package example
+
 import (
     rk "github.com/dannypsnl/rocket"
 )
@@ -24,18 +26,23 @@ import (
 #### Create Handler
 
 ```go
-import "fmt"
+package example
 
-var hello = rk.Get("/name/:name/age/:age", func(ctx rk.Ctx) rk.Res {
-    return fmt.Sprintf("Hello, %s.\nYour age is %s.", ctx["name"], ctx["age"])
-})
+import (
+	"fmt"
+	
+	rk "github.com/dannypsnl/rocket"
+)
 
-var static = rk.Get("/*path", func(ctx rk.Ctx) rk.Res {
-    return "static"
-})
+type User struct {
+	Name string `route:"name"`
+	Age string `route:"age"`
+}
 
-var API = rk.Post("/", func(ctx rk.Ctx) rk.Res {
-    return "Something..."
+var hello = rk.Get("/name/:name/age/:age", func(u *User) string {
+    return fmt.Sprintf(
+    	"Hello, %s.\nYour age is %s.",
+    	u.Name, u.Age)
 })
 ```
 
