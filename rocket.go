@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -22,7 +23,7 @@ func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 
 // Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
-	http.HandleFunc("/", rk.serveLoop)
+	http.HandleFunc("/", rk.ServeHTTP)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
@@ -30,16 +31,19 @@ func (rk *Rocket) Launch() {
 func Ignite(port string) *Rocket {
 	hs := make(map[string]*Route)
 	// Initial internal method map
-	hs["GET"] = &Route{}
-	hs["POST"] = &Route{}
-	hs["PUT"] = &Route{}
-	hs["DELETE"] = &Route{}
+	hs["GET"] = NewRoute()
+	hs["POST"] = NewRoute()
+	hs["PUT"] = NewRoute()
+	hs["DELETE"] = NewRoute()
 	return &Rocket{
 		port:     port,
 		handlers: hs,
 	}
 }
 
-// serveLoop is prepare for http server trait, but the plan change, it need a new name.
-func (rk *Rocket) serveLoop(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
+func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	response := rk.handlers[r.Method].Call(r.URL.Path)
+
+	fmt.Fprint(w, response)
 }

@@ -1,6 +1,8 @@
 package rocket
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -16,6 +18,26 @@ func NewRoute() *Route {
 	return &Route{
 		Children: make(map[string]*Route),
 	}
+}
+
+func (r *Route) Call(url string) string {
+	handler := r.matching(url)
+
+	rs := strings.Split(url, "/")[1:]
+
+	contextType := handler.do.Type().In(0)
+	context := reflect.New(contextType.Elem())
+
+	hrs := strings.Split(handler.route, "/")[1:]
+	for idx, route := range hrs {
+		if route[0] == ':' {
+			context.Elem().Field(handler.params[idx]).Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
+		}
+	}
+
+	result := handler.do.Call([]reflect.Value{context})[0]
+
+	return fmt.Sprintf("%v", result)
 }
 
 func (r *Route) AddHandlerTo(route string, h *handler) {
