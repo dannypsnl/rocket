@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/dannypsnl/rocket.svg?style=svg)](https://circleci.com/gh/dannypsnl/rocket)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dannypsnl/rocket)](https://goreportcard.com/report/github.com/dannypsnl/rocket)
-[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/rocket/badge.svg?branch=master)](https://coveralls.io/github/dannypsnl/rocket?branch=master)
+[![codecov](https://codecov.io/gh/dannypsnl/rocket/branch/master/graph/badge.svg)](https://codecov.io/gh/dannypsnl/rocket)<Paste>
 [![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)
 
 Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
