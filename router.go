@@ -47,7 +47,14 @@ func (r *Route) Call(url string) string {
 }
 
 func (r *Route) addHandlerTo(route string, h *handler) {
-	rs := strings.Split(route, "/")[1:]
+	splitRoutes := strings.Split(route, "/")[1:]
+
+	rs := make([]string, 0)
+	for _, rout := range splitRoutes {
+		if rout != "" {
+			rs = append(rs, rout)
+		}
+	}
 
 	next := r.Children
 	i := 0

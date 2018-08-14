@@ -16,6 +16,10 @@ type User struct {
 	Name string `route:"name"`
 }
 
+var noParamNoRoute = rocket.Get("/", func() string {
+	return "no param no route"
+})
+
 var helloName = rocket.Get("/:name", func(u *User) string {
 	return "Hello, " + u.Name
 })
@@ -29,7 +33,8 @@ func TestServer(t *testing.T) {
 
 	rk := rocket.Ignite(":8080").
 		Mount("/for", forPost).
-		Mount("/hello", helloName)
+		Mount("/hello", helloName).
+		Mount("/test", noParamNoRoute)
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
 
@@ -37,6 +42,12 @@ func TestServer(t *testing.T) {
 		result, err := response("GET", ts.URL, "/hello/Danny")
 		assert.Eq(err, nil)
 		assert.Eq(result, "Hello, Danny")
+	})
+
+	t.Run("NoParamNoRoute", func(t *testing.T) {
+		result, err := response("GET", ts.URL, "/test")
+		assert.Eq(err, nil)
+		assert.Eq(result, "no param no route")
 	})
 
 	t.Run("Post", func(t *testing.T) {
