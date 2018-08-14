@@ -21,7 +21,14 @@ func NewRoute() *Route {
 }
 
 func (r *Route) Call(url string) string {
-	rs := strings.Split(url, "/")[1:]
+	splitRoutes := strings.Split(url, "/")[1:]
+
+	rs := make([]string, 0)
+	for _, rout := range splitRoutes {
+		if rout != "" {
+			rs = append(rs, rout)
+		}
+	}
 
 	handler := r.matching(rs)
 
@@ -56,6 +63,11 @@ func (r *Route) addHandlerTo(route string, h *handler) {
 		}
 	}
 
+	if len(rs) == 0 {
+		r.Matched = h
+		return
+	}
+
 	next := r.Children
 	i := 0
 	for i < len(rs) {
@@ -68,10 +80,14 @@ func (r *Route) addHandlerTo(route string, h *handler) {
 			next = next[rrr].Children
 		}
 	}
+
 	next[rs[len(rs)-1]].Matched = h
 }
 
 func (r *Route) matching(rs []string) *handler {
+	if len(rs) == 0 {
+		return r.Matched
+	}
 	useToMatch := make([]string, 0)
 	next := r.Children
 	i := 0

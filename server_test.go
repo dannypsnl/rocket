@@ -32,6 +32,7 @@ func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	rk := rocket.Ignite(":8080").
+		Mount("/", noParamNoRoute).
 		Mount("/for", forPost).
 		Mount("/hello", helloName).
 		Mount("/test", noParamNoRoute)
@@ -46,6 +47,10 @@ func TestServer(t *testing.T) {
 
 	t.Run("NoParamNoRoute", func(t *testing.T) {
 		result, err := response("GET", ts.URL, "/test")
+		assert.Eq(err, nil)
+		assert.Eq(result, "no param no route")
+
+		result, err = response("GET", ts.URL, "/")
 		assert.Eq(err, nil)
 		assert.Eq(result, "no param no route")
 	})
