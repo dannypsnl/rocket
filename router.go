@@ -25,18 +25,23 @@ func (r *Route) Call(url string) string {
 
 	handler := r.matching(rs)
 
-	contextType := handler.do.Type().In(0)
-	context := reflect.New(contextType.Elem())
+	param := make([]reflect.Value, 0)
+	if handler.do.Type().NumIn() > 0 {
+		contextType := handler.do.Type().In(0)
+		context := reflect.New(contextType.Elem())
 
-	hrs := strings.Split(handler.route, "/")[1:]
-	for idx, route := range hrs {
-		if route[0] == ':' {
-			context.Elem().Field(handler.params[idx]).
-				Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
+		hrs := strings.Split(handler.route, "/")[1:]
+		for idx, route := range hrs {
+			if route[0] == ':' {
+				context.Elem().Field(handler.params[idx]).
+					Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
+			}
 		}
+
+		param = append(param, context)
 	}
 
-	result := handler.do.Call([]reflect.Value{context})[0]
+	result := handler.do.Call(param)[0]
 
 	return fmt.Sprintf("%v", result)
 }

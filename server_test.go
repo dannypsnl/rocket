@@ -1,8 +1,8 @@
 package rocket_test
 
 import (
+	"bytes"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,24 +20,50 @@ var helloName = rocket.Get("/:name", func(u *User) string {
 	return "Hello, " + u.Name
 })
 
+var forPost = rocket.Post("/post", func() string {
+	return "for post"
+})
+
 func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	rk := rocket.Ignite(":8080").
+		Mount("/for", forPost).
 		Mount("/hello", helloName)
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
 
-	res, err := http.Get(ts.URL + "/hello/Danny")
+	t.Run("Get", func(t *testing.T) {
+		result, err := response("GET", ts.URL, "/hello/Danny")
+		assert.Eq(err, nil)
+		assert.Eq(result, "Hello, Danny")
+	})
+
+	t.Run("Post", func(t *testing.T) {
+		result, err := response("POST", ts.URL, "/for/post")
+		assert.Eq(err, nil)
+		assert.Eq(result, "for post")
+	})
+}
+
+func response(method, serverUrl, route string) (string, error) {
+	req, err := http.NewRequest(method, serverUrl+route, bytes.NewBuffer([]byte(``)))
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	greeting, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		return "", err
 	}
 
-	assert.Eq(string(greeting), "Hello, Danny")
-
+	return string(b), nil
 }

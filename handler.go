@@ -22,14 +22,16 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	}
 
 	handlerT := reflect.TypeOf(do)
-	userDefinedT := handlerT.In(0).Elem()
-	for idx, r := range strings.Split(h.route, "/")[1:] {
-		if r[0] == ':' {
-			for i := 0; i < userDefinedT.NumField(); i++ {
-				key := userDefinedT.Field(i).Tag.Get("route")
-				if key == r[1:] {
-					h.params[idx] = i
-					break
+	if handlerT.NumIn() > 0 {
+		userDefinedT := handlerT.In(0).Elem()
+		for idx, r := range strings.Split(h.route, "/")[1:] {
+			if r[0] == ':' {
+				for i := 0; i < userDefinedT.NumField(); i++ {
+					key := userDefinedT.Field(i).Tag.Get("route")
+					if key == r[1:] {
+						h.params[idx] = i
+						break
+					}
 				}
 			}
 		}
