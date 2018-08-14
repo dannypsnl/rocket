@@ -1,6 +1,6 @@
 # rocket
 
-[![CircleCI](https://circleci.com/gh/dannypsnl/rocket.svg?style=svg)](https://circleci.com/gh/dannypsnl/rocket)
+[![Build Status](https://travis-ci.org/dannypsnl/rocket.svg)](https://travis-ci.org/dannypsnl/rocket)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dannypsnl/rocket)](https://goreportcard.com/report/github.com/dannypsnl/rocket)
 [![codecov](https://codecov.io/gh/dannypsnl/rocket/branch/master/graph/badge.svg)](https://codecov.io/gh/dannypsnl/rocket)<Paste>
 [![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)
