@@ -46,7 +46,7 @@ func (r *Route) Call(url string) string {
 	return fmt.Sprintf("%v", result)
 }
 
-func (r *Route) AddHandlerTo(route string, h *handler) {
+func (r *Route) addHandlerTo(route string, h *handler) {
 	rs := strings.Split(route, "/")[1:]
 
 	next := r.Children

@@ -19,7 +19,7 @@ func TestRoute(t *testing.T) {
 	}, "GET")
 
 	r := NewRoute()
-	r.AddHandlerTo("/hello"+handler.route, handler)
+	r.addHandlerTo("/hello"+handler.route, handler)
 
 	t.Run("Call", func(t *testing.T) {
 		actual := r.Call("/hello/world/0")
