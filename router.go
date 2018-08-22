@@ -37,11 +37,13 @@ func (r *Route) Call(url string) string {
 		contextType := handler.do.Type().In(0)
 		context := reflect.New(contextType.Elem())
 
+		// TODO: cache split route, not original string
 		hrs := strings.Split(handler.route, "/")[1:]
+		handlerRouteLen := len(hrs)
 		for idx, route := range hrs {
-			if route[0] == ':' {
+			if isParameter(route) {
 				context.Elem().Field(handler.params[idx]).
-					Set(reflect.ValueOf(rs[len(rs)-len(hrs)+idx]))
+					Set(reflect.ValueOf(rs[len(rs)-handlerRouteLen+idx]))
 			}
 		}
 
@@ -101,7 +103,7 @@ func (r *Route) matching(rs []string) *handler {
 			}
 		} else {
 			for route, _ := range next {
-				if route[0] == ':' {
+				if isParameter(route) {
 					useToMatch = append(useToMatch, route)
 					i++
 					if i != len(rs) {
@@ -113,4 +115,8 @@ func (r *Route) matching(rs []string) *handler {
 		}
 	}
 	return next[useToMatch[len(useToMatch)-1]].Matched
+}
+
+func isParameter(route string) bool {
+	return route[0] == ':'
 }
