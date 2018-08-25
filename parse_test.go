@@ -73,6 +73,12 @@ func TestParseParameter(t *testing.T) {
 		assert.Eq(nv.Interface(), uint32(3))
 		assert.Eq(nv.Kind(), reflect.Uint32)
 	})
+	t.Run("Uint64", func(t *testing.T) {
+		rv := reflect.ValueOf(uint64(5))
+		nv := parseParameter(rv, "3")
+		assert.Eq(nv.Interface(), uint64(3))
+		assert.Eq(nv.Kind(), reflect.Uint64)
+	})
 	t.Run("Float32", func(t *testing.T) {
 		rv := reflect.ValueOf(float32(5))
 		nv := parseParameter(rv, "3")
