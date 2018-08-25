@@ -30,11 +30,9 @@ func (r *Route) Call(url string) interface{} {
 
 	handler := r.matching(rs)
 
-	param := handler.theParams(rs)
-
-	result := handler.do.Call(param)[0]
-
-	return result.Interface()
+	return handler.do.Call(
+		handler.context(rs),
+	)[0].Interface()
 }
 
 func (r *Route) addHandlerTo(route string, h *handler) {

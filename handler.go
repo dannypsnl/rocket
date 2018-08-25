@@ -12,7 +12,7 @@ type handler struct {
 	method string
 }
 
-func (h *handler) theParams(rs []string) []reflect.Value {
+func (h *handler) context(rs []string) []reflect.Value {
 	param := make([]reflect.Value, 0)
 	if h.do.Type().NumIn() > 0 {
 		contextType := h.do.Type().In(0)
