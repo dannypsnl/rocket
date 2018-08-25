@@ -42,8 +42,11 @@ func (r *Route) Call(url string) string {
 		handlerRouteLen := len(hrs)
 		for idx, route := range hrs {
 			if isParameter(route) {
-				context.Elem().Field(handler.params[idx]).
-					Set(reflect.ValueOf(rs[len(rs)-handlerRouteLen+idx]))
+				param := rs[len(rs)-handlerRouteLen+idx]
+				index := handler.params[idx]
+				value := parseParameter(context.Elem().Field(index), param)
+				context.Elem().Field(index).
+					Set(value)
 			}
 		}
 
