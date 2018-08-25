@@ -85,6 +85,18 @@ func parseParameter(v reflect.Value, param string) reflect.Value {
 			return reflect.ValueOf((*uint64)(nil))
 		}
 		return reflect.ValueOf(r)
+	case reflect.Float32:
+		r, err := strconv.ParseFloat(param, 32)
+		if err != nil {
+			return reflect.ValueOf((*float32)(nil))
+		}
+		return reflect.ValueOf(float32(r))
+	case reflect.Float64:
+		r, err := strconv.ParseFloat(param, 64)
+		if err != nil {
+			return reflect.ValueOf((*float64)(nil))
+		}
+		return reflect.ValueOf(r)
 	case reflect.String:
 		return reflect.ValueOf(param)
 	default:
