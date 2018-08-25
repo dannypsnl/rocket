@@ -1,10 +1,10 @@
 package rocket
 
 import (
+	"github.com/dannypsnl/assert"
 	"testing"
 
 	"fmt"
-	"github.com/dannypsnl/assert"
 )
 
 type User struct {
@@ -21,7 +21,7 @@ func TestRoute(t *testing.T) {
 	}, "GET")
 
 	r := NewRoute()
-	r.addHandlerTo("/hello"+handler.route, handler)
+	r.addHandlerTo("/hello", handler)
 
 	t.Run("Call", func(t *testing.T) {
 		actual := r.Call("/hello/world/danny/21")

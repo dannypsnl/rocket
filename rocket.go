@@ -16,7 +16,7 @@ type Rocket struct {
 func (rk *Rocket) Mount(route string, h *handler) *Rocket {
 	verifyBase(route)
 
-	rk.handlers[h.method].addHandlerTo(route+h.route, h)
+	rk.handlers[h.method].addHandlerTo(route, h)
 
 	return rk
 }

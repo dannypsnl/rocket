@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"reflect"
 	"strings"
 )
 
@@ -31,26 +30,7 @@ func (r *Route) Call(url string) interface{} {
 
 	handler := r.matching(rs)
 
-	param := make([]reflect.Value, 0)
-	if handler.do.Type().NumIn() > 0 {
-		contextType := handler.do.Type().In(0)
-		context := reflect.New(contextType.Elem())
-
-		// TODO: cache split route, not original string
-		hrs := strings.Split(handler.route, "/")[1:]
-		handlerRouteLen := len(hrs)
-		for idx, route := range hrs {
-			if isParameter(route) {
-				param := rs[len(rs)-handlerRouteLen+idx]
-				index := handler.params[idx]
-				value := parseParameter(context.Elem().Field(index), param)
-				context.Elem().Field(index).
-					Set(value)
-			}
-		}
-
-		param = append(param, context)
-	}
+	param := handler.theParams(rs)
 
 	result := handler.do.Call(param)[0]
 
@@ -58,10 +38,10 @@ func (r *Route) Call(url string) interface{} {
 }
 
 func (r *Route) addHandlerTo(route string, h *handler) {
-	splitRoutes := strings.Split(route, "/")[1:]
+	routes := append(strings.Split(route, "/")[1:], h.routes...)
 
 	rs := make([]string, 0)
-	for _, rout := range splitRoutes {
+	for _, rout := range routes {
 		if rout != "" {
 			rs = append(rs, rout)
 		}
