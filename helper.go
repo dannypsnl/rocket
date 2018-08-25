@@ -19,6 +19,12 @@ func verifyBase(route string) bool {
 
 func parseParameter(v reflect.Value, param string) reflect.Value {
 	switch v.Kind() {
+	case reflect.Bool:
+		r, err := strconv.ParseBool(param)
+		if err != nil {
+			return reflect.ValueOf((*bool)(nil))
+		}
+		return reflect.ValueOf(r)
 	case reflect.Int:
 		r, err := strconv.ParseInt(param, 10, 0)
 		if err != nil {

@@ -14,6 +14,11 @@ func TestParseParameter(t *testing.T) {
 		nv := parseParameter(rv, "change")
 		assert.Eq(nv.Interface(), "change")
 	})
+	t.Run("Bool", func(t *testing.T) {
+		rv := reflect.ValueOf(true)
+		nv := parseParameter(rv, "false")
+		assert.Eq(nv.Interface(), false)
+	})
 	t.Run("Int", func(t *testing.T) {
 		rv := reflect.ValueOf(10)
 		nv := parseParameter(rv, "50")
