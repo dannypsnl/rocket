@@ -1,18 +1,20 @@
 package rocket
 
 import (
+	"net/http"
 	"reflect"
 	"strings"
 )
 
 type handler struct {
-	routes []string
-	params map[int]int   // Never custom it. It only for rocket inside.
-	do     reflect.Value // do should return response for HTTP writer
-	method string
+	routes     []string
+	params     map[int]int // Never custom it. It only for rocket inside.
+	postParams map[string]int
+	do         reflect.Value // do should return response for HTTP writer
+	method     string
 }
 
-func (h *handler) context(rs []string) []reflect.Value {
+func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, 0)
 	if h.do.Type().NumIn() > 0 {
 		contextType := h.do.Type().In(0)
@@ -28,6 +30,14 @@ func (h *handler) context(rs []string) []reflect.Value {
 			}
 		}
 
+		req.ParseForm()
+		for k, idx := range h.postParams {
+			p := req.FormValue(k)
+			value := parseParameter(context.Elem().Field(idx), p)
+			context.Elem().Field(idx).
+				Set(value)
+		}
+
 		param = append(param, context)
 	}
 	return param
@@ -35,11 +45,13 @@ func (h *handler) context(rs []string) []reflect.Value {
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
+	splitPostParam := strings.Split(*route, ",")
 	h := &handler{
-		routes: strings.Split(*route, "/")[1:],
-		do:     handlerDo,
-		method: method,
-		params: make(map[int]int),
+		routes:     strings.Split(splitPostParam[0], "/")[1:],
+		do:         handlerDo,
+		method:     method,
+		params:     make(map[int]int),
+		postParams: make(map[string]int),
 	}
 
 	handlerT := reflect.TypeOf(do)
@@ -53,6 +65,15 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 						h.params[idx] = i
 						break
 					}
+				}
+			}
+		}
+
+		for _, postP := range splitPostParam[1:] {
+			for i := 0; i < userDefinedT.NumField(); i++ {
+				key := userDefinedT.Field(i).Tag.Get("form")
+				if key == postP {
+					h.postParams[postP] = i
 				}
 			}
 		}

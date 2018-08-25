@@ -43,7 +43,7 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	response := rk.handlers[r.Method].Call(r.URL.Path)
+	response := rk.handlers[r.Method].Call(r)
 	switch response.(type) {
 	case Html:
 		w.Header().Set("Content-Type", "text/html")

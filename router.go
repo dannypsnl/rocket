@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"net/http"
 	"strings"
 )
 
@@ -18,8 +19,8 @@ func NewRoute() *Route {
 	}
 }
 
-func (r *Route) Call(url string) interface{} {
-	splitRoutes := strings.Split(url, "/")[1:]
+func (r *Route) Call(req *http.Request) interface{} {
+	splitRoutes := strings.Split(req.URL.Path, "/")[1:]
 
 	rs := make([]string, 0)
 	for _, rout := range splitRoutes {
@@ -31,7 +32,7 @@ func (r *Route) Call(url string) interface{} {
 	handler := r.matching(rs)
 
 	return handler.do.Call(
-		handler.context(rs),
+		handler.context(rs, req),
 	)[0].Interface()
 }
 
