@@ -9,10 +9,15 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
+	"net/url"
 )
 
 type User struct {
 	Name string `route:"name"`
+}
+
+type ForPost struct {
+	Val string `form:"value"`
 }
 
 var (
@@ -28,8 +33,8 @@ var (
 	helloName = rocket.Get("/:name", func(u *User) string {
 		return "Hello, " + u.Name
 	})
-	forPost = rocket.Post("/post", func() string {
-		return "for post"
+	forPost = rocket.Post("/post,value", func(f *ForPost) string {
+		return f.Val
 	})
 )
 
@@ -74,10 +79,29 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Post", func(t *testing.T) {
-		result, _, err := response("POST", ts.URL, "/for/post")
+		result, _, err := post(ts.URL, "/for/post", url.Values{
+			"value": {"for post"},
+		})
 		assert.Eq(err, nil)
 		assert.Eq(result, "for post")
 	})
+}
+
+func post(serverUrl, route string, values url.Values) (string, http.Header, error) {
+	resp, err := http.PostForm(serverUrl+route, values)
+	if err != nil {
+		return "", http.Header{}, err
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", http.Header{}, err
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		return "", http.Header{}, err
+	}
+
+	return string(b), resp.Header, nil
 }
 
 func response(method, serverUrl, route string) (string, http.Header, error) {
