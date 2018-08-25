@@ -16,17 +16,17 @@ type User struct {
 	Name string `route:"name"`
 }
 
-var noParamNoRoute = rocket.Get("/", func() string {
-	return "no param no route"
-})
-
-var helloName = rocket.Get("/:name", func(u *User) string {
-	return "Hello, " + u.Name
-})
-
-var forPost = rocket.Post("/post", func() string {
-	return "for post"
-})
+var (
+	noParamNoRoute = rocket.Get("/", func() string {
+		return "no param no route"
+	})
+	helloName = rocket.Get("/:name", func(u *User) string {
+		return "Hello, " + u.Name
+	})
+	forPost = rocket.Post("/post", func() string {
+		return "for post"
+	})
+)
 
 func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
