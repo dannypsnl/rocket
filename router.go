@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -20,7 +19,7 @@ func NewRoute() *Route {
 	}
 }
 
-func (r *Route) Call(url string) string {
+func (r *Route) Call(url string) interface{} {
 	splitRoutes := strings.Split(url, "/")[1:]
 
 	rs := make([]string, 0)
@@ -55,7 +54,7 @@ func (r *Route) Call(url string) string {
 
 	result := handler.do.Call(param)[0]
 
-	return fmt.Sprintf("%v", result)
+	return result.Interface()
 }
 
 func (r *Route) addHandlerTo(route string, h *handler) {

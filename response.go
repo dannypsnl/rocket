@@ -1,6 +1,4 @@
 package rocket
 
-// Res is response message type
-//
-// TODO: It will contain some method to help you create response
-type Res string
+// Html is a mark for text is HTML
+type Html string
