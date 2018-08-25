@@ -3,6 +3,7 @@ package rocket
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -42,8 +43,15 @@ func (r *Route) Call(url string) string {
 		handlerRouteLen := len(hrs)
 		for idx, route := range hrs {
 			if isParameter(route) {
-				context.Elem().Field(handler.params[idx]).
-					Set(reflect.ValueOf(rs[len(rs)-handlerRouteLen+idx]))
+				value := reflect.ValueOf(rs[len(rs)-handlerRouteLen+idx])
+				index := handler.params[idx]
+				switch context.Elem().Field(index).Kind() {
+				case reflect.Uint32:
+					v, _ := strconv.ParseUint(rs[len(rs)-handlerRouteLen+idx], 10, 32)
+					value = reflect.ValueOf(uint32(v))
+				}
+				context.Elem().Field(index).
+					Set(value)
 			}
 		}
 
