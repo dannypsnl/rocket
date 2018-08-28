@@ -45,9 +45,8 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
-	splitPostParam := strings.Split(*route, ",")
 	h := &handler{
-		routes:     strings.Split(splitPostParam[0], "/")[1:],
+		routes:     strings.Split(*route, "/")[1:],
 		do:         handlerDo,
 		method:     method,
 		params:     make(map[int]int),
@@ -69,12 +68,10 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 			}
 		}
 
-		for _, postP := range splitPostParam[1:] {
-			for i := 0; i < userDefinedT.NumField(); i++ {
-				key := userDefinedT.Field(i).Tag.Get("form")
-				if key == postP {
-					h.postParams[postP] = i
-				}
+		for i := 0; i < userDefinedT.NumField(); i++ {
+			key, ok := userDefinedT.Field(i).Tag.Lookup("form")
+			if ok {
+				h.postParams[key] = i
 			}
 		}
 	}
