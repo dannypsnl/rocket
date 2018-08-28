@@ -34,6 +34,7 @@ func Ignite(port string) *Rocket {
 	hs["GET"] = NewRoute()
 	hs["POST"] = NewRoute()
 	hs["PUT"] = NewRoute()
+	hs["PATCH"] = NewRoute()
 	hs["DELETE"] = NewRoute()
 	return &Rocket{
 		port:     port,
