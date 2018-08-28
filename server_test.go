@@ -38,10 +38,10 @@ var (
 	helloName = rocket.Get("/:name", func(u *User) string {
 		return "Hello, " + u.Name
 	})
-	forPost = rocket.Post("/post,value", func(f *ForPost) string {
+	forPost = rocket.Post("/post", func(f *ForPost) string {
 		return f.Val
 	})
-	forPatch = rocket.Patch("/patch,value", func(f *ForPatch) string {
+	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
 	})
 )
