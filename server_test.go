@@ -2,14 +2,15 @@ package rocket_test
 
 import (
 	"bytes"
-	"github.com/dannypsnl/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
+	"github.com/dannypsnl/assert"
 	"github.com/dannypsnl/rocket"
-	"net/url"
 )
 
 type User struct {
@@ -17,6 +18,10 @@ type User struct {
 }
 
 type ForPost struct {
+	Val string `form:"value"`
+}
+
+type ForPatch struct {
 	Val string `form:"value"`
 }
 
@@ -36,6 +41,9 @@ var (
 	forPost = rocket.Post("/post,value", func(f *ForPost) string {
 		return f.Val
 	})
+	forPatch = rocket.Patch("/patch,value", func(f *ForPatch) string {
+		return f.Val
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -44,6 +52,7 @@ func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage).
 		Mount("/for", forPost).
+		Mount("/for", forPatch).
 		Mount("/hello", helloName).
 		Mount("/test", noParamNoRoute)
 	ts := httptest.NewServer(rk)
@@ -85,6 +94,14 @@ func TestServer(t *testing.T) {
 		assert.Eq(err, nil)
 		assert.Eq(result, "for post")
 	})
+
+	t.Run("Patch", func(t *testing.T) {
+		result, _, err := request("PATCH", ts.URL, "/for/patch", url.Values{
+			"value": {"for patch"},
+		})
+		assert.Eq(err, nil)
+		assert.Eq(result, "for patch")
+	})
 }
 
 func post(serverUrl, route string, values url.Values) (string, http.Header, error) {
@@ -101,6 +118,29 @@ func post(serverUrl, route string, values url.Values) (string, http.Header, erro
 		return "", http.Header{}, err
 	}
 
+	return string(b), resp.Header, nil
+}
+
+func request(method, serverUrl, route string, values url.Values) (string, http.Header, error) {
+	body := strings.NewReader(values.Encode())
+	req, err := http.NewRequest(method, serverUrl+route, body)
+	if err != nil {
+		return "", http.Header{}, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	c := &http.Client{}
+	resp, err := c.Do(req)
+	if err != nil {
+		return "", http.Header{}, err
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", http.Header{}, err
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		return "", http.Header{}, err
+	}
 	return string(b), resp.Header, nil
 }
 
