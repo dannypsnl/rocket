@@ -50,8 +50,7 @@ func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	rk := rocket.Ignite(":8080").
-		Mount("/", homePage).
-		Mount("/for", forPost).
+		Mount("/", homePage, forPost).
 		Mount("/for", forPatch).
 		Mount("/hello", helloName).
 		Mount("/test", noParamNoRoute)
@@ -88,7 +87,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Post", func(t *testing.T) {
-		result, _, err := post(ts.URL, "/for/post", url.Values{
+		result, _, err := post(ts.URL, "/post", url.Values{
 			"value": {"for post"},
 		})
 		assert.Eq(err, nil)
