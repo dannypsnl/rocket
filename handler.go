@@ -44,11 +44,14 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 			}
 		}
 
+		req.ParseForm()
 		for k, idx := range h.formParams {
-			p := req.FormValue(k)
-			value := parseParameter(context.Elem().Field(idx), p)
-			context.Elem().Field(idx).
-				Set(value)
+			if v, ok := req.Form[k]; ok {
+				p := v[0]
+				value := parseParameter(context.Elem().Field(idx), p)
+				context.Elem().Field(idx).
+					Set(value)
+			}
 		}
 
 		param = append(param, context)
