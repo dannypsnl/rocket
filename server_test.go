@@ -2,6 +2,7 @@ package rocket_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -38,8 +39,8 @@ var (
 	helloName = rocket.Get("/:name", func(u *User) string {
 		return "Hello, " + u.Name
 	})
-	forPost = rocket.Post("/post", func(f *ForPost) string {
-		return f.Val
+	forPost = rocket.Post("/post", func(f *ForPost) rocket.Json {
+		return `{"value": "response"}`
 	})
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
@@ -98,10 +99,12 @@ func TestServer(t *testing.T) {
 		}
 		defer resp.Body.Close()
 
-		result, err := ioutil.ReadAll(resp.Body)
+		var response ForPost
+		err = json.NewDecoder(resp.Body).Decode(&response)
 
 		assert.Eq(err, nil)
-		assert.Eq(string(result), "for post")
+		assert.Eq(resp.Header.Get("Content-Type"), "application/json")
+		assert.Eq(response.Val, "response")
 	})
 
 	t.Run("Patch", func(t *testing.T) {
