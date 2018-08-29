@@ -2,6 +2,7 @@ package rocket_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ type User struct {
 }
 
 type ForPost struct {
-	Val string `form:"value"`
+	Val string `json:"value"`
 }
 
 type ForPatch struct {
@@ -38,8 +39,8 @@ var (
 	helloName = rocket.Get("/:name", func(u *User) string {
 		return "Hello, " + u.Name
 	})
-	forPost = rocket.Post("/post", func(f *ForPost) string {
-		return f.Val
+	forPost = rocket.Post("/post", func(f *ForPost) rocket.Json {
+		return `{"value": "response"}`
 	})
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
@@ -87,11 +88,23 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Post", func(t *testing.T) {
-		result, _, err := post(ts.URL, "/post", url.Values{
-			"value": {"for post"},
-		})
+		var jsonStr = []byte(`{"value":"for post"}`)
+		req, err := http.NewRequest("POST", ts.URL+"/post", bytes.NewBuffer(jsonStr))
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		var response ForPost
+		err = json.NewDecoder(resp.Body).Decode(&response)
+
 		assert.Eq(err, nil)
-		assert.Eq(result, "for post")
+		assert.Eq(resp.Header.Get("Content-Type"), "application/json")
+		assert.Eq(response.Val, "response")
 	})
 
 	t.Run("Patch", func(t *testing.T) {

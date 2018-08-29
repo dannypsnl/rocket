@@ -52,6 +52,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch response.(type) {
 	case Html:
 		w.Header().Set("Content-Type", "text/html")
+	case Json:
+		w.Header().Set("Content-Type", "application/json")
 	case string:
 		w.Header().Set("Content-Type", "text/plain")
 	}
