@@ -18,7 +18,7 @@ type User struct {
 }
 
 type ForPost struct {
-	Val string `form:"value"`
+	Val string `json:"value"`
 }
 
 type ForPatch struct {
@@ -87,11 +87,21 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Post", func(t *testing.T) {
-		result, _, err := post(ts.URL, "/post", url.Values{
-			"value": {"for post"},
-		})
+		var jsonStr = []byte(`{"value":"for post"}`)
+		req, err := http.NewRequest("POST", ts.URL+"/post", bytes.NewBuffer(jsonStr))
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		result, err := ioutil.ReadAll(resp.Body)
+
 		assert.Eq(err, nil)
-		assert.Eq(result, "for post")
+		assert.Eq(string(result), "for post")
 	})
 
 	t.Run("Patch", func(t *testing.T) {
