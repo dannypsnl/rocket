@@ -31,7 +31,7 @@ func (r *Route) Call(req *http.Request) (interface{}, error) {
 
 	handler := r.matching(rs)
 	if handler == nil {
-		return nil, PageNotFound("can't found " + req.URL.Path)
+		return nil, PageNotFound(concatString("can't found ", req.URL.Path))
 	}
 
 	return handler.do.Call(
