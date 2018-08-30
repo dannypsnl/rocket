@@ -36,33 +36,43 @@ import (
 
 type User struct {
 	Name string `route:"name"`
-	Age string `route:"age"`
+	Age int `route:"age"`
 }
 
 var hello = rk.Get("/name/:name/age/:age", func(u *User) string {
     return fmt.Sprintf(
-    	"Hello, %s.\nYour age is %s.",
+    	"Hello, %s.\nYour age is %d.",
     	u.Name, u.Age)
 })
 ```
 
-- First argument of handler creator function is a suffix for routing.
-- context help you get parameters those you interest in request URL.
-- Get, Post function match http method.
+- First argument of handler creator is a route string can have variant part. 
+- Second argument is handler function.
+	- handler function can have a argument, that is a type you define to be request context
+		Tag in your type will load request value into it!
+		- route tag is `route:"name"`, if route contains `/:name`, then value is request URL at this place
+			e.g. `/Danny` will let value of `name` is string `Danny`
+		- form tag is `form:"key"`, it get form value from form request
+		- json tag is `json:"key"`, it get POST/PUT body that is JSON
+	- return type of handler function is meaningful
+		- Html: returns text as HTML(set Content-Type to `text/html`)
+		- Json: returns text as JSON(set Content-Type to `application/json`)
+		- string: returns text as plain text(set Content-Type to `text/plain`)
+- handler creator name is match to HTTP Method
 
 #### Mount and Start
 
 ```go
 rocket.Ignite(":8080"). // Setting port
-    Mount("/", index).
-    Mount("/", static).
+    Mount("/", index, static).
     Mount("/hello", hello).
     Launch() // Start Serve
 ```
 
 - func Ignite get a string to describe port.
 - Launch start the server.
-- Mount receive a prefix route and a routes.Handler to handle route.
+- Mount receive a base route and a handler that exactly handle route.
+	you can emit 1 to N handlers at one `Mount`
 
 ##### Note
 
