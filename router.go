@@ -19,7 +19,7 @@ func NewRoute() *Route {
 	}
 }
 
-func (r *Route) Call(req *http.Request) interface{} {
+func (r *Route) Call(req *http.Request) (interface{}, error) {
 	splitRoutes := strings.Split(req.URL.Path, "/")[1:]
 
 	rs := make([]string, 0)
@@ -30,10 +30,13 @@ func (r *Route) Call(req *http.Request) interface{} {
 	}
 
 	handler := r.matching(rs)
+	if handler == nil {
+		return nil, PageNotFound(concatString("can't found ", req.URL.Path))
+	}
 
 	return handler.do.Call(
 		handler.context(rs, req),
-	)[0].Interface()
+	)[0].Interface(), nil
 }
 
 func (r *Route) addHandlerTo(route string, h *handler) {
@@ -52,8 +55,7 @@ func (r *Route) addHandlerTo(route string, h *handler) {
 	}
 
 	next := r.Children
-	i := 0
-	for i < len(rs) {
+	for i := 0; i < len(rs); {
 		rrr := rs[i]
 		if _, ok := next[rrr]; !ok {
 			next[rrr] = NewRoute()
@@ -73,8 +75,7 @@ func (r *Route) matching(rs []string) *handler {
 	}
 	useToMatch := make([]string, 0)
 	next := r.Children
-	i := 0
-	for i < len(rs) {
+	for i := 0; i < len(rs); {
 		rrr := rs[i]
 		if _, ok := next[rrr]; ok {
 			useToMatch = append(useToMatch, rrr)
@@ -83,6 +84,7 @@ func (r *Route) matching(rs []string) *handler {
 				next = next[rrr].Children
 			}
 		} else {
+			routeExist := false
 			for route, _ := range next {
 				if isParameter(route) {
 					useToMatch = append(useToMatch, route)
@@ -90,8 +92,12 @@ func (r *Route) matching(rs []string) *handler {
 					if i != len(rs) {
 						next = next[route].Children
 					}
+					routeExist = true
 					break
 				}
+			}
+			if !routeExist {
+				return nil
 			}
 		}
 	}
