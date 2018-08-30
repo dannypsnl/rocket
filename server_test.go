@@ -53,7 +53,10 @@ func TestServer(t *testing.T) {
 		Mount("/", homePage, forPost).
 		Mount("/for", forPatch).
 		Mount("/hello", helloName).
-		Mount("/test", noParamNoRoute)
+		Mount("/test", noParamNoRoute).
+		Default(func() rocket.Html {
+			return "<h1>Page Not Found</h1>"
+		})
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
 
@@ -100,6 +103,12 @@ func TestServer(t *testing.T) {
 		})
 		assert.Eq(err, nil)
 		assert.Eq(result, "for patch")
+	})
+
+	t.Run("404", func(t *testing.T) {
+		result, _, err := response("GET", ts.URL, "/404")
+		assert.Eq(err, nil)
+		assert.Eq(result, "<h1>Page Not Found</h1>")
 	})
 }
 

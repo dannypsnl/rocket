@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 )
 
 // Rocket is our service.
 type Rocket struct {
-	port     string
-	handlers map[string]*Route
+	port           string
+	handlers       map[string]*Route
+	defaultHandler reflect.Value
 }
 
 // Mount add handler into our service.
@@ -22,6 +24,11 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 		rk.handlers[h.method].addHandlerTo(route, h)
 	}
 
+	return rk
+}
+
+func (rk *Rocket) Default(do interface{}) *Rocket {
+	rk.defaultHandler = reflect.ValueOf(do)
 	return rk
 }
 
@@ -43,12 +50,19 @@ func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:     port,
 		handlers: hs,
+		defaultHandler: reflect.ValueOf(func() string {
+			return "page not found"
+		}),
 	}
 }
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	response := rk.handlers[r.Method].Call(r)
+	response, err := rk.handlers[r.Method].Call(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		response = rk.defaultHandler.Call([]reflect.Value{})[0]
+	}
 	switch response.(type) {
 	case Html:
 		w.Header().Set("Content-Type", "text/html")
