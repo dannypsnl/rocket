@@ -99,9 +99,8 @@ func (route *Route) matching(requestUrl []string) *handler {
 					routeExist = true
 					break
 				} else if route[0] == '*' {
-					useToMatch = append(useToMatch, route)
-					next[useToMatch[len(useToMatch)-1]].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
-					return next[useToMatch[len(useToMatch)-1]].Matched
+					next[route].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
+					return next[route].Matched
 				}
 			}
 			if !routeExist {
