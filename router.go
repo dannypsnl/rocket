@@ -39,30 +39,33 @@ func (r *Route) Call(req *http.Request) (interface{}, error) {
 	)[0].Interface(), nil
 }
 
-func (r *Route) addHandlerTo(route string, h *handler) {
-	routes := append(strings.Split(route, "/")[1:], h.routes...)
+func (route *Route) addHandlerTo(routeStr string, h *handler) {
+	routes := append(
+		strings.Split(routeStr, "/")[1:],
+		h.routes...)
 
 	rs := make([]string, 0)
-	for _, rout := range routes {
-		if rout != "" {
-			rs = append(rs, rout)
+	for _, r := range routes {
+		if r != "" {
+			rs = append(rs, r)
 		}
 	}
 
 	if len(rs) == 0 {
-		r.Matched = h
+		route.Matched = h
 		return
 	}
 
-	next := r.Children
-	for i := 0; i < len(rs); {
-		rrr := rs[i]
-		if _, ok := next[rrr]; !ok {
-			next[rrr] = NewRoute()
+	next := route.Children
+	i := 0
+	for i < len(rs) {
+		r := rs[i]
+		if _, ok := next[r]; !ok {
+			next[r] = NewRoute()
 			i++
 		}
 		if i != len(rs) {
-			next = next[rrr].Children
+			next = next[r].Children
 		}
 	}
 
