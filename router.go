@@ -72,19 +72,19 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	next[rs[len(rs)-1]].Matched = h
 }
 
-func (route *Route) matching(rs []string) *handler {
-	if len(rs) == 0 {
+func (route *Route) matching(requestUrl []string) *handler {
+	if len(requestUrl) == 0 {
 		return route.Matched
 	}
 	useToMatch := make([]string, 0)
 	next := route.Children
 	i := 0
-	for i < len(rs) {
-		r := rs[i]
+	for i < len(requestUrl) {
+		r := requestUrl[i]
 		if _, ok := next[r]; ok {
 			useToMatch = append(useToMatch, r)
 			i++
-			if i != len(rs) {
+			if i != len(requestUrl) {
 				next = next[r].Children
 			}
 		} else {
@@ -93,14 +93,14 @@ func (route *Route) matching(rs []string) *handler {
 				if isParameter(route) {
 					useToMatch = append(useToMatch, route)
 					i++
-					if i != len(rs) {
+					if i != len(requestUrl) {
 						next = next[route].Children
 					}
 					routeExist = true
 					break
 				} else if route[0] == '*' {
 					useToMatch = append(useToMatch, route)
-					next[useToMatch[len(useToMatch)-1]].Matched.addMatchedPathValueIntoContext(rs[i:]...)
+					next[useToMatch[len(useToMatch)-1]].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
 					return next[useToMatch[len(useToMatch)-1]].Matched
 				}
 			}
