@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -15,6 +16,18 @@ type handler struct {
 	expectJsonRequest bool
 	do                reflect.Value // do should return response for HTTP writer
 	method            string
+
+	matchedPath    string
+	matchPathIndex int
+}
+
+func (h *handler) addMatchedPathValueIntoContext(path ...string) {
+	buf := bytes.NewBuffer([]byte(``))
+	for _, v := range path {
+		buf.WriteString(v)
+		buf.WriteRune('/')
+	}
+	h.matchedPath = buf.String()[:buf.Len()-1]
 }
 
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
@@ -42,6 +55,14 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 				context.Elem().Field(index).
 					Set(value)
 			}
+		}
+
+		if h.matchedPath != "" {
+			param := h.matchedPath
+			index := h.matchPathIndex
+			value := parseParameter(context.Elem().Field(index), param)
+			context.Elem().Field(index).
+				Set(value)
 		}
 
 		req.ParseForm()
@@ -78,6 +99,14 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 					key := userDefinedT.Field(i).Tag.Get("route")
 					if key == r[1:] {
 						h.params[idx] = i
+						break
+					}
+				}
+			} else if r[0] == '*' {
+				for i := 0; i < userDefinedT.NumField(); i++ {
+					key := userDefinedT.Field(i).Tag.Get("route")
+					if key == r[1:] {
+						h.matchPathIndex = i
 						break
 					}
 				}

@@ -91,6 +91,10 @@ func (r *Route) matching(rs []string) *handler {
 						next = next[route].Children
 					}
 					break
+				} else if route[0] == '*' {
+					useToMatch = append(useToMatch, route)
+					next[useToMatch[len(useToMatch)-1]].Matched.addMatchedPathValueIntoContext(rs[i:]...)
+					return next[useToMatch[len(useToMatch)-1]].Matched
 				}
 			}
 		}
