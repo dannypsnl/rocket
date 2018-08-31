@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,11 +11,23 @@ import (
 
 type handler struct {
 	routes            []string
-	params            map[int]int // Never custom it. It only for rocket inside.
+	routeParams       map[int]int // Never custom it. It only for rocket inside.
 	formParams        map[string]int
 	expectJsonRequest bool
 	do                reflect.Value // do should return response for HTTP writer
 	method            string
+
+	matchedPath    string
+	matchPathIndex int
+}
+
+func (h *handler) addMatchedPathValueIntoContext(path ...string) {
+	buf := bytes.NewBuffer([]byte(``))
+	for _, v := range path {
+		buf.WriteString(v)
+		buf.WriteRune('/')
+	}
+	h.matchedPath = buf.String()[:buf.Len()-1]
 }
 
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
@@ -37,11 +50,19 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		for idx, route := range h.routes {
 			if isParameter(route) {
 				param := rs[len(rs)-len(h.routes)+idx]
-				index := h.params[idx]
+				index := h.routeParams[idx]
 				value := parseParameter(context.Elem().Field(index), param)
 				context.Elem().Field(index).
 					Set(value)
 			}
+		}
+
+		if h.matchedPath != "" {
+			param := h.matchedPath
+			index := h.matchPathIndex
+			value := parseParameter(context.Elem().Field(index), param)
+			context.Elem().Field(index).
+				Set(value)
 		}
 
 		req.ParseForm()
@@ -62,25 +83,28 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
 	h := &handler{
-		routes:     strings.Split(*route, "/")[1:],
-		do:         handlerDo,
-		method:     method,
-		params:     make(map[int]int),
-		formParams: make(map[string]int),
+		routes:      strings.Split(*route, "/")[1:],
+		do:          handlerDo,
+		method:      method,
+		routeParams: make(map[int]int),
+		formParams:  make(map[string]int),
 	}
 
 	handlerT := reflect.TypeOf(do)
 	if handlerT.NumIn() > 0 {
 		userDefinedT := handlerT.In(0).Elem()
+
+		routeParams := make(map[string]int)
+		for i := 0; i < userDefinedT.NumField(); i++ {
+			key, ok := userDefinedT.Field(i).Tag.Lookup("route")
+			if ok {
+				routeParams[key] = i
+			}
+		}
+
 		for idx, r := range h.routes {
-			if r[0] == ':' {
-				for i := 0; i < userDefinedT.NumField(); i++ {
-					key := userDefinedT.Field(i).Tag.Get("route")
-					if key == r[1:] {
-						h.params[idx] = i
-						break
-					}
-				}
+			if r[0] == ':' || r[0] == '*' {
+				h.routeParams[idx] = routeParams[r[1:]]
 			}
 		}
 
@@ -98,29 +122,4 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	}
 
 	return h
-}
-
-// Get return a get handler.
-func Get(route string, do interface{}) *handler {
-	return handlerByMethod(&route, do, "GET")
-}
-
-// Post return a post handler.
-func Post(route string, do interface{}) *handler {
-	return handlerByMethod(&route, do, "POST")
-}
-
-// Put return a put handler.
-func Put(route string, do interface{}) *handler {
-	return handlerByMethod(&route, do, "PUT")
-}
-
-// Patch return a patch handler.
-func Patch(route string, do interface{}) *handler {
-	return handlerByMethod(&route, do, "PATCH")
-}
-
-// Delete return delete handler.
-func Delete(route string, do interface{}) *handler {
-	return handlerByMethod(&route, do, "DELETE")
 }

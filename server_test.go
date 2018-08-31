@@ -26,12 +26,19 @@ type ForPatch struct {
 	Val string `form:"value"`
 }
 
+type Files struct {
+	FileName string `route:"filename"`
+}
+
 var (
 	homePage = rocket.Get("/", func() rocket.Html {
 		return `
 		<h1>Title</h1>
 		<p>Hello, World</p>
 		`
+	})
+	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
+		return fs.FileName
 	})
 	noParamNoRoute = rocket.Get("/", func() string {
 		return "no param no route"
@@ -51,7 +58,7 @@ func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	rk := rocket.Ignite(":8080").
-		Mount("/", homePage, forPost).
+		Mount("/", homePage, forPost, staticFiles).
 		Mount("/for", forPatch).
 		Mount("/hello", helloName).
 		Mount("/test", noParamNoRoute).
@@ -76,6 +83,15 @@ func TestServer(t *testing.T) {
 			}
 		}
 		assert.Assert(flag)
+	})
+
+	t.Run("MatchStaticPath", func(t *testing.T) {
+		result, _, err := response("GET", ts.URL, "/static/index.js")
+		assert.Eq(err, nil)
+		assert.Eq(result, `index.js`)
+		result, _, err = response("GET", ts.URL, "/static/css/index.css")
+		assert.Eq(err, nil)
+		assert.Eq(result, `css/index.css`)
 	})
 
 	t.Run("Get", func(t *testing.T) {
