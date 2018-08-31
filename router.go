@@ -77,20 +77,12 @@ func (route *Route) matching(rs []string) *handler {
 		return route.Matched
 	}
 	useToMatch := make([]string, 0)
-<<<<<<< HEAD
-	next := r.Children
-	for i := 0; i < len(rs); {
-		rrr := rs[i]
-		if _, ok := next[rrr]; ok {
-			useToMatch = append(useToMatch, rrr)
-=======
 	next := route.Children
 	i := 0
 	for i < len(rs) {
 		r := rs[i]
 		if _, ok := next[r]; ok {
 			useToMatch = append(useToMatch, r)
->>>>>>> refactor: improve func matching naming
 			i++
 			if i != len(rs) {
 				next = next[r].Children
