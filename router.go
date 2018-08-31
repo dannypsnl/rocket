@@ -80,12 +80,12 @@ func (route *Route) matching(requestUrl []string) *handler {
 	i := 0
 	for i < len(requestUrl) {
 		r := requestUrl[i]
-		if _, ok := next[r]; ok {
+		if router, ok := next[r]; ok {
 			i++
 			if i != len(requestUrl) {
 				next = next[r].Children
 			} else {
-				return next[r].Matched
+				return router.Matched
 			}
 		} else {
 			for route, _ := range next {
