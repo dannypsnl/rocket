@@ -76,39 +76,35 @@ func (route *Route) matching(requestUrl []string) *handler {
 	if len(requestUrl) == 0 {
 		return route.Matched
 	}
-	useToMatch := make([]string, 0)
 	next := route.Children
 	i := 0
 	for i < len(requestUrl) {
 		r := requestUrl[i]
 		if _, ok := next[r]; ok {
-			useToMatch = append(useToMatch, r)
 			i++
 			if i != len(requestUrl) {
 				next = next[r].Children
+			} else {
+				return next[r].Matched
 			}
 		} else {
-			routeExist := false
 			for route, _ := range next {
 				if isParameter(route) {
-					useToMatch = append(useToMatch, route)
 					i++
 					if i != len(requestUrl) {
 						next = next[route].Children
+					} else {
+						return next[route].Matched
 					}
-					routeExist = true
-					break
 				} else if route[0] == '*' {
 					next[route].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
 					return next[route].Matched
 				}
 			}
-			if !routeExist {
-				return nil
-			}
+			return nil
 		}
 	}
-	return next[useToMatch[len(useToMatch)-1]].Matched
+	return nil
 }
 
 func isParameter(route string) bool {
