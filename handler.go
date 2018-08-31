@@ -11,7 +11,7 @@ import (
 
 type handler struct {
 	routes            []string
-	params            map[int]int // Never custom it. It only for rocket inside.
+	routeParams       map[int]int // Never custom it. It only for rocket inside.
 	formParams        map[string]int
 	expectJsonRequest bool
 	do                reflect.Value // do should return response for HTTP writer
@@ -50,7 +50,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		for idx, route := range h.routes {
 			if isParameter(route) {
 				param := rs[len(rs)-len(h.routes)+idx]
-				index := h.params[idx]
+				index := h.routeParams[idx]
 				value := parseParameter(context.Elem().Field(index), param)
 				context.Elem().Field(index).
 					Set(value)
@@ -83,33 +83,28 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
 	h := &handler{
-		routes:     strings.Split(*route, "/")[1:],
-		do:         handlerDo,
-		method:     method,
-		params:     make(map[int]int),
-		formParams: make(map[string]int),
+		routes:      strings.Split(*route, "/")[1:],
+		do:          handlerDo,
+		method:      method,
+		routeParams: make(map[int]int),
+		formParams:  make(map[string]int),
 	}
 
 	handlerT := reflect.TypeOf(do)
 	if handlerT.NumIn() > 0 {
 		userDefinedT := handlerT.In(0).Elem()
+
+		routeParams := make(map[string]int)
+		for i := 0; i < userDefinedT.NumField(); i++ {
+			key, ok := userDefinedT.Field(i).Tag.Lookup("route")
+			if ok {
+				routeParams[key] = i
+			}
+		}
+
 		for idx, r := range h.routes {
-			if r[0] == ':' {
-				for i := 0; i < userDefinedT.NumField(); i++ {
-					key := userDefinedT.Field(i).Tag.Get("route")
-					if key == r[1:] {
-						h.params[idx] = i
-						break
-					}
-				}
-			} else if r[0] == '*' {
-				for i := 0; i < userDefinedT.NumField(); i++ {
-					key := userDefinedT.Field(i).Tag.Get("route")
-					if key == r[1:] {
-						h.matchPathIndex = i
-						break
-					}
-				}
+			if r[0] == ':' || r[0] == '*' {
+				h.routeParams[idx] = routeParams[r[1:]]
 			}
 		}
 
