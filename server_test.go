@@ -16,6 +16,7 @@ import (
 
 type User struct {
 	Name string `route:"name"`
+	Age  int    `route:"age"`
 }
 
 type ForPost struct {
@@ -52,23 +53,32 @@ var (
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
 	})
+	user = rocket.Get("/:name/name", func(u *User) string {
+		return u.Name
+	})
 )
 
 func TestServer(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	rk := rocket.Ignite(":8080").
-		Mount("/", homePage, forPost, staticFiles).
-		Mount("/for", forPatch).
+		Mount("/", homePage, staticFiles).
 		Mount("/hello", helloName).
-		Mount("/test", noParamNoRoute).
+		Mount("/users", user).
+		Mount("/test", noParamNoRoute, forPatch, forPost).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
 
-	t.Run("GetHTML", func(t *testing.T) {
+	t.Run("GetUserName", func(t *testing.T) {
+		result, _, err := response("GET", ts.URL, "/users/Danny/name")
+		assert.Eq(err, nil)
+		assert.Eq(result, "Danny")
+	})
+
+	t.Run("GetHomePage", func(t *testing.T) {
 		result, header, err := response("GET", ts.URL, "/")
 		assert.Eq(err, nil)
 		assert.Eq(result, `
@@ -108,7 +118,7 @@ func TestServer(t *testing.T) {
 
 	t.Run("Post", func(t *testing.T) {
 		var jsonStr = []byte(`{"value":"for post"}`)
-		req, err := http.NewRequest("POST", ts.URL+"/post", bytes.NewBuffer(jsonStr))
+		req, err := http.NewRequest("POST", ts.URL+"/test/post", bytes.NewBuffer(jsonStr))
 		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{}
@@ -127,14 +137,14 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Patch", func(t *testing.T) {
-		result, _, err := request("PATCH", ts.URL, "/for/patch", url.Values{
-			"value": {"for patch"},
+		result, _, err := request("PATCH", ts.URL, "/test/patch", url.Values{
+			"value": {"patch"},
 		})
 		assert.Eq(err, nil)
-		assert.Eq(result, "for patch")
+		assert.Eq(result, "patch")
 	})
 
-	t.Run("404", func(t *testing.T) {
+	t.Run("Handle404NotFound", func(t *testing.T) {
 		result, _, err := response("GET", ts.URL, "/404")
 		assert.Eq(err, nil)
 		assert.Eq(result, "<h1>Page Not Found</h1>")

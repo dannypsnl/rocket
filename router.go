@@ -39,73 +39,76 @@ func (r *Route) Call(req *http.Request) (interface{}, error) {
 	)[0].Interface(), nil
 }
 
-func (r *Route) addHandlerTo(route string, h *handler) {
-	routes := append(strings.Split(route, "/")[1:], h.routes...)
+func (route *Route) addHandlerTo(routeStr string, h *handler) {
+	routes := append(
+		strings.Split(routeStr, "/")[1:],
+		h.routes...)
 
 	rs := make([]string, 0)
-	for _, rout := range routes {
-		if rout != "" {
-			rs = append(rs, rout)
+	for _, r := range routes {
+		if r != "" {
+			rs = append(rs, r)
 		}
 	}
 
 	if len(rs) == 0 {
-		r.Matched = h
+		route.Matched = h
 		return
 	}
 
-	next := r.Children
-	for i := 0; i < len(rs); {
-		rrr := rs[i]
-		if _, ok := next[rrr]; !ok {
-			next[rrr] = NewRoute()
+	next := route.Children
+	i := 0
+	for i < len(rs) {
+		r := rs[i]
+		if _, ok := next[r]; !ok {
+			next[r] = NewRoute()
 			i++
 		}
 		if i != len(rs) {
-			next = next[rrr].Children
+			next = next[r].Children
 		}
 	}
 
 	next[rs[len(rs)-1]].Matched = h
 }
 
-func (r *Route) matching(rs []string) *handler {
-	if len(rs) == 0 {
-		return r.Matched
+func (route *Route) matching(requestUrl []string) *handler {
+	if len(requestUrl) == 0 {
+		return route.Matched
 	}
-	useToMatch := make([]string, 0)
-	next := r.Children
-	for i := 0; i < len(rs); {
-		rrr := rs[i]
-		if _, ok := next[rrr]; ok {
-			useToMatch = append(useToMatch, rrr)
+	next := route.Children
+	i := 0
+	for i < len(requestUrl) {
+		r := requestUrl[i]
+		if router, ok := next[r]; ok {
 			i++
-			if i != len(rs) {
-				next = next[rrr].Children
+			if i != len(requestUrl) {
+				next = next[r].Children
+			} else {
+				return router.Matched
 			}
 		} else {
-			routeExist := false
+			found := false
 			for route, _ := range next {
 				if isParameter(route) {
-					useToMatch = append(useToMatch, route)
 					i++
-					if i != len(rs) {
+					if i != len(requestUrl) {
+						found = true
 						next = next[route].Children
+					} else {
+						return next[route].Matched
 					}
-					routeExist = true
-					break
 				} else if route[0] == '*' {
-					useToMatch = append(useToMatch, route)
-					next[useToMatch[len(useToMatch)-1]].Matched.addMatchedPathValueIntoContext(rs[i:]...)
-					return next[useToMatch[len(useToMatch)-1]].Matched
+					next[route].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
+					return next[route].Matched
 				}
 			}
-			if !routeExist {
+			if !found {
 				return nil
 			}
 		}
 	}
-	return next[useToMatch[len(useToMatch)-1]].Matched
+	return nil
 }
 
 func isParameter(route string) bool {
