@@ -88,10 +88,12 @@ func (route *Route) matching(requestUrl []string) *handler {
 				return router.Matched
 			}
 		} else {
+			found := false
 			for route, _ := range next {
 				if isParameter(route) {
 					i++
 					if i != len(requestUrl) {
+						found = true
 						next = next[route].Children
 					} else {
 						return next[route].Matched
@@ -101,7 +103,9 @@ func (route *Route) matching(requestUrl []string) *handler {
 					return next[route].Matched
 				}
 			}
-			return nil
+			if !found {
+				return nil
+			}
 		}
 	}
 	return nil

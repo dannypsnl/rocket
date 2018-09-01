@@ -16,6 +16,7 @@ import (
 
 type User struct {
 	Name string `route:"name"`
+	Age  int    `route:"age"`
 }
 
 type ForPost struct {
@@ -52,6 +53,9 @@ var (
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
 	})
+	user = rocket.Get("/:name/name", func(u *User) string {
+		return u.Name
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -61,12 +65,19 @@ func TestServer(t *testing.T) {
 		Mount("/", homePage, forPost, staticFiles).
 		Mount("/for", forPatch).
 		Mount("/hello", helloName).
+		Mount("/users", user).
 		Mount("/test", noParamNoRoute).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
+
+	t.Run("GetUserName", func(t *testing.T) {
+		result, _, err := response("GET", ts.URL, "/users/Danny/name")
+		assert.Eq(err, nil)
+		assert.Eq(result, "Danny")
+	})
 
 	t.Run("GetHTML", func(t *testing.T) {
 		result, header, err := response("GET", ts.URL, "/")
