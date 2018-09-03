@@ -20,7 +20,12 @@ func NewRoute() *Route {
 }
 
 func (r *Route) Call(req *http.Request) (interface{}, error) {
-	splitRoutes := strings.Split(req.URL.Path, "/")[1:]
+	queryIdx := strings.Index(req.URL.Path, "?")
+	path := req.URL.Path
+	if queryIdx > -1 {
+		path = path[:queryIdx]
+	}
+	splitRoutes := strings.Split(path, "/")[1:]
 
 	rs := make([]string, 0)
 	for _, rout := range splitRoutes {
@@ -53,6 +58,9 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 
 	if len(rs) == 0 {
 		route.Matched = h
+		return
+	} else if len(rs) == 1 {
+		route.Children[rs[0]].Matched = h
 		return
 	}
 
