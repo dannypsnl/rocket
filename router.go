@@ -70,8 +70,9 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		r := rs[i]
 		if _, ok := next[r]; !ok {
 			next[r] = NewRoute()
-			i++
 		}
+		// increase i whether create new route or not
+		i++
 		if i != len(rs) {
 			next = next[r].Children
 		}
