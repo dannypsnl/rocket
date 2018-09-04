@@ -13,6 +13,7 @@ type handler struct {
 	routes            []string
 	routeParams       map[int]int // Never custom it. It only for rocket inside.
 	formParams        map[string]int
+	queryParams       map[string]int
 	expectJsonRequest bool
 	do                reflect.Value // do should return response for HTTP writer
 	method            string
@@ -65,6 +66,16 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 				Set(value)
 		}
 
+		for k, idx := range h.queryParams {
+			values := req.URL.Query()
+			if v, ok := values[k]; ok {
+				p := v[0]
+				value := parseParameter(context.Elem().Field(idx), p)
+				context.Elem().Field(idx).
+					Set(value)
+			}
+		}
+
 		req.ParseForm()
 		for k, idx := range h.formParams {
 			if v, ok := req.Form[k]; ok {
@@ -88,6 +99,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 		method:      method,
 		routeParams: make(map[int]int),
 		formParams:  make(map[string]int),
+		queryParams: make(map[string]int),
 	}
 
 	handlerT := reflect.TypeOf(do)
@@ -113,11 +125,14 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 			if ok {
 				h.formParams[key] = i
 			}
-		}
-
-		for i := 0; i < userDefinedT.NumField(); i++ {
-			_, ok := userDefinedT.Field(i).Tag.Lookup("json")
-			h.expectJsonRequest = ok
+			key, ok = userDefinedT.Field(i).Tag.Lookup("query")
+			if ok {
+				h.queryParams[key] = i
+			}
+			_, ok = userDefinedT.Field(i).Tag.Lookup("json")
+			if ok {
+				h.expectJsonRequest = ok
+			}
 		}
 	}
 
