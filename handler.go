@@ -130,7 +130,9 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 				h.queryParams[key] = i
 			}
 			_, ok = userDefinedT.Field(i).Tag.Lookup("json")
-			h.expectJsonRequest = ok
+			if ok {
+				h.expectJsonRequest = ok
+			}
 		}
 	}
 
