@@ -94,7 +94,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
 	h := &handler{
-		routes:      strings.Split(*route, "/")[1:],
+		routes:      strings.Split(strings.Trim(*route, "/"), "/"),
 		do:          handlerDo,
 		method:      method,
 		routeParams: make(map[int]int),
