@@ -55,7 +55,7 @@ var (
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
 		return f.Val
 	})
-	user = rocket.Get("/:name/name", func(u *User) string {
+	user = rocket.Get("/:name/name/", func(u *User) string {
 		return u.Name
 	})
 	query = rocket.Get("/query", func(u *User) string {
