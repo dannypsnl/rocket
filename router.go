@@ -56,29 +56,18 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		}
 	}
 
-	if len(rs) == 0 {
-		route.Matched = h
-		return
-	} else if len(rs) == 1 {
-		route.Children[rs[0]].Matched = h
-		return
+	matchRoute := route
+	child := route.Children
+	for _, r := range rs {
+		// create route if child[r] is nil
+		if _, ok := child[r]; !ok {
+			child[r] = NewRoute()
+		}
+		matchRoute = child[r]
+		child = matchRoute.Children
 	}
 
-	next := route.Children
-	i := 0
-	for i < len(rs) {
-		r := rs[i]
-		if _, ok := next[r]; !ok {
-			next[r] = NewRoute()
-		}
-		// increase i whether create new route or not
-		i++
-		if i != len(rs) {
-			next = next[r].Children
-		}
-	}
-
-	next[rs[len(rs)-1]].Matched = h
+	matchRoute.Matched = h
 }
 
 func (route *Route) matching(requestUrl []string) *handler {
