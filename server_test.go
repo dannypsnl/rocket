@@ -61,6 +61,9 @@ var (
 	query = rocket.Get("/query", func(u *User) string {
 		return u.QueryName
 	})
+	endWithSlash = rocket.Get("/end-with-slash/", func() string {
+		return "you found me"
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -70,7 +73,7 @@ func TestServer(t *testing.T) {
 		Mount("/", homePage, staticFiles).
 		Mount("/hello", helloName).
 		Mount("/users", user).
-		Mount("/test", query, noParamNoRoute, forPatch, forPost).
+		Mount("/test", query, endWithSlash, noParamNoRoute, forPatch, forPost).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -153,6 +156,12 @@ func TestServer(t *testing.T) {
 		result, _, err := response("GET", ts.URL, "/test/query?name=Danny")
 		assert.Eq(err, nil)
 		assert.Eq(result, "Danny")
+	})
+
+	t.Run("EndWithSlash", func(t *testing.T) {
+		result, _, err := response("GET", ts.URL, "/test/end-with-slash")
+		assert.Eq(err, nil)
+		assert.Eq(result, "you found me")
 	})
 
 	t.Run("Handle404NotFound", func(t *testing.T) {
