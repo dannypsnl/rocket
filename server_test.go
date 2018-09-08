@@ -43,12 +43,6 @@ var (
 	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
 		return fs.FileName
 	})
-	noParamNoRoute = rocket.Get("/", func() string {
-		return "no param no route"
-	})
-	helloName = rocket.Get("/:name", func(u *User) string {
-		return "Hello, " + u.Name
-	})
 	forPost = rocket.Post("/post", func(f *ForPost) rocket.Json {
 		return `{"value": "response"}`
 	})
@@ -71,9 +65,8 @@ func TestServer(t *testing.T) {
 
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
-		Mount("/hello", helloName).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, noParamNoRoute, forPatch, forPost).
+		Mount("/test", query, endWithSlash, forPatch, forPost).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -81,47 +74,27 @@ func TestServer(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("GetUserName", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/users/Danny/name")
+		result, err := response("GET", ts.URL, "/users/Danny/name")
 		assert.Eq(err, nil)
 		assert.Eq(result, "Danny")
 	})
 
 	t.Run("GetHomePage", func(t *testing.T) {
-		result, header, err := response("GET", ts.URL, "/")
+		result, err := response("GET", ts.URL, "/")
 		assert.Eq(err, nil)
 		assert.Eq(result, `
 		<h1>Title</h1>
 		<p>Hello, World</p>
 		`)
-
-		flag := false
-		for _, s := range header["Content-Type"] {
-			if s == "text/html" {
-				flag = true
-			}
-		}
-		assert.Assert(flag)
 	})
 
-	t.Run("MatchStaticPath", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/static/index.js")
+	t.Run("MatchPathParameter", func(t *testing.T) {
+		result, err := response("GET", ts.URL, "/static/index.js")
 		assert.Eq(err, nil)
 		assert.Eq(result, `index.js`)
-		result, _, err = response("GET", ts.URL, "/static/css/index.css")
+		result, err = response("GET", ts.URL, "/static/css/index.css")
 		assert.Eq(err, nil)
 		assert.Eq(result, `css/index.css`)
-	})
-
-	t.Run("Get", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/hello/Danny")
-		assert.Eq(err, nil)
-		assert.Eq(result, "Hello, Danny")
-	})
-
-	t.Run("NoParamNoRoute", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/test")
-		assert.Eq(err, nil)
-		assert.Eq(result, "no param no route")
 	})
 
 	t.Run("Post", func(t *testing.T) {
@@ -153,39 +126,22 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Query", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/test/query?name=Danny")
+		result, err := response("GET", ts.URL, "/test/query?name=Danny")
 		assert.Eq(err, nil)
 		assert.Eq(result, "Danny")
 	})
 
 	t.Run("EndWithSlash", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/test/end-with-slash")
+		result, err := response("GET", ts.URL, "/test/end-with-slash")
 		assert.Eq(err, nil)
 		assert.Eq(result, "you found me")
 	})
 
 	t.Run("Handle404NotFound", func(t *testing.T) {
-		result, _, err := response("GET", ts.URL, "/404")
+		result, err := response("GET", ts.URL, "/404")
 		assert.Eq(err, nil)
 		assert.Eq(result, "<h1>Page Not Found</h1>")
 	})
-}
-
-func post(serverUrl, route string, values url.Values) (string, http.Header, error) {
-	resp, err := http.PostForm(serverUrl+route, values)
-	if err != nil {
-		return "", http.Header{}, err
-	}
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", http.Header{}, err
-	}
-	err = resp.Body.Close()
-	if err != nil {
-		return "", http.Header{}, err
-	}
-
-	return string(b), resp.Header, nil
 }
 
 func request(method, serverUrl, route string, values url.Values) (string, http.Header, error) {
@@ -211,24 +167,24 @@ func request(method, serverUrl, route string, values url.Values) (string, http.H
 	return string(b), resp.Header, nil
 }
 
-func response(method, serverUrl, route string) (string, http.Header, error) {
+func response(method, serverUrl, route string) (string, error) {
 	req, err := http.NewRequest(method, serverUrl+route, bytes.NewBuffer([]byte(``)))
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 
-	return string(b), resp.Header, nil
+	return string(b), nil
 }
