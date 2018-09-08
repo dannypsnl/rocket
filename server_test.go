@@ -118,7 +118,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Patch", func(t *testing.T) {
-		result, _, err := request("PATCH", ts.URL, "/test/patch", url.Values{
+		result, err := request("PATCH", ts.URL, "/test/patch", url.Values{
 			"value": {"patch"},
 		})
 		assert.Eq(err, nil)
@@ -144,27 +144,27 @@ func TestServer(t *testing.T) {
 	})
 }
 
-func request(method, serverUrl, route string, values url.Values) (string, http.Header, error) {
+func request(method, serverUrl, route string, values url.Values) (string, error) {
 	body := strings.NewReader(values.Encode())
 	req, err := http.NewRequest(method, serverUrl+route, body)
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		return "", http.Header{}, err
+		return "", err
 	}
-	return string(b), resp.Header, nil
+	return string(b), nil
 }
 
 func response(method, serverUrl, route string) (string, error) {
