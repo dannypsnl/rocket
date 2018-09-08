@@ -91,13 +91,10 @@ func (route *Route) matching(requestUrl []string) *handler {
 		return route.Matched
 	}
 	next := route
-	matched := route.Matched
 	for i, r := range requestUrl {
 		if router, ok := next.Children[r]; ok {
 			next = router
-			matched = router.Matched
 		} else if next.VariableRoute != nil {
-			matched = next.VariableRoute.Matched
 			next = next.VariableRoute
 		} else if next.PathRouteHandler != nil {
 			next.PathRouteHandler.addMatchedPathValueIntoContext(requestUrl[i:]...)
@@ -106,7 +103,7 @@ func (route *Route) matching(requestUrl []string) *handler {
 			return nil
 		}
 	}
-	return matched
+	return next.Matched
 }
 
 func isParameter(route string) bool {
