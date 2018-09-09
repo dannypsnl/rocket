@@ -63,14 +63,20 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		response = rk.defaultHandler.Call([]reflect.Value{})[0]
 	}
-	switch response.(type) {
-	case Html:
-		w.Header().Set("Content-Type", "text/html")
-	case Json:
-		w.Header().Set("Content-Type", "application/json")
-	case string:
-		w.Header().Set("Content-Type", "text/plain")
-	}
+	w.Header().Set("Content-Type", contentTypeOf(response))
 
 	fmt.Fprint(w, response)
+}
+
+func contentTypeOf(response interface{}) string {
+	switch response.(type) {
+	case Html:
+		return "text/html"
+	case Json:
+		return "application/json"
+	case string:
+		return "text/plain"
+	default:
+		return "text/plain"
+	}
 }
