@@ -102,35 +102,37 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 		queryParams: make(map[string]int),
 	}
 
-	handlerT := reflect.TypeOf(do)
-	if handlerT.NumIn() > 0 {
-		userDefinedT := handlerT.In(0).Elem()
+	handlerFuncT := reflect.TypeOf(do)
+	if handlerFuncT.NumIn() > 0 {
+		contextT := handlerFuncT.In(0).Elem()
 
 		routeParams := make(map[string]int)
-		for i := 0; i < userDefinedT.NumField(); i++ {
-			key, ok := userDefinedT.Field(i).Tag.Lookup("route")
+		for i := 0; i < contextT.NumField(); i++ {
+			key, ok := contextT.Field(i).Tag.Lookup("route")
 			if ok {
 				routeParams[key] = i
 			}
 		}
 
 		for idx, r := range h.routes {
+			// a route part like `:name`
 			if r[0] == ':' || r[0] == '*' {
+				// r[1:] is `name`, that's the key we expected
 				h.routeParams[idx] = routeParams[r[1:]]
 			}
 		}
 
-		for i := 0; i < userDefinedT.NumField(); i++ {
-			key, ok := userDefinedT.Field(i).Tag.Lookup("form")
+		for i := 0; i < contextT.NumField(); i++ {
+			key, ok := contextT.Field(i).Tag.Lookup("form")
 			if ok {
 				h.formParams[key] = i
 			}
-			key, ok = userDefinedT.Field(i).Tag.Lookup("query")
+			key, ok = contextT.Field(i).Tag.Lookup("query")
 			if ok {
 				h.queryParams[key] = i
 			}
-			_, ok = userDefinedT.Field(i).Tag.Lookup("json")
-			if ok {
+			_, ok = contextT.Field(i).Tag.Lookup("json")
+			if !h.expectJsonRequest && ok {
 				h.expectJsonRequest = ok
 			}
 		}

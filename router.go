@@ -23,7 +23,7 @@ func NewRoute() *Route {
 	}
 }
 
-func (r *Route) Call(req *http.Request) (interface{}, error) {
+func (route *Route) Call(req *http.Request) (interface{}, error) {
 	queryIdx := strings.Index(req.URL.Path, "?")
 	path := req.URL.Path
 	if queryIdx > -1 {
@@ -38,7 +38,7 @@ func (r *Route) Call(req *http.Request) (interface{}, error) {
 		}
 	}
 
-	handler := r.matching(rs)
+	handler := route.matching(rs)
 	if handler == nil {
 		return nil, PageNotFound(concatString("can't found ", req.URL.Path))
 	}
