@@ -8,6 +8,10 @@ import (
 type Route struct {
 	// Children route can be nil
 	Children map[string]*Route
+	// VariableRoute is prepare for route like `:name`
+	VariableRoute *Route
+	// PathRouteHandler is the handler of route `*path`
+	PathRouteHandler *handler
 	// Matched means what is under the route
 	// For example we can put Handler at here
 	Matched *handler
@@ -59,11 +63,23 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute := route
 	child := route.Children
 	for _, r := range rs {
-		// create route if child[r] is nil
-		if _, ok := child[r]; !ok {
+		if isParameter(r) {
+			if matchRoute.VariableRoute == nil {
+				matchRoute.VariableRoute = NewRoute()
+			}
+			matchRoute = matchRoute.VariableRoute
+		} else if r[0] == '*' {
+			if matchRoute.PathRouteHandler == nil {
+				matchRoute.PathRouteHandler = h
+				return
+			}
+			panic("Duplicated route")
+		} else if _, ok := child[r]; !ok {
 			child[r] = NewRoute()
+			matchRoute = child[r]
+		} else {
+			matchRoute = child[r]
 		}
-		matchRoute = child[r]
 		child = matchRoute.Children
 	}
 
@@ -74,39 +90,20 @@ func (route *Route) matching(requestUrl []string) *handler {
 	if len(requestUrl) == 0 {
 		return route.Matched
 	}
-	next := route.Children
-	i := 0
-	for i < len(requestUrl) {
-		r := requestUrl[i]
-		if router, ok := next[r]; ok {
-			i++
-			if i != len(requestUrl) {
-				next = next[r].Children
-			} else {
-				return router.Matched
-			}
+	next := route
+	for i, r := range requestUrl {
+		if router, ok := next.Children[r]; ok {
+			next = router
+		} else if next.VariableRoute != nil {
+			next = next.VariableRoute
+		} else if next.PathRouteHandler != nil {
+			next.PathRouteHandler.addMatchedPathValueIntoContext(requestUrl[i:]...)
+			return next.PathRouteHandler
 		} else {
-			found := false
-			for route, _ := range next {
-				if isParameter(route) {
-					i++
-					if i != len(requestUrl) {
-						found = true
-						next = next[route].Children
-					} else {
-						return next[route].Matched
-					}
-				} else if route[0] == '*' {
-					next[route].Matched.addMatchedPathValueIntoContext(requestUrl[i:]...)
-					return next[route].Matched
-				}
-			}
-			if !found {
-				return nil
-			}
+			return nil
 		}
 	}
-	return nil
+	return next.Matched
 }
 
 func isParameter(route string) bool {
