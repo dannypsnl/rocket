@@ -18,6 +18,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 
 	handlerFuncT := reflect.TypeOf(do)
 	if handlerFuncT.NumIn() > 0 {
+		// TODO: check if handler receive a param type is *rocket.Cookies
 		contextT := handlerFuncT.In(0).Elem()
 
 		routeParams := make(map[string]int)
