@@ -9,13 +9,17 @@ import (
 )
 
 type handler struct {
-	routes            []string
+	routes []string
+	do     reflect.Value // do should return response for HTTP writer
+	method string
+
+	userDefinedContextOffset int
+	cookiesOffset            int
+
 	routeParams       map[int]int // Never custom it. It only for rocket inside.
 	formParams        map[string]int
 	queryParams       map[string]int
 	expectJsonRequest bool
-	do                reflect.Value // do should return response for HTTP writer
-	method            string
 
 	matchedPath    string
 	matchPathIndex int
@@ -30,10 +34,17 @@ func (h *handler) addMatchedPathValueIntoContext(path ...string) {
 	h.matchedPath = buf.String()[:buf.Len()-1]
 }
 
+func (h *handler) hasUserDefinedContext() bool {
+	return h.userDefinedContextOffset != -1
+}
+func (h *handler) needCookies() bool {
+	return h.cookiesOffset != -1
+}
+
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, 0)
-	if h.do.Type().NumIn() > 0 {
-		contextType := h.do.Type().In(0)
+	if h.hasUserDefinedContext() {
+		contextType := h.do.Type().In(h.userDefinedContextOffset)
 		context := reflect.New(contextType.Elem())
 
 		if h.expectJsonRequest {
@@ -87,5 +98,13 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 
 		param = append(param, context)
 	}
+
+	if h.needCookies() {
+		cs := &Cookies{
+			req: req,
+		}
+		param = append(param, reflect.ValueOf(cs))
+	}
+
 	return param
 }

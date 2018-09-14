@@ -58,6 +58,13 @@ var (
 	endWithSlash = rocket.Get("/end-with-slash/", func() string {
 		return "you found me"
 	})
+	handleCookies = rocket.Get("cookies", func(cs *rocket.Cookies) string {
+		_, err := cs.Cookie("brabrabra")
+		if err == nil {
+			return "incorrect!"
+		}
+		return "cookies"
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -66,7 +73,7 @@ func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost).
+		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -129,6 +136,12 @@ func TestServer(t *testing.T) {
 		result, err := response("GET", ts.URL, "/test/query?name=Danny")
 		assert.Eq(err, nil)
 		assert.Eq(result, "Danny")
+	})
+
+	t.Run("Cookies", func(t *testing.T) {
+		result, err := response("GET", ts.URL, "/test/cookies")
+		assert.Eq(err, nil)
+		assert.Eq(result, "cookies")
 	})
 
 	t.Run("EndWithSlash", func(t *testing.T) {

@@ -8,17 +8,31 @@ import (
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
 	h := &handler{
-		routes:      strings.Split(strings.Trim(*route, "/"), "/"),
-		do:          handlerDo,
-		method:      method,
-		routeParams: make(map[int]int),
-		formParams:  make(map[string]int),
-		queryParams: make(map[string]int),
+		routes:                   strings.Split(strings.Trim(*route, "/"), "/"),
+		do:                       handlerDo,
+		method:                   method,
+		userDefinedContextOffset: -1,
+		cookiesOffset:            -1,
+		routeParams:              make(map[int]int),
+		formParams:               make(map[string]int),
+		queryParams:              make(map[string]int),
 	}
 
 	handlerFuncT := reflect.TypeOf(do)
-	if handlerFuncT.NumIn() > 0 {
-		contextT := handlerFuncT.In(0).Elem()
+
+	for i := 0; i < handlerFuncT.NumIn(); i++ {
+		t := handlerFuncT.In(i).Elem()
+		if t.AssignableTo(reflect.TypeOf(Cookies{})) {
+			h.cookiesOffset = i
+		} else {
+			// We not sure what it's, so just assume it's user defined context
+			h.userDefinedContextOffset = i
+		}
+	}
+
+	if h.userDefinedContextOffset != -1 {
+		// TODO: check if handler receive a param type is *rocket.Cookies
+		contextT := handlerFuncT.In(h.userDefinedContextOffset).Elem()
 
 		routeParams := make(map[string]int)
 		for i := 0; i < contextT.NumField(); i++ {
