@@ -34,9 +34,16 @@ func (h *handler) addMatchedPathValueIntoContext(path ...string) {
 	h.matchedPath = buf.String()[:buf.Len()-1]
 }
 
+func (h *handler) hasUserDefinedContext() bool {
+	return h.userDefinedContextOffset != -1
+}
+func (h *handler) needCookies() bool {
+	return h.cookiesOffset != -1
+}
+
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, 0)
-	if h.userDefinedContextOffset != -1 {
+	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset)
 		context := reflect.New(contextType.Elem())
 
@@ -92,7 +99,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		param = append(param, context)
 	}
 
-	if h.cookiesOffset != -1 {
+	if h.needCookies() {
 		cs := &Cookies{
 			req: req,
 		}
