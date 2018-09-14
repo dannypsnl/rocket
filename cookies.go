@@ -11,3 +11,7 @@ type Cookies struct {
 func (c *Cookies) Cookie(name string) (*http.Cookie, error) {
 	return c.req.Cookie(name)
 }
+
+func (c *Cookies) List() []*http.Cookie {
+	return c.req.Cookies()
+}
