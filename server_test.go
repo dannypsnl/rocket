@@ -84,6 +84,7 @@ func TestServer(t *testing.T) {
 	t.Run("GetHomePage", func(t *testing.T) {
 		e.GET("/").
 			Expect().Status(http.StatusOK).
+			ContentType("text/html", "").
 			Body().Equal(`
 		<h1>Title</h1>
 		<p>Hello, World</p>
