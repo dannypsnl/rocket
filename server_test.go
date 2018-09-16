@@ -1,6 +1,7 @@
 package rocket_test
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -76,13 +77,13 @@ func TestServer(t *testing.T) {
 
 	t.Run("GetUserName", func(t *testing.T) {
 		e.GET("/users/name/Danny").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal("Danny")
 	})
 
 	t.Run("GetHomePage", func(t *testing.T) {
 		e.GET("/").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal(`
 		<h1>Title</h1>
 		<p>Hello, World</p>
@@ -91,10 +92,10 @@ func TestServer(t *testing.T) {
 
 	t.Run("MatchPathParameter", func(t *testing.T) {
 		e.GET("/static/index.js").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal(`index.js`)
 		e.GET("/static/css/index.css").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal(`css/index.css`)
 	})
 
@@ -106,38 +107,38 @@ func TestServer(t *testing.T) {
 			"value": "response",
 		}
 		e.POST("/test/post").WithJSON(jsonObj).
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			ContentType("application/json", "").
 			JSON().Equal(expected)
 	})
 
 	t.Run("Patch", func(t *testing.T) {
 		e.PATCH("/test/patch").WithFormField("value", "patch").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal("patch")
 	})
 
 	t.Run("Query", func(t *testing.T) {
 		e.GET("/test/query").WithQuery("name", "Danny").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal("Danny")
 	})
 
 	t.Run("Cookies", func(t *testing.T) {
 		e.GET("/test/cookies").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal("cookies")
 	})
 
 	t.Run("EndWithSlash", func(t *testing.T) {
 		e.GET("/test/end-with-slash").
-			Expect().Status(200).
+			Expect().Status(http.StatusOK).
 			Body().Equal("you found me")
 	})
 
 	t.Run("Handle404NotFound", func(t *testing.T) {
 		e.GET("/404").
-			Expect().Status(404).
+			Expect().Status(http.StatusNotFound).
 			Body().Equal("<h1>Page Not Found</h1>")
 	})
 }
