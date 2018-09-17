@@ -63,11 +63,13 @@ var (
 	customResponseForHeader = rocket.Get("/", func() *rocket.Response {
 		body := rocket.Json(`{"msg": "welcome"}`)
 		return rocket.NewResponse(body).Headers(
-			rocket.Header{"Access-Control-Allow-Origin", "*"},
+			rocket.Headers{
+				"Access-Control-Allow-Origin": "*",
+			},
 		)
 	})
-	handlerHeaders = rocket.Get("/headers", func(headers *rocket.Headers) string {
-		if headers.Get("x-token") == "token" {
+	handlerHeaders = rocket.Get("/headers", func(header *rocket.Header) string {
+		if header.Get("x-token") == "token" {
 			return "received token"
 		}
 		return "not receive token"

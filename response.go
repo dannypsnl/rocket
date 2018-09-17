@@ -5,10 +5,7 @@ type Response struct {
 	body    interface{}
 }
 
-type Header struct {
-	Key   string
-	Value string
-}
+type Headers map[string]string
 
 func NewResponse(body interface{}) *Response {
 	return &Response{
@@ -17,9 +14,9 @@ func NewResponse(body interface{}) *Response {
 	}
 }
 
-func (res *Response) Headers(headers ...Header) *Response {
-	for _, header := range headers {
-		res.headers[header.Key] = header.Value
+func (res *Response) Headers(headers Headers) *Response {
+	for k, v := range headers {
+		res.headers[k] = v
 	}
 	return res
 }

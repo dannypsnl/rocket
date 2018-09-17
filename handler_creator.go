@@ -13,7 +13,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 		method: method,
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
-		headersOffset:            -1,
+		headerOffset:             -1,
 		routeParams:              make(map[int]int),
 		formParams:               make(map[string]int),
 		queryParams:              make(map[string]int),
@@ -22,13 +22,13 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerFuncT := reflect.TypeOf(do)
 
 	cookiesT := reflect.TypeOf(Cookies{})
-	headersT := reflect.TypeOf(Headers{})
+	headerT := reflect.TypeOf(Header{})
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
 		if t.AssignableTo(cookiesT) {
 			h.cookiesOffset = i
-		} else if t.AssignableTo(headersT) {
-			h.headersOffset = i
+		} else if t.AssignableTo(headerT) {
+			h.headerOffset = i
 		} else {
 			// We not sure what it's, so just assume it's user defined context
 			h.userDefinedContextOffset = i
