@@ -66,13 +66,19 @@ var (
 			rocket.Header{"Access-Control-Allow-Origin", "*"},
 		)
 	})
+	handlerHeaders = rocket.Get("/headers", func(headers *rocket.Headers) string {
+		if headers.Get("x-token") == "token" {
+			return "received token"
+		}
+		return "not receive token"
+	})
 )
 
 func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies).
+		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders).
 		Mount("/custom-response-header", customResponseHeader).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
@@ -160,5 +166,13 @@ func TestServer(t *testing.T) {
 		e.GET("/custom-response-header").
 			Expect().Status(http.StatusOK).
 			JSON().Equal(expected)
+	})
+
+	t.Run("Header", func(t *testing.T) {
+		expected := "received token"
+		e.GET("/test/headers").
+			WithHeader("x-token", "token").
+			Expect().Status(http.StatusOK).
+			Body().Equal(expected)
 	})
 }
