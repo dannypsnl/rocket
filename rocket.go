@@ -67,8 +67,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case *Response:
 		res := response.(*Response)
 		w.Header().Set("Content-Type", contentTypeOf(res.body))
-		for _, header := range res.headers {
-			w.Header().Set(header.Key, header.Value)
+		for k, v := range res.headers {
+			w.Header().Set(k, v)
 		}
 		fmt.Fprint(w, res.body)
 	default:

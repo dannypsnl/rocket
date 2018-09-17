@@ -1,7 +1,7 @@
 package rocket
 
 type Response struct {
-	headers []Header
+	headers map[string]string
 	body    interface{}
 }
 
@@ -12,12 +12,14 @@ type Header struct {
 
 func NewResponse(body interface{}) *Response {
 	return &Response{
-		headers: make([]Header, 0),
+		headers: make(map[string]string),
 		body:    body,
 	}
 }
 
 func (res *Response) Headers(headers ...Header) *Response {
-	res.headers = append(res.headers, headers...)
+	for _, header := range headers {
+		res.headers[header.Key] = header.Value
+	}
 	return res
 }
