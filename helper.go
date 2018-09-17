@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"bytes"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -103,12 +102,4 @@ func parseParameter(v reflect.Value, param string) reflect.Value {
 	default:
 		panic("")
 	}
-}
-
-func concatString(strs ...string) string {
-	var buffer bytes.Buffer
-	for _, s := range strs {
-		buffer.WriteString(s)
-	}
-	return buffer.String()
 }
