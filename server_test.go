@@ -60,6 +60,12 @@ var (
 		}
 		return "cookies"
 	})
+	customResponseHeader = rocket.Get("/", func() *rocket.Response {
+		body := rocket.Json(`{"msg": "welcome"}`)
+		return rocket.NewResponse(body).Headers(
+			rocket.Header{"Access-Control-Allow-Origin", "*"},
+		)
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -67,6 +73,7 @@ func TestServer(t *testing.T) {
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
 		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies).
+		Mount("/custom-response-header", customResponseHeader).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -141,5 +148,17 @@ func TestServer(t *testing.T) {
 		e.GET("/404").
 			Expect().Status(http.StatusNotFound).
 			Body().Equal("<h1>Page Not Found</h1>")
+	})
+
+	t.Run("customResponseHeader", func(t *testing.T) {
+		expected := map[string]interface{}{
+			"msg": "welcome",
+		}
+		e.GET("/custom-response-header").
+			Expect().Status(http.StatusOK).
+			Header("Access-Control-Allow-Origin").Equal("*")
+		e.GET("/custom-response-header").
+			Expect().Status(http.StatusOK).
+			JSON().Equal(expected)
 	})
 }
