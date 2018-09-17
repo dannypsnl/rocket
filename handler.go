@@ -15,6 +15,7 @@ type handler struct {
 
 	userDefinedContextOffset int
 	cookiesOffset            int
+	headerOffset             int
 
 	routeParams       map[int]int // Never custom it. It only for rocket inside.
 	formParams        map[string]int
@@ -39,6 +40,9 @@ func (h *handler) hasUserDefinedContext() bool {
 }
 func (h *handler) needCookies() bool {
 	return h.cookiesOffset != -1
+}
+func (h *handler) needHeader() bool {
+	return h.headerOffset != -1
 }
 
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
@@ -104,6 +108,13 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 			req: req,
 		}
 		param = append(param, reflect.ValueOf(cs))
+	}
+
+	if h.needHeader() {
+		hs := &Header{
+			req: req,
+		}
+		param = append(param, reflect.ValueOf(hs))
 	}
 
 	return param
