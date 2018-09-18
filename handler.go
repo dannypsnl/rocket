@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 )
@@ -24,6 +25,25 @@ type handler struct {
 
 	matchedPath    string
 	matchPathIndex int
+}
+
+func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
+	response := h.do.Call(
+		h.context(rs, r),
+	)[0].Interface()
+
+	switch response.(type) {
+	case *Response:
+		res := response.(*Response)
+		w.Header().Set("Content-Type", contentTypeOf(res.body))
+		for k, v := range res.headers {
+			w.Header().Set(k, v)
+		}
+		fmt.Fprint(w, res.body)
+	default:
+		w.Header().Set("Content-Type", contentTypeOf(response))
+		fmt.Fprint(w, response)
+	}
 }
 
 func (h *handler) addMatchedPathValueIntoContext(path ...string) {
