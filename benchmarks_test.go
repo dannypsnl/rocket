@@ -23,7 +23,7 @@ func BenchmarkWithUserDefinedContext(b *testing.B) {
 
 	rk := rocket.Ignite(":8080").
 		Mount("/hello", rocket.Get("/:name", func(user *User) string {
-			return "welcome" + user.Name
+			return "welcome-" + user.Name
 		}))
 	Request(b, rk, "GET", "/hello/kw", nil)
 }
@@ -31,7 +31,7 @@ func BenchmarkWithUserDefinedContext(b *testing.B) {
 func BenchmarkWithCustomResponse(b *testing.B) {
 	rk := rocket.Ignite(":8080").
 		Mount("/home", rocket.Get("/", func() *rocket.Response {
-			return rocket.NewResponse(`welcome`).Headers(
+			return rocket.NewResponse(`welcome-custom-response`).Headers(
 				rocket.Headers{
 					"Access-Control-Allow-Origin": "*",
 				},
@@ -43,7 +43,7 @@ func BenchmarkWithCustomResponse(b *testing.B) {
 func BenchmarkWithHeader(b *testing.B) {
 	rk := rocket.Ignite(":8080").
 		Mount("/home", rocket.Get("/", func(header *rocket.Header) string {
-			return "Content-Type is " + header.Get("Content-Type")
+			return "Content-Type-is-" + header.Get("Content-Type")
 		}))
 	Request(b, rk, "GET", "/home", nil)
 }
