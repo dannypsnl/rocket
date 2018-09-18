@@ -8,7 +8,7 @@ import (
 	"github.com/dannypsnl/rocket"
 )
 
-func BenchmarkWithoutUserDefindContext(b *testing.B) {
+func BenchmarkWithoutUserDefinedContext(b *testing.B) {
 	rk := rocket.Ignite(":8080").
 		Mount("/home", rocket.Get("/", func() string {
 			return "welcome"
@@ -16,7 +16,7 @@ func BenchmarkWithoutUserDefindContext(b *testing.B) {
 	Request(b, rk, "GET", "/home", nil)
 }
 
-func BenchmarkWithUserDefindContext(b *testing.B) {
+func BenchmarkWithUserDefinedContext(b *testing.B) {
 	type User struct {
 		Name string `route:"name"`
 	}
