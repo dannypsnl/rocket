@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 // Rocket is our service.
@@ -58,23 +59,31 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	response, err := rk.handlers[r.Method].Call(r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		response = rk.defaultHandler.Call([]reflect.Value{})[0]
+	queryIdx := strings.Index(r.URL.Path, "?")
+	path := r.URL.Path
+	if queryIdx > -1 {
+		path = path[:queryIdx]
 	}
-	switch response.(type) {
-	case *Response:
-		res := response.(*Response)
-		w.Header().Set("Content-Type", contentTypeOf(res.body))
-		for k, v := range res.headers {
-			w.Header().Set(k, v)
+
+	splitRoutes := strings.Split(path, "/")[1:]
+
+	rs := make([]string, 0)
+	for _, rout := range splitRoutes {
+		if rout != "" {
+			rs = append(rs, rout)
 		}
-		fmt.Fprint(w, res.body)
-	default:
-		w.Header().Set("Content-Type", contentTypeOf(response))
-		fmt.Fprint(w, response)
 	}
+
+	handler := rk.handlers[r.Method].getHandler(rs)
+	if handler != nil {
+		handler.Handle(rs, w, r)
+		return
+	}
+	// 404 Page Not Found
+	w.WriteHeader(http.StatusNotFound)
+	response := rk.defaultHandler.Call([]reflect.Value{})[0]
+	fmt.Fprint(w, response)
+
 }
 
 func contentTypeOf(response interface{}) string {

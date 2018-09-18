@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"net/http"
 	"strings"
 )
 
@@ -21,31 +20,6 @@ func NewRoute() *Route {
 	return &Route{
 		Children: make(map[string]*Route),
 	}
-}
-
-func (route *Route) Call(req *http.Request) (interface{}, error) {
-	queryIdx := strings.Index(req.URL.Path, "?")
-	path := req.URL.Path
-	if queryIdx > -1 {
-		path = path[:queryIdx]
-	}
-	splitRoutes := strings.Split(path, "/")[1:]
-
-	rs := make([]string, 0)
-	for _, rout := range splitRoutes {
-		if rout != "" {
-			rs = append(rs, rout)
-		}
-	}
-
-	handler := route.matching(rs)
-	if handler == nil {
-		return nil, PageNotFound(concatString("can't found ", req.URL.Path))
-	}
-
-	return handler.do.Call(
-		handler.context(rs, req),
-	)[0].Interface(), nil
 }
 
 func (route *Route) addHandlerTo(routeStr string, h *handler) {
@@ -86,7 +60,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute.Matched = h
 }
 
-func (route *Route) matching(requestUrl []string) *handler {
+func (route *Route) getHandler(requestUrl []string) *handler {
 	if len(requestUrl) == 0 {
 		return route.Matched
 	}

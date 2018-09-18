@@ -54,7 +54,7 @@ var (
 		return "you found me"
 	})
 	handleCookies = rocket.Get("cookies", func(cs *rocket.Cookies) string {
-		_, err := cs.Cookie("brabrabra")
+		_, err := cs.Get("brabrabra")
 		if err == nil {
 			return "incorrect!"
 		}
