@@ -40,6 +40,14 @@ func BenchmarkWithCustomResponse(b *testing.B) {
 	Request(b, rk, "GET", "/home", nil)
 }
 
+func BenchmarkWithHeader(b *testing.B) {
+	rk := rocket.Ignite(":8080").
+		Mount("/home", rocket.Get("/", func(header *rocket.Header) string {
+			return "Content-Type is " + header.Get("Content-Type")
+		}))
+	Request(b, rk, "GET", "/home", nil)
+}
+
 func Request(b *testing.B, rk *rocket.Rocket, method, path string, body io.Reader) {
 	b.Helper()
 	req, _ := http.NewRequest(method, path, body)
