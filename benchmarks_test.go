@@ -28,6 +28,18 @@ func BenchmarkWithUserDefinedContext(b *testing.B) {
 	Request(b, rk, "GET", "/hello/kw", nil)
 }
 
+func BenchmarkWithCustomResponse(b *testing.B) {
+	rk := rocket.Ignite(":8080").
+		Mount("/home", rocket.Get("/", func() *rocket.Response {
+			return rocket.NewResponse(`welcome`).Headers(
+				rocket.Headers{
+					"Access-Control-Allow-Origin": "*",
+				},
+			)
+		}))
+	Request(b, rk, "GET", "/home", nil)
+}
+
 func Request(b *testing.B, rk *rocket.Rocket, method, path string, body io.Reader) {
 	b.Helper()
 	req, _ := http.NewRequest(method, path, body)
