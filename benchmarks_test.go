@@ -16,6 +16,18 @@ func BenchmarkWithoutUserDefindContext(b *testing.B) {
 	Request(b, rk, "GET", "/home", nil)
 }
 
+func BenchmarkWithUserDefindContext(b *testing.B) {
+	type User struct {
+		Name string `route:"name"`
+	}
+
+	rk := rocket.Ignite(":8080").
+		Mount("/hello", rocket.Get("/:name", func(user *User) string {
+			return "welcome" + user.Name
+		}))
+	Request(b, rk, "GET", "/hello/kw", nil)
+}
+
 func Request(b *testing.B, rk *rocket.Rocket, method, path string, body io.Reader) {
 	b.Helper()
 	req, _ := http.NewRequest(method, path, body)
