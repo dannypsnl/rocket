@@ -1,6 +1,7 @@
 package rocket_test
 
 import (
+	"io"
 	"net/http"
 	"testing"
 
@@ -12,7 +13,12 @@ func BenchmarkWithoutUserDefindContext(b *testing.B) {
 		Mount("/home", rocket.Get("/", func() string {
 			return "welcome"
 		}))
-	req, _ := http.NewRequest("GET", "/", nil)
+	Request(b, rk, "GET", "/home", nil)
+}
+
+func Request(b *testing.B, rk *rocket.Rocket, method, path string, body io.Reader) {
+	b.Helper()
+	req, _ := http.NewRequest(method, path, body)
 	b.ReportAllocs()
 	b.ResetTimer()
 	w := &mockRespWriter{}
