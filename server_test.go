@@ -54,8 +54,8 @@ var (
 		return "you found me"
 	})
 	handleCookies = rocket.Get("cookies", func(cs *rocket.Cookies) string {
-		_, err := cs.Get("brabrabra")
-		if err == nil {
+		_, err := cs.Get("cookie")
+		if err != nil || len(cs.List()) != 1 {
 			return "incorrect!"
 		}
 		return "cookies"
@@ -141,7 +141,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Cookies", func(t *testing.T) {
-		e.GET("/test/cookies").
+		e.GET("/test/cookies").WithCookie("cookie", "cookie").
 			Expect().Status(http.StatusOK).
 			Body().Equal("cookies")
 	})
