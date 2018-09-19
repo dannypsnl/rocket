@@ -36,7 +36,6 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	}
 
 	if h.userDefinedContextOffset != -1 {
-		// TODO: check if handler receive a param type is *rocket.Cookies
 		contextT := handlerFuncT.In(h.userDefinedContextOffset).Elem()
 
 		routeParams := make(map[string]int)
