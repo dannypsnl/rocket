@@ -28,9 +28,16 @@ type handler struct {
 }
 
 func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
+	context := h.context(rs, r)
 	response := h.do.Call(
-		h.context(rs, r),
+		context,
 	)[0].Interface()
+
+	if h.needCookies() {
+		for _, c := range context[h.cookiesOffset].Interface().(*Cookies).listOfCookie {
+			http.SetCookie(w, c)
+		}
+	}
 
 	switch response.(type) {
 	case *Response:
