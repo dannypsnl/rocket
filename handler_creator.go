@@ -30,7 +30,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 		} else if t.AssignableTo(headerT) {
 			h.headerOffset = i
 		} else {
-			// We not sure what it's, so just assume it's user defined context
+			// We not sure what is it, so just assume it's user defined context
 			h.userDefinedContextOffset = i
 		}
 	}

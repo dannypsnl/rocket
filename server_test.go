@@ -74,13 +74,16 @@ var (
 		}
 		return "not receive token"
 	})
+	context = rocket.Get("/context", func(header *rocket.Header, cookies *rocket.Cookies) string {
+		return ""
+	})
 )
 
 func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders).
+		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context).
 		Mount("/custom-response-header", customResponseForHeader).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
@@ -176,5 +179,10 @@ func TestServer(t *testing.T) {
 			WithHeader("x-token", "token").
 			Expect().Status(http.StatusOK).
 			Body().Equal(expected)
+	})
+
+	t.Run("Context", func(t *testing.T) {
+		e.GET("/test/context").
+			Expect().Status(http.StatusOK)
 	})
 }
