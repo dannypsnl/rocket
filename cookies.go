@@ -6,6 +6,8 @@ import (
 
 type Cookies struct {
 	req *http.Request
+
+	listOfCookie []*http.Cookie
 }
 
 func (c *Cookies) Get(name string) (*http.Cookie, error) {
@@ -14,4 +16,8 @@ func (c *Cookies) Get(name string) (*http.Cookie, error) {
 
 func (c *Cookies) List() []*http.Cookie {
 	return c.req.Cookies()
+}
+
+func (c *Cookies) Add(newCookie *http.Cookie) {
+	c.listOfCookie = append(c.listOfCookie, newCookie)
 }
