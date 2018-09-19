@@ -66,7 +66,7 @@ func (h *handler) needHeader() bool {
 }
 
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
-	param := make([]reflect.Value, 0)
+	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset)
 		context := reflect.New(contextType.Elem())
@@ -75,10 +75,10 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 			v := context.Interface()
 			err := json.NewDecoder(req.Body).Decode(v)
 			if err != nil {
-				param = append(param, reflect.ValueOf(errors.New("400")))
+				param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
 				return param
 			}
-			param = append(param, reflect.ValueOf(v))
+			param[h.userDefinedContextOffset] = reflect.ValueOf(v)
 			return param
 		}
 
@@ -120,21 +120,15 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 			}
 		}
 
-		param = append(param, context)
+		param[h.userDefinedContextOffset] = context
 	}
 
 	if h.needCookies() {
-		cs := &Cookies{
-			req: req,
-		}
-		param = append(param, reflect.ValueOf(cs))
+		param[h.cookiesOffset] = reflect.ValueOf(&Cookies{req: req})
 	}
 
 	if h.needHeader() {
-		hs := &Header{
-			req: req,
-		}
-		param = append(param, reflect.ValueOf(hs))
+		param[h.headerOffset] = reflect.ValueOf(&Header{req: req})
 	}
 
 	return param
