@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/dannypsnl/rocket/resp"
+	"github.com/dannypsnl/rocket/response"
 )
 
 type handler struct {
@@ -35,8 +35,8 @@ func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 	)[0].Interface()
 
 	switch handlerResponse.(type) {
-	case *resp.Response:
-		res := handlerResponse.(*resp.Response)
+	case *response.Response:
+		res := handlerResponse.(*response.Response)
 		w.Header().Set("Content-Type", contentTypeOf(res.Body))
 		for k, v := range res.Headers {
 			w.Header().Set(k, v)

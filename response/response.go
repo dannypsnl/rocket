@@ -1,4 +1,4 @@
-package resp
+package response
 
 type Response struct {
 	Headers map[string]string

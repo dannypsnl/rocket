@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
-	"github.com/dannypsnl/rocket/resp"
+	"github.com/dannypsnl/rocket/response"
 	"github.com/gavv/httpexpect"
 )
 
@@ -61,10 +61,10 @@ var (
 		}
 		return "cookies"
 	})
-	customResponseForHeader = rocket.Get("/", func() *resp.Response {
+	customResponseForHeader = rocket.Get("/", func() *response.Response {
 		body := rocket.Json(`{"msg": "welcome"}`)
-		return resp.New(body).WithHeaders(
-			resp.Headers{
+		return response.New(body).WithHeaders(
+			response.Headers{
 				"Access-Control-Allow-Origin": "*",
 			},
 		)
