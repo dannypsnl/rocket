@@ -30,21 +30,21 @@ type handler struct {
 }
 
 func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
-	handlerResponse := h.do.Call(
+	resp := h.do.Call(
 		h.context(rs, r),
 	)[0].Interface()
 
-	switch handlerResponse.(type) {
+	switch resp.(type) {
 	case *response.Response:
-		res := handlerResponse.(*response.Response)
+		res := resp.(*response.Response)
 		w.Header().Set("Content-Type", contentTypeOf(res.Body))
 		for k, v := range res.Headers {
 			w.Header().Set(k, v)
 		}
 		fmt.Fprint(w, res.Body)
 	default:
-		w.Header().Set("Content-Type", contentTypeOf(handlerResponse))
-		fmt.Fprint(w, handlerResponse)
+		w.Header().Set("Content-Type", contentTypeOf(resp))
+		fmt.Fprint(w, resp)
 	}
 }
 
