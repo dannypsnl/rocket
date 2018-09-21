@@ -46,7 +46,7 @@ func BenchmarkWithCustomResponse(b *testing.B) {
 }
 
 func BenchmarkWithHeader(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Header) string {
+	rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
 		return "Content-Type-is-" + header.Get("Content-Type")
 	}))
 	Request(b, rk, "GET", "/home", nil)

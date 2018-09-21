@@ -69,13 +69,13 @@ var (
 			},
 		)
 	})
-	handlerHeaders = rocket.Get("/headers", func(header *rocket.Header) string {
+	handlerHeaders = rocket.Get("/headers", func(header *rocket.Headers) string {
 		if header.Get("x-token") == "token" {
 			return "received token"
 		}
 		return "not receive token"
 	})
-	context = rocket.Get("/context", func(header *rocket.Header, cookies *rocket.Cookies) string {
+	context = rocket.Get("/context", func(header *rocket.Headers, cookies *rocket.Cookies) string {
 		return ""
 	})
 )
