@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-type Header struct {
+type Headers struct {
 	req *http.Request
 }
 
-func (h *Header) Get(key string) string {
+func (h *Headers) Get(key string) string {
 	return h.req.Header.Get(key)
 }

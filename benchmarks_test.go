@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/response"
 )
 
 var rk *rocket.Rocket
@@ -34,9 +35,9 @@ func BenchmarkWithUserDefinedContext(b *testing.B) {
 }
 
 func BenchmarkWithCustomResponse(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func() *rocket.Response {
-		return rocket.NewResponse(`welcome-custom-response`).Headers(
-			rocket.Headers{
+	rk = rk.Mount("/home", rocket.Get("/", func() *response.Response {
+		return response.New(`welcome-custom-response`).WithHeaders(
+			response.Headers{
 				"Access-Control-Allow-Origin": "*",
 			},
 		)
@@ -45,7 +46,7 @@ func BenchmarkWithCustomResponse(b *testing.B) {
 }
 
 func BenchmarkWithHeader(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Header) string {
+	rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
 		return "Content-Type-is-" + header.Get("Content-Type")
 	}))
 	Request(b, rk, "GET", "/home", nil)

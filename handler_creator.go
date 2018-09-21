@@ -22,7 +22,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerFuncT := reflect.TypeOf(do)
 
 	cookiesT := reflect.TypeOf(Cookies{})
-	headerT := reflect.TypeOf(Header{})
+	headerT := reflect.TypeOf(Headers{})
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
 		if t.AssignableTo(cookiesT) {
