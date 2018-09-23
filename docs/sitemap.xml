@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://github.io/dannypsnl/rocket/quick_start/</loc>
+    <lastmod>2018-09-23T23:44:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://github.io/dannypsnl/rocket/quick_start/minimum_example/</loc>
+    <lastmod>2018-09-23T23:51:06+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://github.io/dannypsnl/rocket/</loc>
+    <lastmod>2018-09-23T23:51:06+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://github.io/dannypsnl/rocket/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://github.io/dannypsnl/rocket/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+</urlset>
