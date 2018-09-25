@@ -38,10 +38,8 @@ func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 	case *response.Response:
 		res := resp.(*response.Response)
 		w.Header().Set("Content-Type", contentTypeOf(res.Body))
-		for k, v := range res.Headers {
-			w.Header().Set(k, v)
-		}
 		res.SetCookie(w)
+		res.SetHeaders(w)
 		fmt.Fprint(w, res.Body)
 	default:
 		w.Header().Set("Content-Type", contentTypeOf(resp))
