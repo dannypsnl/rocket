@@ -1,6 +1,7 @@
 package rocket_test
 
 import (
+	"github.com/dannypsnl/rocket/cookie"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -63,11 +64,10 @@ var (
 		return "cookies"
 	})
 	createCookie = rocket.Get("/new_cookie", func(cs *rocket.Cookies) *response.Response {
-		return response.New(``).WithCookies(&http.Cookie{
-			Name:    "set",
-			Value:   "set",
-			Expires: time.Now().Add(time.Hour * 24),
-		})
+		return response.New(``).Cookies(
+			cookie.New("set", "set").
+				Expires(time.Now().Add(time.Hour * 24)),
+		)
 	})
 	customResponseForHeader = rocket.Get("/", func() *response.Response {
 		body := rocket.Json(`{"msg": "welcome"}`)
