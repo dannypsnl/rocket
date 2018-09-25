@@ -1,13 +1,13 @@
 package rocket_test
 
 import (
-	"github.com/dannypsnl/rocket/cookie"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
 	"github.com/gavv/httpexpect"
 )
