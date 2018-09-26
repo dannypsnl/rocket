@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
 	"github.com/gavv/httpexpect"
 )
@@ -61,6 +63,17 @@ var (
 		}
 		return "cookies"
 	})
+	createCookie = rocket.Get("/new_cookie", func(cs *rocket.Cookies) *response.Response {
+		return response.New(``).Cookies(
+			cookie.New("set", "set").
+				Expires(time.Now().Add(time.Hour * 24)),
+		)
+	})
+	deleteCookie = rocket.Delete("/cookies", func() *response.Response {
+		return response.New(``).Cookies(
+			cookie.Forget("set"),
+		)
+	})
 	customResponseForHeader = rocket.Get("/", func() *response.Response {
 		body := rocket.Json(`{"msg": "welcome"}`)
 		return response.New(body).WithHeaders(
@@ -84,7 +97,7 @@ func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context).
+		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context, createCookie, deleteCookie).
 		Mount("/custom-response-header", customResponseForHeader).
 		Default(func() rocket.Html {
 			return "<h1>Page Not Found</h1>"
@@ -148,6 +161,26 @@ func TestServer(t *testing.T) {
 		e.GET("/test/cookies").WithCookie("cookie", "cookie").
 			Expect().Status(http.StatusOK).
 			Body().Equal("cookies")
+	})
+	t.Run("DeleteCookie", func(t *testing.T) {
+		c := e.DELETE("/test/cookies").WithCookie("set", "set").
+			Expect().Status(http.StatusOK).
+			Cookie("set")
+
+		c.Expires().Equal(time.Unix(0, 0))
+	})
+	t.Run("CreateNewCookie", func(t *testing.T) {
+		startTime := time.Now()
+
+		c := e.GET("/test/new_cookie").
+			Expect().Status(http.StatusOK).
+			Cookie("set")
+
+		c.Name().Equal("set")
+		c.Value()
+		c.Path()
+		c.Domain()
+		c.Expires().InRange(startTime, startTime.Add(time.Hour*24))
 	})
 
 	t.Run("EndWithSlash", func(t *testing.T) {

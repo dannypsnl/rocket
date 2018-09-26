@@ -41,6 +41,7 @@ func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 		for k, v := range res.Headers {
 			w.Header().Set(k, v)
 		}
+		res.SetCookie(w)
 		fmt.Fprint(w, res.Body)
 	default:
 		w.Header().Set("Content-Type", contentTypeOf(resp))
