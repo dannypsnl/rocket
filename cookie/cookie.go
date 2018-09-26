@@ -12,6 +12,15 @@ type Cookie struct {
 	expires     time.Time
 }
 
+func Forget(name string) *Cookie {
+	return &Cookie{
+		name:    name,
+		value:   "",
+		path:    "/",
+		expires: time.Unix(0, 0), // delete cookie is just create a cookie live time is 0
+	}
+}
+
 func New(name, value string) *Cookie {
 	return &Cookie{
 		name:  name,
