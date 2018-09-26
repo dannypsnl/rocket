@@ -7,6 +7,8 @@
 
 Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenitez/Rocket).
 
+Document: [https://dannypsnl.github.io/rocket](https://dannypsnl.github.io/rocket)
+
 ## Install
 
 `go get github.com/dannypsnl/rocket`
