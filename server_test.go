@@ -32,7 +32,7 @@ type Files struct {
 }
 
 var (
-	homePage = rocket.Get("/", func() rocket.Html {
+	homePage = rocket.Get("/", func() response.Html {
 		return `
 		<h1>Title</h1>
 		<p>Hello, World</p>
@@ -41,7 +41,7 @@ var (
 	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
 		return fs.FileName
 	})
-	forPost = rocket.Post("/post", func(f *ForPost) rocket.Json {
+	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
 		return `{"value": "response"}`
 	})
 	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
@@ -75,7 +75,7 @@ var (
 		)
 	})
 	customResponseForHeader = rocket.Get("/", func() *response.Response {
-		body := rocket.Json(`{"msg": "welcome"}`)
+		body := response.Json(`{"msg": "welcome"}`)
 		return response.New(body).WithHeaders(
 			response.Headers{
 				"Access-Control-Allow-Origin": "*",
@@ -99,7 +99,7 @@ func TestServer(t *testing.T) {
 		Mount("/users", user).
 		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context, createCookie, deleteCookie).
 		Mount("/custom-response-header", customResponseForHeader).
-		Default(func() rocket.Html {
+		Default(func() response.Html {
 			return "<h1>Page Not Found</h1>"
 		})
 	ts := httptest.NewServer(rk)

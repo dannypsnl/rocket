@@ -37,12 +37,12 @@ func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 	switch resp.(type) {
 	case *response.Response:
 		res := resp.(*response.Response)
-		w.Header().Set("Content-Type", contentTypeOf(res.Body))
 		res.SetCookie(w)
+		w.Header().Set("Content-Type", response.ContentTypeOf(res.Body))
 		res.SetHeaders(w)
 		fmt.Fprint(w, res.Body)
 	default:
-		w.Header().Set("Content-Type", contentTypeOf(resp))
+		w.Header().Set("Content-Type", response.ContentTypeOf(resp))
 		fmt.Fprint(w, resp)
 	}
 }
