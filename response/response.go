@@ -7,7 +7,7 @@ import (
 )
 
 type Response struct {
-	Headers map[string]string
+	headers map[string]string
 	Body    interface{}
 	cookies []*http.Cookie
 }
@@ -16,7 +16,7 @@ type Headers map[string]string
 
 func New(body interface{}) *Response {
 	return &Response{
-		Headers: make(map[string]string),
+		headers: make(map[string]string),
 		Body:    body,
 		cookies: make([]*http.Cookie, 0),
 	}
@@ -24,7 +24,7 @@ func New(body interface{}) *Response {
 
 func (res *Response) WithHeaders(headers Headers) *Response {
 	for k, v := range headers {
-		res.Headers[k] = v
+		res.headers[k] = v
 	}
 	return res
 }
@@ -39,5 +39,11 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 func (res *Response) SetCookie(w http.ResponseWriter) {
 	for _, c := range res.cookies {
 		http.SetCookie(w, c)
+	}
+}
+
+func (res *Response) SetHeaders(w http.ResponseWriter) {
+	for k, v := range res.headers {
+		w.Header().Set(k, v)
 	}
 }

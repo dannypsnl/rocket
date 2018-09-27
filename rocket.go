@@ -85,16 +85,3 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, response)
 
 }
-
-func contentTypeOf(response interface{}) string {
-	switch response.(type) {
-	case Html:
-		return "text/html"
-	case Json:
-		return "application/json"
-	case string:
-		return "text/plain"
-	default:
-		return "text/plain"
-	}
-}

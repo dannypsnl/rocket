@@ -1,4 +1,4 @@
-package rocket
+package response
 
 import (
 	"github.com/dannypsnl/assert"
@@ -23,6 +23,6 @@ func TestSetupHeaderContentType(t *testing.T) {
 func testContentType(t *testing.T, response interface{}, expectedContentType string) {
 	t.Helper()
 	assert := assert.NewTester(t)
-	actualContentType := contentTypeOf(response)
+	actualContentType := ContentTypeOf(response)
 	assert.Eq(actualContentType, expectedContentType)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	rk "github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/response"
 )
 
 type User struct {
@@ -15,7 +16,7 @@ var (
 	hello = rk.Get("/:name/age/:age", func(user *User) string {
 		return fmt.Sprintf("Hello %s, your age is %d\n", user.Name, user.Age)
 	})
-	homePage = rk.Get("/", func() rk.Html {
+	homePage = rk.Get("/", func() response.Html {
 		return `<h1>Title</h1>`
 	})
 )
