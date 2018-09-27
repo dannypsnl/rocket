@@ -10,14 +10,15 @@ type Cookie struct {
 	path        string
 	domain      string
 	expires     time.Time
+	maxAge      int
 }
 
 func Forget(name string) *Cookie {
 	return &Cookie{
-		name:    name,
-		value:   "",
-		path:    "/",
-		expires: time.Unix(0, 0), // delete cookie is just create a cookie live time is 0
+		name:   name,
+		value:  "",
+		path:   "/",
+		maxAge: -1,
 	}
 }
 
@@ -48,5 +49,6 @@ func (c *Cookie) Generate() *http.Cookie {
 		Path:    c.path,
 		Domain:  c.domain,
 		Expires: c.expires,
+		MaxAge:  c.maxAge,
 	}
 }

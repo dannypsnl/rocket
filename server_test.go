@@ -9,6 +9,8 @@ import (
 	"github.com/dannypsnl/rocket"
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
+
+	"github.com/dannypsnl/assert"
 	"github.com/gavv/httpexpect"
 )
 
@@ -94,6 +96,8 @@ var (
 )
 
 func TestServer(t *testing.T) {
+	assert := assert.NewTester(t)
+
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
@@ -167,7 +171,7 @@ func TestServer(t *testing.T) {
 			Expect().Status(http.StatusOK).
 			Cookie("set")
 
-		c.Expires().Equal(time.Unix(0, 0))
+		assert.Eq(c.Raw().MaxAge, -1)
 	})
 	t.Run("CreateNewCookie", func(t *testing.T) {
 		startTime := time.Now()
