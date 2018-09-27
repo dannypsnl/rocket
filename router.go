@@ -10,15 +10,19 @@ type Route struct {
 	// VariableRoute is prepare for route like `:name`
 	VariableRoute *Route
 	// PathRouteHandler is the handler of route `*path`
-	PathRouteHandler *handler
+	PathRouteHandler map[string]*handler
 	// Matched means what is under the route
 	// For example we can put Handler at here
-	Matched *handler
+	//
+	OwnHandler bool
+	Handlers   map[string]*handler
 }
 
 func NewRoute() *Route {
 	return &Route{
-		Children: make(map[string]*Route),
+		Children:         make(map[string]*Route),
+		Handlers:         make(map[string]*handler),
+		PathRouteHandler: make(map[string]*handler),
 	}
 }
 
@@ -43,8 +47,9 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 			}
 			matchRoute = matchRoute.VariableRoute
 		} else if r[0] == '*' {
-			if matchRoute.PathRouteHandler == nil {
-				matchRoute.PathRouteHandler = h
+			if matchRoute.PathRouteHandler[h.method] == nil {
+				matchRoute.OwnHandler = true
+				matchRoute.PathRouteHandler[h.method] = h
 				return
 			}
 			panic("Duplicated route")
@@ -57,12 +62,21 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		child = matchRoute.Children
 	}
 
-	matchRoute.Matched = h
+	matchRoute.OwnHandler = true
+	matchRoute.Handlers[h.method] = h
 }
 
-func (route *Route) getHandler(requestUrl []string) *handler {
+func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
-		return route.Matched
+		if !route.OwnHandler {
+			return nil
+		}
+		if h, ok := route.Handlers[method]; ok {
+			return h
+		} else {
+			// FIXME: return 403
+			return nil
+		}
 	}
 	next := route
 	for i, r := range requestUrl {
@@ -71,13 +85,26 @@ func (route *Route) getHandler(requestUrl []string) *handler {
 		} else if next.VariableRoute != nil {
 			next = next.VariableRoute
 		} else if next.PathRouteHandler != nil {
-			next.PathRouteHandler.addMatchedPathValueIntoContext(requestUrl[i:]...)
-			return next.PathRouteHandler
+			if h, ok := next.PathRouteHandler[method]; ok {
+				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
+				return h
+			} else {
+				// FIXME: return 403
+				return nil
+			}
 		} else {
 			return nil
 		}
 	}
-	return next.Matched
+	if !next.OwnHandler {
+		return nil
+	}
+	if h, ok := next.Handlers[method]; ok {
+		return h
+	} else {
+		// FIXME: return 403
+		return nil
+	}
 }
 
 func isParameter(route string) bool {

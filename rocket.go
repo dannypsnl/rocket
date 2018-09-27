@@ -11,7 +11,7 @@ import (
 // Rocket is our service.
 type Rocket struct {
 	port           string
-	handlers       map[string]*Route
+	handlers       *Route
 	defaultHandler reflect.Value
 }
 
@@ -19,10 +19,10 @@ type Rocket struct {
 func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 	verifyBase(route)
 
-	rk.handlers[h.method].addHandlerTo(route, h)
+	rk.handlers.addHandlerTo(route, h)
 
 	for _, h := range hs {
-		rk.handlers[h.method].addHandlerTo(route, h)
+		rk.handlers.addHandlerTo(route, h)
 	}
 
 	return rk
@@ -41,16 +41,9 @@ func (rk *Rocket) Launch() {
 
 // Ignite initial service by port.
 func Ignite(port string) *Rocket {
-	hs := make(map[string]*Route)
-	// Initial internal method map
-	hs["GET"] = NewRoute()
-	hs["POST"] = NewRoute()
-	hs["PUT"] = NewRoute()
-	hs["PATCH"] = NewRoute()
-	hs["DELETE"] = NewRoute()
 	return &Rocket{
 		port:     port,
-		handlers: hs,
+		handlers: NewRoute(),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
@@ -74,7 +67,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	handler := rk.handlers[r.Method].getHandler(rs)
+	handler := rk.handlers.getHandler(rs, r.Method)
 	if handler != nil {
 		handler.Handle(rs, w, r)
 		return
