@@ -1,7 +1,10 @@
 package rocket
 
 import (
+	"reflect"
 	"strings"
+
+	"github.com/dannypsnl/rocket/response"
 )
 
 type Route struct {
@@ -9,20 +12,19 @@ type Route struct {
 	Children map[string]*Route
 	// VariableRoute is prepare for route like `:name`
 	VariableRoute *Route
+	// OwnHandler means this Route has route, so not found handler would be 403(wrong method),
+	// else is 404
+	OwnHandler bool
 	// PathRouteHandler is the handler of route `*path`
 	PathRouteHandler map[string]*handler
-	// Matched means what is under the route
-	// For example we can put Handler at here
 	//
-	OwnHandler bool
-	Handlers   map[string]*handler
+	Handlers map[string]*handler
 }
 
 func NewRoute() *Route {
 	return &Route{
-		Children:         make(map[string]*Route),
-		Handlers:         make(map[string]*handler),
-		PathRouteHandler: make(map[string]*handler),
+		Children: make(map[string]*Route),
+		Handlers: make(map[string]*handler),
 	}
 }
 
@@ -47,7 +49,10 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 			}
 			matchRoute = matchRoute.VariableRoute
 		} else if r[0] == '*' {
-			if matchRoute.PathRouteHandler[h.method] == nil {
+			if matchRoute.PathRouteHandler == nil {
+				matchRoute.PathRouteHandler = make(map[string]*handler)
+			}
+			if _, ok := matchRoute.PathRouteHandler[h.method]; !ok {
 				matchRoute.OwnHandler = true
 				matchRoute.PathRouteHandler[h.method] = h
 				return
@@ -74,8 +79,11 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		if h, ok := route.Handlers[method]; ok {
 			return h
 		} else {
-			// FIXME: return 403
-			return nil
+			return &handler{
+				do: reflect.ValueOf(func() *response.Response {
+					return response.New("").Status(403)
+				}),
+			}
 		}
 	}
 	next := route
@@ -85,12 +93,18 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		} else if next.VariableRoute != nil {
 			next = next.VariableRoute
 		} else if next.PathRouteHandler != nil {
+			if !route.OwnHandler {
+				return nil
+			}
 			if h, ok := next.PathRouteHandler[method]; ok {
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
-				// FIXME: return 403
-				return nil
+				return &handler{
+					do: reflect.ValueOf(func() *response.Response {
+						return response.New("").Status(403)
+					}),
+				}
 			}
 		} else {
 			return nil
@@ -102,8 +116,11 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if h, ok := next.Handlers[method]; ok {
 		return h
 	} else {
-		// FIXME: return 403
-		return nil
+		return &handler{
+			do: reflect.ValueOf(func() *response.Response {
+				return response.New("").Status(403)
+			}),
+		}
 	}
 }
 
