@@ -54,6 +54,7 @@ func Ignite(port string) *Rocket {
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	queryIdx := strings.Index(r.URL.Path, "?")
 	path := r.URL.Path
+	// has query string
 	if queryIdx > -1 {
 		path = path[:queryIdx]
 	}
