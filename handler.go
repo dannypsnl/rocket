@@ -40,6 +40,7 @@ func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 		res.SetCookie(w)
 		w.Header().Set("Content-Type", response.ContentTypeOf(res.Body))
 		res.SetHeaders(w)
+		res.SetStatusCode(w)
 		fmt.Fprint(w, res.Body)
 	default:
 		w.Header().Set("Content-Type", response.ContentTypeOf(resp))

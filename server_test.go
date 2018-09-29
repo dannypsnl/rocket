@@ -219,4 +219,9 @@ func TestServer(t *testing.T) {
 		e.GET("/test/context").
 			Expect().Status(http.StatusOK)
 	})
+
+	t.Run("PostHomePage", func(t *testing.T) {
+		e.POST("/").
+			Expect().Status(http.StatusForbidden)
+	})
 }

@@ -9,7 +9,9 @@ import (
 type Response struct {
 	headers map[string]string
 	Body    interface{}
-	cookies []*http.Cookie
+
+	cookies    []*http.Cookie
+	statusCode int
 }
 
 type Headers map[string]string
@@ -20,6 +22,11 @@ func New(body interface{}) *Response {
 		Body:    body,
 		cookies: make([]*http.Cookie, 0),
 	}
+}
+
+func (res *Response) Status(code int) *Response {
+	res.statusCode = code
+	return res
 }
 
 func (res *Response) WithHeaders(headers Headers) *Response {
@@ -34,6 +41,12 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 		res.cookies = append(res.cookies, c.Generate())
 	}
 	return res
+}
+
+func (res *Response) SetStatusCode(w http.ResponseWriter) {
+	if res.statusCode != 0 {
+		w.WriteHeader(res.statusCode)
+	}
 }
 
 func (res *Response) SetCookie(w http.ResponseWriter) {
