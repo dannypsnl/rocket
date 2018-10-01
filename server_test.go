@@ -10,6 +10,7 @@ import (
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
+
 	"github.com/gavv/httpexpect"
 )
 
@@ -41,6 +42,9 @@ var (
 	})
 	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
 		return fs.FileName
+	})
+	mime = rocket.Get("/mime/*filename", func(fs *Files) *response.Response {
+		return file.Response(fs.FileName).ByFileSuffix()
 	})
 	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
 		return `{"value": "response"}`
@@ -98,7 +102,18 @@ func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context, createCookie, deleteCookie).
+		Mount("/test",
+			query,
+			endWithSlash,
+			forPatch,
+			forPost,
+			handleCookies,
+			handlerHeaders,
+			context,
+			createCookie,
+			deleteCookie,
+			mime,
+		).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
 			return resp.WithHeaders(response.Headers{
@@ -127,6 +142,12 @@ func TestServer(t *testing.T) {
 		<h1>Title</h1>
 		<p>Hello, World</p>
 		`)
+	})
+
+	t.Run("MIME", func(t *testing.T) {
+		e.GET("/test/mime/test_data/test.html").
+			Expect().Status(http.StatusOK).
+			Header("Content-Type").Equal("text/html")
 	})
 
 	t.Run("MatchPathParameter", func(t *testing.T) {
