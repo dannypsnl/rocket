@@ -29,6 +29,14 @@ type handler struct {
 	matchPathIndex int
 }
 
+func newHandler() *handler {
+	return &handler{
+		userDefinedContextOffset: -1,
+		cookiesOffset:            -1,
+		headerOffset:             -1,
+	}
+}
+
 func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 	resp := h.do.Call(
 		h.context(rs, r),
@@ -104,11 +112,11 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 
 		for k, idx := range h.queryParams {
 			values := req.URL.Query()
+			field := context.Elem().Field(idx)
 			if v, ok := values[k]; ok {
 				p := v[0]
 				value := parseParameter(context.Elem().Field(idx), p)
-				context.Elem().Field(idx).
-					Set(value)
+				field.Set(value)
 			}
 		}
 

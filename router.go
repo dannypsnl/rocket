@@ -71,6 +71,13 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute.Handlers[h.method] = h
 }
 
+func new403Handler() *handler {
+	h := newHandler()
+	h.do = reflect.ValueOf(func() *response.Response {
+		return response.New("").Status(403)
+	})
+	return h
+}
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
 		if !route.OwnHandler {
@@ -79,11 +86,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		if h, ok := route.Handlers[method]; ok {
 			return h
 		} else {
-			return &handler{
-				do: reflect.ValueOf(func() *response.Response {
-					return response.New("").Status(403)
-				}),
-			}
+			return new403Handler()
 		}
 	}
 	next := route
@@ -100,11 +103,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
-				return &handler{
-					do: reflect.ValueOf(func() *response.Response {
-						return response.New("").Status(403)
-					}),
-				}
+				return new403Handler()
 			}
 		} else {
 			return nil
@@ -116,11 +115,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if h, ok := next.Handlers[method]; ok {
 		return h
 	} else {
-		return &handler{
-			do: reflect.ValueOf(func() *response.Response {
-				return response.New("").Status(403)
-			}),
-		}
+		return new403Handler()
 	}
 }
 

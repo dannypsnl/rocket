@@ -7,17 +7,13 @@ import (
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
-	h := &handler{
-		routes: strings.Split(strings.Trim(*route, "/"), "/"),
-		do:     handlerDo,
-		method: method,
-		userDefinedContextOffset: -1,
-		cookiesOffset:            -1,
-		headerOffset:             -1,
-		routeParams:              make(map[int]int),
-		formParams:               make(map[string]int),
-		queryParams:              make(map[string]int),
-	}
+	h := newHandler()
+	h.do = handlerDo
+	h.method = method
+	h.routes = strings.Split(strings.Trim(*route, "/"), "/")
+	h.routeParams = make(map[int]int)
+	h.formParams = make(map[string]int)
+	h.queryParams = make(map[string]int)
 
 	handlerFuncT := reflect.TypeOf(do)
 
