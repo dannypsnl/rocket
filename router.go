@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"net/http"
 	"strings"
 )
 
@@ -76,7 +77,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		if h, ok := route.Handlers[method]; ok {
 			return h
 		} else {
-			return new403Handler()
+			return newErrorHandler(http.StatusMethodNotAllowed)
 		}
 	}
 	next := route
@@ -93,7 +94,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
-				return new403Handler()
+				return newErrorHandler(http.StatusMethodNotAllowed)
 			}
 		} else {
 			return nil
@@ -105,7 +106,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if h, ok := next.Handlers[method]; ok {
 		return h
 	} else {
-		return new403Handler()
+		return newErrorHandler(http.StatusMethodNotAllowed)
 	}
 }
 

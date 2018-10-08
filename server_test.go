@@ -222,6 +222,6 @@ func TestServer(t *testing.T) {
 
 	t.Run("PostHomePage", func(t *testing.T) {
 		e.POST("/").
-			Expect().Status(http.StatusForbidden)
+			Expect().Status(http.StatusMethodNotAllowed)
 	})
 }
