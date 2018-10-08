@@ -9,7 +9,6 @@ import (
 	"github.com/dannypsnl/rocket"
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/fairing"
-	"github.com/dannypsnl/rocket/file"
 	"github.com/dannypsnl/rocket/response"
 
 	"github.com/gavv/httpexpect"
@@ -64,7 +63,7 @@ var (
 		return r.Field + r.Query + r.JField
 	})
 	mime = rocket.Get("/mime/*filename", func(fs *Files) *response.Response {
-		return file.Response(fs.FileName).ByFileSuffix()
+		return response.File(fs.FileName).ByFileSuffix(response.DefaultContentTypes)
 	})
 	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
 		return `{"value": "response"}`
