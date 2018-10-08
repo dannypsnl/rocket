@@ -1,10 +1,7 @@
 package rocket
 
 import (
-	"reflect"
 	"strings"
-
-	"github.com/dannypsnl/rocket/response"
 )
 
 type Route struct {
