@@ -36,6 +36,13 @@ func newHandler() *handler {
 		headerOffset:             -1,
 	}
 }
+func new403Handler() *handler {
+	h := newHandler()
+	h.do = reflect.ValueOf(func() *response.Response {
+		return response.New("").Status(403)
+	})
+	return h
+}
 
 func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
 	resp := h.do.Call(

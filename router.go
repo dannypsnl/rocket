@@ -71,13 +71,6 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute.Handlers[h.method] = h
 }
 
-func new403Handler() *handler {
-	h := newHandler()
-	h.do = reflect.ValueOf(func() *response.Response {
-		return response.New("").Status(403)
-	})
-	return h
-}
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
 		if !route.OwnHandler {
