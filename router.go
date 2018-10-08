@@ -1,10 +1,7 @@
 package rocket
 
 import (
-	"reflect"
 	"strings"
-
-	"github.com/dannypsnl/rocket/response"
 )
 
 type Route struct {
@@ -79,11 +76,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		if h, ok := route.Handlers[method]; ok {
 			return h
 		} else {
-			return &handler{
-				do: reflect.ValueOf(func() *response.Response {
-					return response.New("").Status(403)
-				}),
-			}
+			return new403Handler()
 		}
 	}
 	next := route
@@ -100,11 +93,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
-				return &handler{
-					do: reflect.ValueOf(func() *response.Response {
-						return response.New("").Status(403)
-					}),
-				}
+				return new403Handler()
 			}
 		} else {
 			return nil
@@ -116,11 +105,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if h, ok := next.Handlers[method]; ok {
 		return h
 	} else {
-		return &handler{
-			do: reflect.ValueOf(func() *response.Response {
-				return response.New("").Status(403)
-			}),
-		}
+		return new403Handler()
 	}
 }
 
