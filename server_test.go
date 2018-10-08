@@ -44,7 +44,7 @@ var (
 		return fs.FileName
 	})
 	mime = rocket.Get("/mime/*filename", func(fs *Files) *response.Response {
-		return file.Response(fs.FileName).ByFileSuffix()
+		return response.File(fs.FileName).ByFileSuffix(response.DefaultContentTypes)
 	})
 	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
 		return `{"value": "response"}`
