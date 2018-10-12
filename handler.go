@@ -37,10 +37,10 @@ func newHandler() *handler {
 	}
 }
 
-func newErrorHandler(code int) *handler {
+func newErrorHandler(code int, content string) *handler {
 	h := newHandler()
 	h.do = reflect.ValueOf(func() *response.Response {
-		return response.New("").Status(code)
+		return response.New(content).Status(code)
 	})
 	return h
 }

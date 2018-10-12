@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -69,6 +70,10 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute.Handlers[h.method] = h
 }
 
+const (
+	ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
+)
+
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
 		if !route.OwnHandler {
@@ -77,7 +82,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		if h, ok := route.Handlers[method]; ok {
 			return h
 		} else {
-			return newErrorHandler(http.StatusMethodNotAllowed)
+			return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 		}
 	}
 	next := route
@@ -94,7 +99,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
-				return newErrorHandler(http.StatusMethodNotAllowed)
+				return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 			}
 		} else {
 			return nil
@@ -106,7 +111,7 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if h, ok := next.Handlers[method]; ok {
 		return h
 	} else {
-		return newErrorHandler(http.StatusMethodNotAllowed)
+		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 	}
 }
 
