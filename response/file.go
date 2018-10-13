@@ -14,10 +14,14 @@ type FileResponser struct {
 	err  error
 }
 
-func File(filepath string) *FileResponser {
-	r := &FileResponser{
+func newFileResponser(filepath string) *FileResponser {
+	return &FileResponser{
 		filepath: filepath,
 	}
+}
+
+func File(filepath string) *FileResponser {
+	r := newFileResponser(filepath)
 	f, err := os.Open(filepath)
 	if err != nil {
 		r.err = err
