@@ -1,6 +1,7 @@
 package response
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dannypsnl/rocket/cookie"
@@ -66,4 +67,5 @@ func (res *Response) Handle(w http.ResponseWriter) {
 	res.SetHeaders(w)
 	res.SetCookie(w)
 	res.SetStatusCode(w)
+	fmt.Fprint(w, res.Body)
 }

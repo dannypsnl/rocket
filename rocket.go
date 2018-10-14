@@ -1,12 +1,12 @@
 package rocket
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"reflect"
 	"strings"
 
+	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
 )
 
@@ -15,6 +15,7 @@ type Rocket struct {
 	port           string
 	handlers       *Route
 	defaultHandler reflect.Value
+	responseHook   *fairing.Response
 }
 
 // Mount add handler into our service.
@@ -27,6 +28,16 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 		rk.handlers.addHandlerTo(route, h)
 	}
 
+	return rk
+}
+
+func (rk *Rocket) Attach(f interface{}) *Rocket {
+	switch v := f.(type) {
+	case *fairing.Response:
+		rk.responseHook = v
+	default:
+		panic("not support fairing")
+	}
 	return rk
 }
 
@@ -80,6 +91,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp = response.New(body).Status(http.StatusNotFound)
 	}
 
+	if rk.responseHook != nil {
+		resp = rk.responseHook.Hook(resp)
+	}
 	resp.Handle(w)
-	fmt.Fprint(w, resp.Body)
 }
