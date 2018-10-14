@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 
@@ -45,22 +44,16 @@ func newErrorHandler(code int, content string) *handler {
 	return h
 }
 
-func (h *handler) Handle(rs []string, w http.ResponseWriter, r *http.Request) {
+func (h *handler) Handle(rs []string, r *http.Request) *response.Response {
 	resp := h.do.Call(
 		h.context(rs, r),
 	)[0].Interface()
 
-	switch resp.(type) {
+	switch v := resp.(type) {
 	case *response.Response:
-		res := resp.(*response.Response)
-		res.SetCookie(w)
-		w.Header().Set("Content-Type", response.ContentTypeOf(res.Body))
-		res.SetHeaders(w)
-		res.SetStatusCode(w)
-		fmt.Fprint(w, res.Body)
+		return v
 	default:
-		w.Header().Set("Content-Type", response.ContentTypeOf(resp))
-		fmt.Fprint(w, resp)
+		return response.New(v)
 	}
 }
 

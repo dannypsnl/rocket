@@ -60,3 +60,10 @@ func (res *Response) SetHeaders(w http.ResponseWriter) {
 		w.Header().Set(k, v)
 	}
 }
+
+func (res *Response) Handle(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", ContentTypeOf(res.Body))
+	res.SetHeaders(w)
+	res.SetCookie(w)
+	res.SetStatusCode(w)
+}

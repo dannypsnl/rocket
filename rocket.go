@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/dannypsnl/rocket/response"
 )
 
 // Rocket is our service.
@@ -68,14 +70,16 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// get response
 	handler := rk.handlers.getHandler(rs, r.Method)
+	var resp *response.Response
 	if handler != nil {
-		handler.Handle(rs, w, r)
-		return
+		resp = handler.Handle(rs, r)
+	} else {
+		body := rk.defaultHandler.Call([]reflect.Value{})[0]
+		resp = response.New(body).Status(http.StatusNotFound)
 	}
-	// 404 Page Not Found
-	w.WriteHeader(http.StatusNotFound)
-	response := rk.defaultHandler.Call([]reflect.Value{})[0]
-	fmt.Fprint(w, response)
 
+	resp.Handle(w)
+	fmt.Fprint(w, resp.Body)
 }
