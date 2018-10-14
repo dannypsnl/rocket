@@ -44,28 +44,28 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 	return res
 }
 
-func (res *Response) SetStatusCode(w http.ResponseWriter) {
-	if res.statusCode != 0 {
-		w.WriteHeader(res.statusCode)
-	}
+func (res *Response) Handle(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", contentTypeOf(res.Body))
+	res.setHeaders(w)
+	res.setCookie(w)
+	res.setStatusCode(w)
+	fmt.Fprint(w, res.Body)
 }
 
-func (res *Response) SetCookie(w http.ResponseWriter) {
-	for _, c := range res.cookies {
-		http.SetCookie(w, c)
-	}
-}
-
-func (res *Response) SetHeaders(w http.ResponseWriter) {
+func (res *Response) setHeaders(w http.ResponseWriter) {
 	for k, v := range res.headers {
 		w.Header().Set(k, v)
 	}
 }
 
-func (res *Response) Handle(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", ContentTypeOf(res.Body))
-	res.SetHeaders(w)
-	res.SetCookie(w)
-	res.SetStatusCode(w)
-	fmt.Fprint(w, res.Body)
+func (res *Response) setCookie(w http.ResponseWriter) {
+	for _, c := range res.cookies {
+		http.SetCookie(w, c)
+	}
+}
+
+func (res *Response) setStatusCode(w http.ResponseWriter) {
+	if res.statusCode != 0 {
+		w.WriteHeader(res.statusCode)
+	}
 }

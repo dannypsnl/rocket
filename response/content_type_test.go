@@ -23,6 +23,6 @@ func TestSetupHeaderContentType(t *testing.T) {
 func testContentType(t *testing.T, response interface{}, expectedContentType string) {
 	t.Helper()
 	assert := assert.NewTester(t)
-	actualContentType := ContentTypeOf(response)
+	actualContentType := contentTypeOf(response)
 	assert.Eq(actualContentType, expectedContentType)
 }
