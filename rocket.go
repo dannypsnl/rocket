@@ -31,6 +31,7 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 	return rk
 }
 
+// Attach add fairing to lifecycle of each request to response
 func (rk *Rocket) Attach(f interface{}) *Rocket {
 	switch v := f.(type) {
 	case *fairing.Response:
