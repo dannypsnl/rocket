@@ -16,40 +16,39 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func BenchmarkWithoutUserDefinedContext(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func() string {
-		return "welcome"
-	}))
-	Request(b, rk, "GET", "/home", nil)
-}
+func BenchmarkRequest(b *testing.B) {
+	b.Run("WithoutUserDefinedContext", func(b *testing.B) {
+		rk = rk.Mount("/home", rocket.Get("/", func() string {
+			return "welcome"
+		}))
+		Request(b, rk, "GET", "/home", nil)
+	})
+	b.Run("WithUserDefinedContext", func(b *testing.B) {
+		type User struct {
+			Name string `route:"name"`
+		}
 
-func BenchmarkWithUserDefinedContext(b *testing.B) {
-	type User struct {
-		Name string `route:"name"`
-	}
-
-	rk = rk.Mount("/hello", rocket.Get("/:name", func(user *User) string {
-		return "welcome-" + user.Name
-	}))
-	Request(b, rk, "GET", "/hello/kw", nil)
-}
-
-func BenchmarkWithCustomResponse(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func() *response.Response {
-		return response.New(`welcome-custom-response`).WithHeaders(
-			response.Headers{
-				"Access-Control-Allow-Origin": "*",
-			},
-		)
-	}))
-	Request(b, rk, "GET", "/home", nil)
-}
-
-func BenchmarkWithHeader(b *testing.B) {
-	rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
-		return "Content-Type-is-" + header.Get("Content-Type")
-	}))
-	Request(b, rk, "GET", "/home", nil)
+		rk = rk.Mount("/hello", rocket.Get("/:name", func(user *User) string {
+			return "welcome-" + user.Name
+		}))
+		Request(b, rk, "GET", "/hello/kw", nil)
+	})
+	b.Run("WithCustomResponse", func(b *testing.B) {
+		rk = rk.Mount("/home", rocket.Get("/", func() *response.Response {
+			return response.New(`welcome-custom-response`).WithHeaders(
+				response.Headers{
+					"Access-Control-Allow-Origin": "*",
+				},
+			)
+		}))
+		Request(b, rk, "GET", "/home", nil)
+	})
+	b.Run("WithHeader", func(b *testing.B) {
+		rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
+			return "Content-Type-is-" + header.Get("Content-Type")
+		}))
+		Request(b, rk, "GET", "/home", nil)
+	})
 }
 
 func Request(b *testing.B, rk *rocket.Rocket, method, path string, body io.Reader) {
