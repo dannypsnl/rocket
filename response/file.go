@@ -39,9 +39,9 @@ func File(filepath string) *FileResponser {
 func (r *FileResponser) ByFileSuffix(contentTypes map[string]string) *Response {
 	if r.err != nil {
 		r.resp.Status(http.StatusUnprocessableEntity)
-	} else {
-		r.resp.Status(http.StatusOK)
+		return r.resp
 	}
+	r.resp.Status(http.StatusOK)
 	headers := Headers{}
 	i := strings.LastIndexByte(r.filepath, '.')
 	v, ok := contentTypes[r.filepath[i+1:]]
