@@ -1,11 +1,13 @@
 package rocket
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/dannypsnl/rocket/fairing"
+	"github.com/dannypsnl/rocket/response"
 )
 
 // Rocket is our service.
@@ -13,6 +15,7 @@ type Rocket struct {
 	port           string
 	handlers       *Route
 	defaultHandler reflect.Value
+	responseHook   *fairing.ResponseDecorator
 }
 
 // Mount add handler into our service.
@@ -25,6 +28,17 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 		rk.handlers.addHandlerTo(route, h)
 	}
 
+	return rk
+}
+
+// Attach add fairing to lifecycle of each request to response
+func (rk *Rocket) Attach(f interface{}) *Rocket {
+	switch v := f.(type) {
+	case *fairing.ResponseDecorator:
+		rk.responseHook = v
+	default:
+		panic("not support fairing")
+	}
 	return rk
 }
 
@@ -68,14 +82,18 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// get response
 	handler := rk.handlers.getHandler(rs, r.Method)
+	var resp *response.Response
 	if handler != nil {
-		handler.Handle(rs, w, r)
-		return
+		resp = handler.Handle(rs, r)
+	} else {
+		body := rk.defaultHandler.Call([]reflect.Value{})[0]
+		resp = response.New(body).Status(http.StatusNotFound)
 	}
-	// 404 Page Not Found
-	w.WriteHeader(http.StatusNotFound)
-	response := rk.defaultHandler.Call([]reflect.Value{})[0]
-	fmt.Fprint(w, response)
 
+	if rk.responseHook != nil {
+		resp = rk.responseHook.Hook(resp)
+	}
+	resp.Handle(w)
 }

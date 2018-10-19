@@ -1,6 +1,6 @@
 package response
 
-func ContentTypeOf(response interface{}) string {
+func contentTypeOf(response interface{}) string {
 	switch response.(type) {
 	case Html:
 		return "text/html"
