@@ -15,7 +15,7 @@ type Rocket struct {
 	port           string
 	handlers       *Route
 	defaultHandler reflect.Value
-	responseHook   *fairing.Response
+	responseHook   *fairing.ResponseDecorator
 }
 
 // Mount add handler into our service.
@@ -34,7 +34,7 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 // Attach add fairing to lifecycle of each request to response
 func (rk *Rocket) Attach(f interface{}) *Rocket {
 	switch v := f.(type) {
-	case *fairing.Response:
+	case *fairing.ResponseDecorator:
 		rk.responseHook = v
 	default:
 		panic("not support fairing")

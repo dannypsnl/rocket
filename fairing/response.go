@@ -6,16 +6,16 @@ import (
 
 type ResponseHook func(*response.Response) *response.Response
 
-type Response struct {
+type ResponseDecorator struct {
 	hook ResponseHook
 }
 
-func (r *Response) Hook(resp *response.Response) *response.Response {
+func (r *ResponseDecorator) Hook(resp *response.Response) *response.Response {
 	return r.hook(resp)
 }
 
-func OnResponse(hook ResponseHook) *Response {
-	return &Response{
+func OnResponse(hook ResponseHook) *ResponseDecorator {
+	return &ResponseDecorator{
 		hook: hook,
 	}
 }
