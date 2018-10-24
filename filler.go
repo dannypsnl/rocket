@@ -38,7 +38,10 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 			param := r.reqURL[baseRouteLen+idx]
 			index := r.routeParams[idx]
 			field := ctx.Elem().Field(index)
-			v := parseParameter(field, param)
+			v, err := parseParameter(field, param)
+			if err != nil {
+				return err
+			}
 			field.Set(v)
 		}
 	}
@@ -54,7 +57,10 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 		field := ctx.Elem().Field(idx)
 		if v, ok := q.query[k]; ok {
 			p := v[0]
-			value := parseParameter(field, p)
+			value, err := parseParameter(field, p)
+			if err != nil {
+				return err
+			}
 			field.Set(value)
 		}
 	}
@@ -74,7 +80,10 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 		if v, ok := f.form[k]; ok {
 			field := ctx.Elem().Field(idx)
 			p := v[0]
-			value := parseParameter(field, p)
+			value, err := parseParameter(field, p)
+			if err != nil {
+				return err
+			}
 			field.Set(value)
 		}
 	}
