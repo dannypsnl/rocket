@@ -21,7 +21,7 @@ Document: [https://dannypsnl.github.io/rocket](https://dannypsnl.github.io/rocke
 package example
 
 import (
-    rk "github.com/dannypsnl/rocket"
+    "github.com/dannypsnl/rocket"
 )
 ```
 
@@ -33,7 +33,7 @@ package example
 import (
 	"fmt"
 	
-	rk "github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket"
 )
 
 type User struct {
@@ -41,7 +41,7 @@ type User struct {
 	Age int `route:"age"`
 }
 
-var hello = rk.Get("/name/:name/age/:age", func(u *User) string {
+var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
     return fmt.Sprintf(
     	"Hello, %s.\nYour age is %d.",
     	u.Name, u.Age)
@@ -74,7 +74,7 @@ rocket.Ignite(":8080"). // Setting port
 - func Ignite get a string to describe port.
 - Launch start the server.
 - Mount receive a base route and a handler that exactly handle route.
-	you can emit 1 to N handlers at one `Mount`
+	you can emit 1 to N handlers in one `Mount`
 
 ##### Note
 
