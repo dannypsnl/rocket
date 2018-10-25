@@ -25,7 +25,7 @@ func TestResponse(t *testing.T) {
 	assert := assert.NewTester(t)
 
 	res := response.New("").
-		WithHeaders(response.Headers{
+		Headers(response.Headers{
 			"x-testing": "hello",
 		}).
 		Cookies(
