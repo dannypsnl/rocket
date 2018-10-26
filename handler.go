@@ -79,8 +79,8 @@ func (h *handler) needHeader() bool {
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
-		contextType := h.do.Type().In(h.userDefinedContextOffset)
-		context := reflect.New(contextType.Elem())
+		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
+		context := reflect.New(contextType)
 
 		for idx, route := range h.routes {
 			if isParameter(route) {
