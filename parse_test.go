@@ -52,7 +52,7 @@ func TestParseParameter(t *testing.T) {
 		{
 			"Uint",
 			"3",
-			3,
+			uint(3),
 		},
 		{
 			"Uint8",
