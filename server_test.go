@@ -77,7 +77,7 @@ var (
 	})
 	customResponseForHeader = rocket.Get("/", func() *response.Response {
 		body := response.Json(`{"msg": "welcome"}`)
-		return response.New(body).WithHeaders(
+		return response.New(body).Headers(
 			response.Headers{
 				"Access-Control-Allow-Origin": "*",
 			},
@@ -101,7 +101,7 @@ func TestServer(t *testing.T) {
 		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context, createCookie, deleteCookie).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
-			return resp.WithHeaders(response.Headers{
+			return resp.Headers(response.Headers{
 				"x-fairing": "response",
 			})
 		})).

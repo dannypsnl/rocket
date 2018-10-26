@@ -35,7 +35,7 @@ func BenchmarkRequest(b *testing.B) {
 	})
 	b.Run("WithCustomResponse", func(b *testing.B) {
 		rk = rk.Mount("/home", rocket.Get("/", func() *response.Response {
-			return response.New(`welcome-custom-response`).WithHeaders(
+			return response.New(`welcome-custom-response`).Headers(
 				response.Headers{
 					"Access-Control-Allow-Origin": "*",
 				},

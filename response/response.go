@@ -30,7 +30,7 @@ func (res *Response) Status(code int) *Response {
 	return res
 }
 
-func (res *Response) WithHeaders(headers Headers) *Response {
+func (res *Response) Headers(headers Headers) *Response {
 	for k, v := range headers {
 		res.headers[k] = v
 	}
