@@ -32,6 +32,12 @@ type Files struct {
 	FileName string `route:"filename"`
 }
 
+type RouteWithJSON struct {
+	Field  string `route:"field"`
+	Query  string `query:"query_field"`
+	JField string `json:"json_field"`
+}
+
 var (
 	homePage = rocket.Get("/", func() response.Html {
 		return `
@@ -41,6 +47,9 @@ var (
 	})
 	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
 		return fs.FileName
+	})
+	routeWithJSON = rocket.Get("route_with_json/:field", func(r *RouteWithJSON) string {
+		return r.Field + r.Query + r.JField
 	})
 	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
 		return `{"value": "response"}`
@@ -98,7 +107,18 @@ func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
 		Mount("/", homePage, staticFiles).
 		Mount("/users", user).
-		Mount("/test", query, endWithSlash, forPatch, forPost, handleCookies, handlerHeaders, context, createCookie, deleteCookie).
+		Mount("/test",
+			query,
+			endWithSlash,
+			forPatch,
+			forPost,
+			handleCookies,
+			handlerHeaders,
+			context,
+			createCookie,
+			deleteCookie,
+			routeWithJSON,
+		).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
 			return resp.Headers(response.Headers{
@@ -235,5 +255,16 @@ func TestServer(t *testing.T) {
 		e.GET("/").
 			Expect().Status(http.StatusOK).
 			Header("x-fairing").Equal("response")
+	})
+
+	t.Run("", func(t *testing.T) {
+		jsonObj := map[string]interface{}{
+			"json_field": " json",
+		}
+		e.GET("/test/route_with_json/field").
+			WithQuery("query_field", " query").
+			WithJSON(jsonObj).
+			Expect().Status(http.StatusOK).
+			Body().Equal("field query json")
 	})
 }

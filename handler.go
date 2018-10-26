@@ -82,17 +82,6 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		contextType := h.do.Type().In(h.userDefinedContextOffset)
 		context := reflect.New(contextType.Elem())
 
-		if h.expectJsonRequest {
-			v := context.Interface()
-			err := json.NewDecoder(req.Body).Decode(v)
-			if err != nil {
-				param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
-				return param
-			}
-			param[h.userDefinedContextOffset] = reflect.ValueOf(v)
-			return param
-		}
-
 		for idx, route := range h.routes {
 			if isParameter(route) {
 				param := rs[len(rs)-len(h.routes)+idx]
@@ -119,6 +108,17 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 				value := parseParameter(context.Elem().Field(idx), p)
 				field.Set(value)
 			}
+		}
+
+		if h.expectJsonRequest {
+			v := context.Interface()
+			err := json.NewDecoder(req.Body).Decode(v)
+			if err != nil {
+				param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
+				return param
+			}
+			param[h.userDefinedContextOffset] = reflect.ValueOf(v)
+			return param
 		}
 
 		req.ParseForm()
