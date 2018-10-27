@@ -257,7 +257,7 @@ func TestServer(t *testing.T) {
 			Header("x-fairing").Equal("response")
 	})
 
-	t.Run("", func(t *testing.T) {
+	t.Run("JSONTagCanWorkWithOtherTag", func(t *testing.T) {
 		jsonObj := map[string]interface{}{
 			"json_field": " json",
 		}
