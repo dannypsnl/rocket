@@ -66,14 +66,7 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	queryIdx := strings.Index(r.URL.Path, "?")
-	path := r.URL.Path
-	// has query string
-	if queryIdx > -1 {
-		path = path[:queryIdx]
-	}
-
-	splitRoutes := strings.Split(path, "/")[1:]
+	splitRoutes := strings.Split(r.URL.Path, "/")[1:]
 
 	rs := make([]string, 0)
 	for _, rout := range splitRoutes {
