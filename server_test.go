@@ -13,24 +13,26 @@ import (
 	"github.com/gavv/httpexpect"
 )
 
-type User struct {
-	Name string `route:"name"`
-	Age  int    `route:"age"`
+type (
+	User struct {
+		Name string `route:"name"`
+		Age  int    `route:"age"`
 
-	QueryName string `query:"name"`
-}
+		QueryName string `query:"name"`
+	}
 
-type ForPost struct {
-	Val string `json:"value"`
-}
+	ForPost struct {
+		Val string `json:"value"`
+	}
 
-type ForPatch struct {
-	Val string `form:"value"`
-}
+	ForPatch struct {
+		Val string `form:"value"`
+	}
 
-type Files struct {
-	FileName string `route:"filename"`
-}
+	Files struct {
+		FileName string `route:"filename"`
+	}
+)
 
 type RouteWithJSON struct {
 	Field  string `route:"field"`
