@@ -41,13 +41,14 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 
 	matchRoute := route
 	child := route.Children
-	for _, r := range rs {
+	for i, r := range rs {
 		if isParameter(r) {
 			if matchRoute.VariableRoute == nil {
 				matchRoute.VariableRoute = NewRoute()
 			}
 			matchRoute = matchRoute.VariableRoute
 		} else if r[0] == '*' {
+			h.matchedPathIndex = i - 1
 			if matchRoute.PathRouteHandler == nil {
 				matchRoute.PathRouteHandler = make(map[string]*handler)
 			}

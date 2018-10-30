@@ -32,6 +32,11 @@ type (
 	Files struct {
 		FileName string `route:"filename"`
 	}
+
+	FilesAndRoute struct {
+		V        string `route:"var"`
+		FileName string `route:"filename"`
+	}
 )
 
 type RouteWithJSON struct {
@@ -46,6 +51,9 @@ var (
 		<h1>Title</h1>
 		<p>Hello, World</p>
 		`
+	})
+	filesAndRoute = rocket.Get("/file/:var/*filename", func(fs *FilesAndRoute) string {
+		return fs.V + "/" + fs.FileName
 	})
 	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
 		return fs.FileName
@@ -120,6 +128,7 @@ func TestServer(t *testing.T) {
 			createCookie,
 			deleteCookie,
 			routeWithJSON,
+			filesAndRoute,
 		).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
@@ -151,6 +160,11 @@ func TestServer(t *testing.T) {
 		`)
 	})
 
+	t.Run("FilesAndRoute", func(t *testing.T) {
+		e.GET("/test/file/css/css/index.css").
+			Expect().Status(http.StatusOK).
+			Body().Equal("css/css/index.css")
+	})
 	t.Run("MatchPathParameter", func(t *testing.T) {
 		e.GET("/static/index.js").
 			Expect().Status(http.StatusOK).

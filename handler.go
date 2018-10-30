@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"reflect"
 
 	"github.com/dannypsnl/rocket/response"
@@ -24,16 +25,17 @@ type handler struct {
 	queryParams       map[string]int
 	expectJsonRequest bool
 
-	matchedPath    string
-	matchPathIndex int
+	matchedPath      string
+	matchedPathIndex int
 }
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do: do,
+		do:                       do,
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
 		headerOffset:             -1,
+		matchedPathIndex:         -1,
 	}
 }
 
@@ -57,13 +59,13 @@ func (h *handler) Handle(rs []string, r *http.Request) *response.Response {
 	}
 }
 
-func (h *handler) addMatchedPathValueIntoContext(path ...string) {
-	buf := bytes.NewBuffer([]byte(``))
-	for _, v := range path {
-		buf.WriteString(v)
-		buf.WriteRune('/')
+func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
+	path := bytes.NewBuffer([]byte(``))
+	for _, v := range paths {
+		path.WriteString(v)
+		path.WriteRune('/')
 	}
-	h.matchedPath = buf.String()[:buf.Len()-1]
+	h.matchedPath = path.String()[:path.Len()-1]
 }
 
 func (h *handler) hasUserDefinedContext() bool {
@@ -76,62 +78,74 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
+func (h *handler) fillRoute(context reflect.Value, rs []string) {
+	for idx, route := range h.routes {
+		if isParameter(route) {
+			param := rs[len(rs)-len(h.routes)+idx]
+			index := h.routeParams[idx]
+			value := parseParameter(context.Elem().Field(index), param)
+			context.Elem().Field(index).
+				Set(value)
+		}
+	}
+	if h.matchedPathIndex != -1 {
+		index := h.routeParams[h.matchedPathIndex]
+		context.Elem().Field(index).
+			Set(reflect.ValueOf(h.matchedPath))
+	}
+}
+func (h *handler) fillQuery(context reflect.Value, querys url.Values) {
+	for k, idx := range h.queryParams {
+		field := context.Elem().Field(idx)
+		if v, ok := querys[k]; ok {
+			p := v[0]
+			value := parseParameter(context.Elem().Field(idx), p)
+			field.Set(value)
+		}
+	}
+}
+func (h *handler) fillJSON(context reflect.Value, req *http.Request) (reflect.Value, error) {
+	if h.expectJsonRequest {
+		v := context.Interface()
+		err := json.NewDecoder(req.Body).Decode(v)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(v), nil
+	}
+	return context, nil
+}
+func (h *handler) fillForm(context reflect.Value, form url.Values) {
+	for k, idx := range h.formParams {
+		if v, ok := form[k]; ok {
+			p := v[0]
+			value := parseParameter(context.Elem().Field(idx), p)
+			context.Elem().Field(idx).
+				Set(value)
+		}
+	}
+}
+
+type contextParser interface {
+	parse(context reflect.Value, rs []string, vs url.Values)
+}
+
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
 		context := reflect.New(contextType)
 
-		// handler won't know which Base Route it bases on, so we only store extend route part(aka. h.routes)
-		lenBaseRoute := len(rs) - len(h.routes)
-		for idx, route := range h.routes {
-			if isParameter(route) {
-				param := rs[lenBaseRoute+idx]
-				index := h.routeParams[idx]
-				value := parseParameter(context.Elem().Field(index), param)
-				context.Elem().Field(index).
-					Set(value)
-			}
-		}
-
-		if h.matchedPath != "" {
-			param := h.matchedPath
-			index := h.matchPathIndex
-			value := parseParameter(context.Elem().Field(index), param)
-			context.Elem().Field(index).
-				Set(value)
-		}
-
-		for k, idx := range h.queryParams {
-			values := req.URL.Query()
-			field := context.Elem().Field(idx)
-			if v, ok := values[k]; ok {
-				p := v[0]
-				value := parseParameter(context.Elem().Field(idx), p)
-				field.Set(value)
-			}
-		}
-
-		if h.expectJsonRequest {
-			v := context.Interface()
-			err := json.NewDecoder(req.Body).Decode(v)
-			if err != nil {
-				param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
-				return param
-			}
-			param[h.userDefinedContextOffset] = reflect.ValueOf(v)
+		h.fillRoute(context, rs)
+		h.fillQuery(context, req.URL.Query())
+		v, err := h.fillJSON(context, req)
+		if err != nil {
+			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
 			return param
 		}
-
+		param[h.userDefinedContextOffset] = v
 		req.ParseForm()
-		for k, idx := range h.formParams {
-			if v, ok := req.Form[k]; ok {
-				p := v[0]
-				value := parseParameter(context.Elem().Field(idx), p)
-				context.Elem().Field(idx).
-					Set(value)
-			}
-		}
+		h.fillForm(context, req.Form)
 
 		param[h.userDefinedContextOffset] = context
 	}
