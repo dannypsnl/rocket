@@ -48,7 +48,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 			}
 			matchRoute = matchRoute.VariableRoute
 		} else if r[0] == '*' {
-			h.matchedPathIndex = i - 1
+			h.matchedPathIndex = i - (len(routes) - len(h.routes))
 			if matchRoute.PathRouteHandler == nil {
 				matchRoute.PathRouteHandler = make(map[string]*handler)
 			}

@@ -115,7 +115,7 @@ var (
 
 func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
-		Mount("/", homePage, staticFiles).
+		Mount("/", homePage, staticFiles, filesAndRoute).
 		Mount("/users", user).
 		Mount("/test",
 			query,
@@ -162,6 +162,9 @@ func TestServer(t *testing.T) {
 
 	t.Run("FilesAndRoute", func(t *testing.T) {
 		e.GET("/test/file/css/css/index.css").
+			Expect().Status(http.StatusOK).
+			Body().Equal("css/css/index.css")
+		e.GET("/file/css/css/index.css").
 			Expect().Status(http.StatusOK).
 			Body().Equal("css/css/index.css")
 	})
