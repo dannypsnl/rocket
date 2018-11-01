@@ -100,17 +100,17 @@ func newRouteFiller(h *handler, rs []string, next contextFiller) contextFiller {
 	return r
 }
 func newQueryFiller(h *handler, query url.Values, next contextFiller) contextFiller {
-	r := &queryFiller{h: h, query: query}
-	r.next = next
-	return r
+	q := &queryFiller{h: h, query: query}
+	q.next = next
+	return q
 }
 func newJSONFiller(h *handler, req *http.Request, next contextFiller) contextFiller {
-	r := &jsonFiller{h: h, req: req}
-	r.next = next
-	return r
+	j := &jsonFiller{h: h, req: req}
+	j.next = next
+	return j
 }
 func newFormFiller(h *handler, form url.Values, next contextFiller) contextFiller {
-	r := &formFiller{h: h, form: form}
-	r.next = next
-	return r
+	f := &formFiller{h: h, form: form}
+	f.next = next
+	return f
 }
