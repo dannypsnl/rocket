@@ -83,13 +83,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		context := reflect.New(contextType)
 
 		req.ParseForm()
-		filler := newRouteFiller(h, rs,
-			newQueryFiller(h, req.URL.Query(),
-				newJSONFiller(h, req.Body,
-					newFormFiller(h, req.Form, nil),
-				),
-			),
-		)
+		filler := defaultFillerChain(h, rs, req.Body, req.URL.Query(), req.Form)
 		err := filler.fill(context)
 		if err != nil {
 			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
