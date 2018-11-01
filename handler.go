@@ -85,7 +85,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		req.ParseForm()
 		filler := newRouteFiller(h, rs,
 			newQueryFiller(h, req.URL.Query(),
-				newJSONFiller(h, req,
+				newJSONFiller(h, req.Body,
 					newFormFiller(h, req.Form, nil),
 				),
 			),

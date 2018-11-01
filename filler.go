@@ -2,7 +2,7 @@ package rocket
 
 import (
 	"encoding/json"
-	"net/http"
+	"io"
 	"net/url"
 	"reflect"
 )
@@ -26,8 +26,8 @@ type (
 	}
 	jsonFiller struct {
 		nextFiller
-		h   *handler
-		req *http.Request
+		h    *handler
+		body io.Reader
 	}
 	formFiller struct {
 		nextFiller
@@ -73,7 +73,7 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 func (j *jsonFiller) fill(ctx reflect.Value) error {
 	if j.h.expectJsonRequest {
 		v := ctx.Interface()
-		err := json.NewDecoder(j.req.Body).Decode(v)
+		err := json.NewDecoder(j.body).Decode(v)
 		if err != nil {
 			return err
 		}
@@ -104,8 +104,8 @@ func newQueryFiller(h *handler, query url.Values, next contextFiller) contextFil
 	q.next = next
 	return q
 }
-func newJSONFiller(h *handler, req *http.Request, next contextFiller) contextFiller {
-	j := &jsonFiller{h: h, req: req}
+func newJSONFiller(h *handler, body io.Reader, next contextFiller) contextFiller {
+	j := &jsonFiller{h: h, body: body}
 	j.next = next
 	return j
 }
