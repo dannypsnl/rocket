@@ -141,7 +141,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	}
 
 	if h.needHeader() {
-		param[h.headerOffset] = reflect.ValueOf(&Headers{req: req})
+		param[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
 	}
 
 	return param
