@@ -7,8 +7,7 @@ import (
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
-	h := newHandler()
-	h.do = handlerDo
+	h := newHandler(handlerDo)
 	h.method = method
 	h.routes = strings.Split(strings.Trim(*route, "/"), "/")
 	h.routeParams = make(map[int]int)
