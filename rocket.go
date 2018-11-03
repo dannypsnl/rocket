@@ -81,12 +81,17 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler != nil {
 		resp = handler.Handle(rs, r)
 	} else {
-		body := rk.defaultHandler.Call([]reflect.Value{})[0]
-		resp = response.New(body).Status(http.StatusNotFound)
+		resp = rk.defaultResponse()
 	}
 
 	if rk.responseHook != nil {
 		resp = rk.responseHook.Hook(resp)
 	}
 	resp.Handle(w)
+}
+
+func (rk *Rocket) defaultResponse() *response.Response {
+	return response.New(
+		rk.defaultHandler.Call([]reflect.Value{})[0],
+	).Status(http.StatusNotFound)
 }
