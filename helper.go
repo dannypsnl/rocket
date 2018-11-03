@@ -6,8 +6,6 @@ import (
 	"strconv"
 )
 
-const legalCharsInUrl = "([a-zA-Z0-9-_]+)"
-
 func verifyBase(route string) bool {
 	r, _ := regexp.Compile(".*?[:*].*?")
 	// Contains : part will Match, it can be on a Base Route
