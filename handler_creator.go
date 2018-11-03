@@ -16,15 +16,14 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 
 	handlerFuncT := reflect.TypeOf(do)
 
-	cookiesT := reflect.TypeOf(Cookies{})
-	headerT := reflect.TypeOf(Headers{})
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
-		if t.AssignableTo(cookiesT) {
+		switch {
+		case t.AssignableTo(reflect.TypeOf(Cookies{})):
 			h.cookiesOffset = i
-		} else if t.AssignableTo(headerT) {
+		case t.AssignableTo(reflect.TypeOf(Headers{})):
 			h.headerOffset = i
-		} else {
+		default:
 			// We not sure what is it, so just assume it's user defined context
 			h.userDefinedContextOffset = i
 		}
@@ -35,9 +34,22 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 
 		routeParams := make(map[string]int)
 		for i := 0; i < contextT.NumField(); i++ {
-			key, ok := contextT.Field(i).Tag.Lookup("route")
+			tagOfField := contextT.Field(i).Tag
+			key, ok := tagOfField.Lookup("route")
 			if ok {
 				routeParams[key] = i
+			}
+			key, ok = tagOfField.Lookup("form")
+			if ok {
+				h.formParams[key] = i
+			}
+			key, ok = tagOfField.Lookup("query")
+			if ok {
+				h.queryParams[key] = i
+			}
+			_, ok = tagOfField.Lookup("json")
+			if !h.expectJsonRequest && ok {
+				h.expectJsonRequest = ok
 			}
 		}
 
@@ -46,21 +58,6 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 			if r[0] == ':' || r[0] == '*' {
 				// r[1:] is `name`, that's the key we expected
 				h.routeParams[idx] = routeParams[r[1:]]
-			}
-		}
-
-		for i := 0; i < contextT.NumField(); i++ {
-			key, ok := contextT.Field(i).Tag.Lookup("form")
-			if ok {
-				h.formParams[key] = i
-			}
-			key, ok = contextT.Field(i).Tag.Lookup("query")
-			if ok {
-				h.queryParams[key] = i
-			}
-			_, ok = contextT.Field(i).Tag.Lookup("json")
-			if !h.expectJsonRequest && ok {
-				h.expectJsonRequest = ok
 			}
 		}
 	}
