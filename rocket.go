@@ -12,10 +12,12 @@ import (
 
 // Rocket is our service.
 type Rocket struct {
-	port           string
-	handlers       *Route
+	port         string
+	handlers     *Route
+	responseHook *fairing.ResponseDecorator
+
 	defaultHandler reflect.Value
-	responseHook   *fairing.ResponseDecorator
+	defaultResp    *response.Response
 }
 
 // Mount add handler into our service.
@@ -91,7 +93,11 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rk *Rocket) defaultResponse() *response.Response {
-	return response.New(
+	if rk.defaultResp != nil {
+		return rk.defaultResp
+	}
+	rk.defaultResp = response.New(
 		rk.defaultHandler.Call([]reflect.Value{})[0],
 	).Status(http.StatusNotFound)
+	return rk.defaultResp
 }
