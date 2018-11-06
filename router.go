@@ -39,6 +39,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		}
 	}
 
+	baseRouteLen := (len(rs) - len(h.routes))
 	matchRoute := route
 	child := route.Children
 	for i, r := range rs {
@@ -48,7 +49,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 			}
 			matchRoute = matchRoute.VariableRoute
 		} else if r[0] == '*' {
-			h.matchedPathIndex = i - (len(routes) - len(h.routes))
+			h.matchedPathIndex = i - baseRouteLen
 			if matchRoute.PathRouteHandler == nil {
 				matchRoute.PathRouteHandler = make(map[string]*handler)
 			}
@@ -82,9 +83,8 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		}
 		if h, ok := route.Handlers[method]; ok {
 			return h
-		} else {
-			return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 		}
+		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 	}
 	next := route
 	for i, r := range requestUrl {
@@ -100,9 +100,8 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 				// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
-			} else {
-				return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 			}
+			return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 		} else {
 			return nil
 		}
@@ -112,9 +111,8 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	}
 	if h, ok := next.Handlers[method]; ok {
 		return h
-	} else {
-		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 	}
+	return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 }
 
 func isParameter(route string) bool {
