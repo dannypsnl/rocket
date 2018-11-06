@@ -28,8 +28,9 @@ type handler struct {
 	matchPathIndex int
 }
 
-func newHandler() *handler {
+func newHandler(do reflect.Value) *handler {
 	return &handler{
+		do: do,
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
 		headerOffset:             -1,
@@ -37,10 +38,9 @@ func newHandler() *handler {
 }
 
 func newErrorHandler(code int, content string) *handler {
-	h := newHandler()
-	h.do = reflect.ValueOf(func() *response.Response {
+	h := newHandler(reflect.ValueOf(func() *response.Response {
 		return response.New(content).Status(code)
-	})
+	}))
 	return h
 }
 
@@ -82,9 +82,11 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
 		context := reflect.New(contextType)
 
+		// handler won't know which Base Route it bases on, so we only store extend route part(aka. h.routes)
+		lenBaseRoute := len(rs) - len(h.routes)
 		for idx, route := range h.routes {
 			if isParameter(route) {
-				param := rs[len(rs)-len(h.routes)+idx]
+				param := rs[lenBaseRoute+idx]
 				index := h.routeParams[idx]
 				value := parseParameter(context.Elem().Field(index), param)
 				context.Elem().Field(index).
@@ -139,7 +141,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	}
 
 	if h.needHeader() {
-		param[h.headerOffset] = reflect.ValueOf(&Headers{req: req})
+		param[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
 	}
 
 	return param

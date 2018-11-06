@@ -5,9 +5,9 @@ import (
 )
 
 type Headers struct {
-	req *http.Request
+	header http.Header
 }
 
 func (h *Headers) Get(key string) string {
-	return h.req.Header.Get(key)
+	return h.header.Get(key)
 }

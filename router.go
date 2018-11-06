@@ -95,7 +95,8 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 			if !route.OwnHandler {
 				return nil
 			}
-			if h, ok := next.PathRouteHandler[method]; ok {
+			if h, hasPathRouteHandler := next.PathRouteHandler[method]; hasPathRouteHandler {
+				// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
 			} else {
