@@ -36,16 +36,6 @@ type (
 	}
 )
 
-func defaultFillerChain(h *handler, rs []string, body io.Reader, query, form url.Values) filler {
-	return newRouteFiller(h, rs,
-		newQueryFiller(h, query,
-			newJSONFiller(h, body,
-				newFormFiller(h, form, nil),
-			),
-		),
-	)
-}
-
 func (n *getNextFiller) next(ctx reflect.Value) error {
 	if n.nextFiller != nil {
 		return n.nextFiller.fill(ctx)

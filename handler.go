@@ -76,6 +76,15 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
+func (h *handler) defaultFillerChain(rs []string, body io.Reader, query, form url.Values) filler {
+	return newRouteFiller(h, rs,
+		newQueryFiller(h, query,
+			newJSONFiller(h, body,
+				newFormFiller(h, form, nil),
+			),
+		),
+	)
+}
 func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
@@ -83,7 +92,7 @@ func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
 		context := reflect.New(contextType)
 
 		req.ParseForm()
-		filler := defaultFillerChain(h, rs, req.Body, req.URL.Query(), req.Form)
+		filler := h.defaultFillerChain(rs, req.Body, req.URL.Query(), req.Form)
 		err := filler.fill(context)
 		if err != nil {
 			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
