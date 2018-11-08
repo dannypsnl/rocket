@@ -3,7 +3,9 @@ package rocket
 import (
 	"bytes"
 	"errors"
+	"io"
 	"net/http"
+	"net/url"
 	"reflect"
 
 	"github.com/dannypsnl/rocket/response"
