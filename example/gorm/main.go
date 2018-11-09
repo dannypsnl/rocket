@@ -8,17 +8,28 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
+var (
+	db, err = gorm.Open("sqlite3", "test.db")
+)
+
+func init() {
+	if err != nil {
+		panic(err)
+	}
+}
+
 type User struct {
 	gorm.Model
 	Name string `route:"name"`
 	Age  uint64
 }
 
+func (u *User) GetAge() (age uint64) {
+	db.First(u, "name = ?", u.Name)
+	return u.Age
+}
+
 func main() {
-	db, err := gorm.Open("sqlite3", "test.db")
-	if err != nil {
-		panic(err)
-	}
 	defer db.Close()
 
 	db.AutoMigrate(&User{})
@@ -26,9 +37,7 @@ func main() {
 
 	rocket.Ignite(":8080").
 		Mount("/user", rocket.Get("/:name", func(u *User) string {
-			var user User
-			db.First(&user, "name = ?", u.Name)
-			return fmt.Sprintf("User %s age is %d", user.Name, user.Age)
+			return fmt.Sprintf("User %s age is %d", u.Name, u.GetAge())
 		})).
 		Launch()
 }
