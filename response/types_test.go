@@ -16,11 +16,11 @@ func TestSetupHeaderContentType(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		testContentType(t, testCase.resp, testCase.contentType)
+		assertContentType(t, testCase.resp, testCase.contentType)
 	}
 }
 
-func testContentType(t *testing.T, response interface{}, expectedContentType string) {
+func assertContentType(t *testing.T, response interface{}, expectedContentType string) {
 	t.Helper()
 	assert := assert.NewTester(t)
 	actualContentType := contentTypeOf(response)
