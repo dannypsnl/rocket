@@ -9,59 +9,48 @@ import (
 
 type (
 	filler interface {
-		fill(context reflect.Value) error
-	}
-	getNextFiller struct {
-		nextFiller filler
+		fill(ctx reflect.Value) error
 	}
 	routeFiller struct {
-		getNextFiller
-		h      *handler
-		reqURL []string
+		routes           []string
+		routeParams      map[int]int
+		reqURL           []string
+		matchedPathIndex int
+		matchedPath      string
 	}
 	queryFiller struct {
-		getNextFiller
-		h     *handler
-		query url.Values
+		queryParams map[string]int
+		query       url.Values
 	}
 	jsonFiller struct {
-		getNextFiller
-		h    *handler
 		body io.Reader
 	}
 	formFiller struct {
-		getNextFiller
-		h    *handler
-		form url.Values
+		formParams map[string]int
+		form       url.Values
 	}
 )
 
-func (n *getNextFiller) next(ctx reflect.Value) error {
-	if n.nextFiller != nil {
-		return n.nextFiller.fill(ctx)
-	}
-	return nil
-}
 func (r *routeFiller) fill(ctx reflect.Value) error {
-	baseRouteLen := len(r.reqURL) - len(r.h.routes)
-	for idx, route := range r.h.routes {
+	baseRouteLen := len(r.reqURL) - len(r.routes)
+	for idx, route := range r.routes {
 		if isParameter(route) {
 			param := r.reqURL[baseRouteLen+idx]
-			index := r.h.routeParams[idx]
+			index := r.routeParams[idx]
 			field := ctx.Elem().Field(index)
 			v := parseParameter(field, param)
 			field.Set(v)
 		}
 	}
-	if r.h.matchedPathIndex != -1 {
-		i := r.h.routeParams[r.h.matchedPathIndex]
+	if r.matchedPathIndex != -1 {
+		i := r.routeParams[r.matchedPathIndex]
 		ctx.Elem().Field(i).
-			Set(reflect.ValueOf(r.h.matchedPath))
+			Set(reflect.ValueOf(r.matchedPath))
 	}
-	return r.next(ctx)
+	return nil
 }
 func (q *queryFiller) fill(ctx reflect.Value) error {
-	for k, idx := range q.h.queryParams {
+	for k, idx := range q.queryParams {
 		field := ctx.Elem().Field(idx)
 		if v, ok := q.query[k]; ok {
 			p := v[0]
@@ -69,22 +58,19 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 			field.Set(value)
 		}
 	}
-	return q.next(ctx)
+	return nil
 }
 func (j *jsonFiller) fill(ctx reflect.Value) error {
-	if j.h.expectJsonRequest {
-		v := ctx.Interface()
-		err := json.NewDecoder(j.body).Decode(v)
-		if err != nil {
-			return err
-		}
-		ctx.Elem().Set(reflect.ValueOf(v).Elem())
-		return nil
+	v := ctx.Interface()
+	err := json.NewDecoder(j.body).Decode(v)
+	if err != nil {
+		return err
 	}
-	return j.next(ctx)
+	ctx.Elem().Set(reflect.ValueOf(v).Elem())
+	return nil
 }
 func (f *formFiller) fill(ctx reflect.Value) error {
-	for k, idx := range f.h.formParams {
+	for k, idx := range f.formParams {
 		if v, ok := f.form[k]; ok {
 			field := ctx.Elem().Field(idx)
 			p := v[0]
@@ -92,26 +78,47 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 			field.Set(value)
 		}
 	}
-	return f.next(ctx)
+	return nil
 }
 
-func newRouteFiller(h *handler, reqURL []string, next filler) filler {
-	r := &routeFiller{h: h, reqURL: reqURL}
-	r.nextFiller = next
-	return r
+type Chain struct {
+	ctx reflect.Value
+	err error
 }
-func newQueryFiller(h *handler, query url.Values, next filler) filler {
-	q := &queryFiller{h: h, query: query}
-	q.nextFiller = next
-	return q
+
+func newChain(ctx reflect.Value) *Chain {
+	return &Chain{ctx: ctx}
 }
-func newJSONFiller(h *handler, body io.Reader, next filler) filler {
-	j := &jsonFiller{h: h, body: body}
-	j.nextFiller = next
-	return j
+
+func (c *Chain) pipe(filler filler) *Chain {
+	if c.err == nil {
+		c.err = filler.fill(c.ctx)
+	}
+	return c
 }
-func newFormFiller(h *handler, form url.Values, next filler) filler {
-	f := &formFiller{h: h, form: form}
-	f.nextFiller = next
-	return f
+
+func (c *Chain) error() error {
+	return c.err
+}
+
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
+	return &routeFiller{
+		routes:           routes,
+		routeParams:      routeParams,
+		reqURL:           reqURL,
+		matchedPathIndex: matchedPathIndex,
+		matchedPath:      matchedPath,
+	}
+}
+func newQueryFiller(queryParams map[string]int, query url.Values) filler {
+	return &queryFiller{
+		queryParams: queryParams,
+		query:       query,
+	}
+}
+func newJSONFiller(body io.Reader) filler {
+	return &jsonFiller{body: body}
+}
+func newFormFiller(formParams map[string]int, form url.Values) filler {
+	return &formFiller{formParams: formParams, form: form}
 }

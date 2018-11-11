@@ -3,9 +3,7 @@ package rocket
 import (
 	"bytes"
 	"errors"
-	"io"
 	"net/http"
-	"net/url"
 	"reflect"
 
 	"github.com/dannypsnl/rocket/response"
@@ -31,7 +29,7 @@ type handler struct {
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do:                       do,
+		do: do,
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
 		headerOffset:             -1,
@@ -46,9 +44,9 @@ func newErrorHandler(code int, content string) *handler {
 	return h
 }
 
-func (h *handler) Handle(rs []string, r *http.Request) *response.Response {
+func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
 	resp := h.do.Call(
-		h.context(rs, r),
+		h.context(reqURL, r),
 	)[0].Interface()
 
 	switch v := resp.(type) {
@@ -78,29 +76,33 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
-func (h *handler) defaultFillerChain(rs []string, body io.Reader, query, form url.Values) filler {
-	return newRouteFiller(h, rs,
-		newQueryFiller(h, query,
-			newJSONFiller(h, body,
-				newFormFiller(h, form, nil),
-			),
-		),
-	)
-}
-func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
+func (h *handler) context(reqURL []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
 		context := reflect.New(contextType)
 
-		req.ParseForm()
-		filler := h.defaultFillerChain(rs, req.Body, req.URL.Query(), req.Form)
-		err := filler.fill(context)
-		if err != nil {
+		req.ParseForm() // required! Unless we won't get parsed req.Form
+		chain := newChain(context).
+			pipe(newRouteFiller(
+				h.routes,
+				reqURL,
+				h.routeParams,
+				h.matchedPathIndex,
+				h.matchedPath,
+			)).
+			pipe(newQueryFiller(h.queryParams, req.URL.Query()))
+		if h.expectJsonRequest {
+			chain.
+				pipe(newJSONFiller(req.Body))
+		} else {
+			chain.
+				pipe(newFormFiller(h.formParams, req.Form))
+		}
+		if chain.error() != nil {
 			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
 			return param
 		}
-
 		param[h.userDefinedContextOffset] = context
 	}
 
