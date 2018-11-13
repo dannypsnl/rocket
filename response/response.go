@@ -19,7 +19,9 @@ type Headers map[string]string
 
 func New(body interface{}) *Response {
 	return &Response{
-		headers: make(map[string]string),
+		headers: map[string]string{
+			"Content-Type": contentTypeOf(body),
+		},
 		Body:    body,
 		cookies: make([]*http.Cookie, 0),
 	}
@@ -44,8 +46,7 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 	return res
 }
 
-func (res *Response) Handle(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", contentTypeOf(res.Body))
+func (res *Response) WriteTo(w http.ResponseWriter) {
 	res.setHeaders(w)
 	res.setCookie(w)
 	res.setStatusCode(w)

@@ -89,7 +89,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if rk.responseHook != nil {
 		resp = rk.responseHook.Hook(resp)
 	}
-	resp.Handle(w)
+	resp.WriteTo(w)
 }
 
 func (rk *Rocket) defaultResponse() *response.Response {

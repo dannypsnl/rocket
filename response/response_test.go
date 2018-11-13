@@ -1,13 +1,13 @@
 package response_test
 
 import (
+	"net/http"
 	"testing"
 
-	"net/http"
-
-	"github.com/dannypsnl/assert"
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
+
+	asserter "github.com/dannypsnl/assert"
 )
 
 type fakeRespWriter struct {
@@ -22,7 +22,7 @@ func (w *fakeRespWriter) Write([]byte) (int, error)  { return 1, nil }
 func (w *fakeRespWriter) WriteHeader(statusCode int) {}
 
 func TestResponse(t *testing.T) {
-	assert := assert.NewTester(t)
+	assert := asserter.NewTester(t)
 
 	res := response.New("").
 		Headers(response.Headers{
@@ -32,7 +32,7 @@ func TestResponse(t *testing.T) {
 			cookie.New("testing", "hello"),
 		)
 	w := &fakeRespWriter{count: 0}
-	res.Handle(w)
+	res.WriteTo(w)
 	// include content-type, set header, set cookie
 	assert.Eq(w.count, 3)
 }
