@@ -57,9 +57,9 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 		- form tag is `form:"key"`, it get form value from form request
 		- json tag is `json:"key"`, it get POST/PUT body that is JSON
 	- return type of handler function is meaningful
-		- Html: returns text as HTML(set Content-Type to `text/html`)
-		- Json: returns text as JSON(set Content-Type to `application/json`)
-		- string: returns text as plain text(set Content-Type to `text/plain`)
+		- `response.Html`: returns text as HTML(set Content-Type to `text/html`)
+		- `response.Json`: returns text as JSON(set Content-Type to `application/json`)
+		- `string`: returns text as plain text(set Content-Type to `text/plain`)
 - handler creator name is match to HTTP Method
 
 #### Mount and Start
@@ -73,9 +73,23 @@ rocket.Ignite(":8080"). // Setting port
 
 - func Ignite get a string to describe port.
 - Launch start the server.
-- Mount receive a base route and a handler that exactly handle route.
-	you can emit 1 to N handlers in one `Mount`
+- **Mount** receive a base route and a handler that exactly handle route. You can emit 1 to N handlers in one `Mount`
+	**Note**: Base route can't put parameters part. That is illegal route.
 
-##### Note
+#### Fairing(experimental release)
 
-- Base route can't put parameters part. That is illegal route.
+- **OnResponse** can help you modified all response at final
+	Example:
+	```go
+	import "github.com/dannypsnl/rocket/response"
+	import "github.com/dannypsnl/rocket/fairing"
+
+	rocket.Ignite(":6060").
+		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
+			return resp.Headers(response.Headers{
+				"x-fairing": "response",
+			})
+		})).
+		// Mount(...)
+		Launch()
+	```
