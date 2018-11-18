@@ -70,18 +70,18 @@ func Ignite(port string) *Rocket {
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	splitRoutes := strings.Split(r.URL.Path, "/")[1:]
 
-	rs := make([]string, 0)
+	reqURL := make([]string, 0)
 	for _, rout := range splitRoutes {
 		if rout != "" {
-			rs = append(rs, rout)
+			reqURL = append(reqURL, rout)
 		}
 	}
 
 	// get response
-	handler := rk.handlers.getHandler(rs, r.Method)
+	handler := rk.handlers.getHandler(reqURL, r.Method)
 	var resp *response.Response
 	if handler != nil {
-		resp = handler.Handle(rs, r)
+		resp = handler.Handle(reqURL, r)
 	} else {
 		resp = rk.defaultResponse()
 	}

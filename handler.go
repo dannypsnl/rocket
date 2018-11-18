@@ -2,7 +2,6 @@ package rocket
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"reflect"
@@ -24,8 +23,8 @@ type handler struct {
 	queryParams       map[string]int
 	expectJsonRequest bool
 
-	matchedPath    string
-	matchPathIndex int
+	matchedPath      string
+	matchedPathIndex int
 }
 
 func newHandler(do reflect.Value) *handler {
@@ -34,6 +33,7 @@ func newHandler(do reflect.Value) *handler {
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
 		headerOffset:             -1,
+		matchedPathIndex:         -1,
 	}
 }
 
@@ -44,9 +44,9 @@ func newErrorHandler(code int, content string) *handler {
 	return h
 }
 
-func (h *handler) Handle(rs []string, r *http.Request) *response.Response {
+func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
 	resp := h.do.Call(
-		h.context(rs, r),
+		h.context(reqURL, r),
 	)[0].Interface()
 
 	switch v := resp.(type) {
@@ -57,13 +57,13 @@ func (h *handler) Handle(rs []string, r *http.Request) *response.Response {
 	}
 }
 
-func (h *handler) addMatchedPathValueIntoContext(path ...string) {
-	buf := bytes.NewBuffer([]byte(``))
-	for _, v := range path {
-		buf.WriteString(v)
-		buf.WriteRune('/')
+func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
+	path := bytes.NewBuffer([]byte(``))
+	for _, v := range paths {
+		path.WriteString(v)
+		path.WriteRune('/')
 	}
-	h.matchedPath = buf.String()[:buf.Len()-1]
+	h.matchedPath = path.String()[:path.Len()-1]
 }
 
 func (h *handler) hasUserDefinedContext() bool {
@@ -76,63 +76,33 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
-func (h *handler) context(rs []string, req *http.Request) []reflect.Value {
+func (h *handler) context(reqURL []string, req *http.Request) []reflect.Value {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
 		context := reflect.New(contextType)
 
-		// handler won't know which Base Route it bases on, so we only store extend route part(aka. h.routes)
-		lenBaseRoute := len(rs) - len(h.routes)
-		for idx, route := range h.routes {
-			if isParameter(route) {
-				param := rs[lenBaseRoute+idx]
-				index := h.routeParams[idx]
-				value := parseParameter(context.Elem().Field(index), param)
-				context.Elem().Field(index).
-					Set(value)
-			}
-		}
-
-		if h.matchedPath != "" {
-			param := h.matchedPath
-			index := h.matchPathIndex
-			value := parseParameter(context.Elem().Field(index), param)
-			context.Elem().Field(index).
-				Set(value)
-		}
-
-		for k, idx := range h.queryParams {
-			values := req.URL.Query()
-			field := context.Elem().Field(idx)
-			if v, ok := values[k]; ok {
-				p := v[0]
-				value := parseParameter(context.Elem().Field(idx), p)
-				field.Set(value)
-			}
-		}
-
+		req.ParseForm() // required! Unless we won't get parsed req.Form
+		chain := newChain(context).
+			pipe(newRouteFiller(
+				h.routes,
+				reqURL,
+				h.routeParams,
+				h.matchedPathIndex,
+				h.matchedPath,
+			)).
+			pipe(newQueryFiller(h.queryParams, req.URL.Query()))
 		if h.expectJsonRequest {
-			v := context.Interface()
-			err := json.NewDecoder(req.Body).Decode(v)
-			if err != nil {
-				param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
-				return param
-			}
-			param[h.userDefinedContextOffset] = reflect.ValueOf(v)
+			chain.
+				pipe(newJSONFiller(req.Body))
+		} else {
+			chain.
+				pipe(newFormFiller(h.formParams, req.Form))
+		}
+		if chain.error() != nil {
+			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
 			return param
 		}
-
-		req.ParseForm()
-		for k, idx := range h.formParams {
-			if v, ok := req.Form[k]; ok {
-				p := v[0]
-				value := parseParameter(context.Elem().Field(idx), p)
-				context.Elem().Field(idx).
-					Set(value)
-			}
-		}
-
 		param[h.userDefinedContextOffset] = context
 	}
 
