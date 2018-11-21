@@ -21,7 +21,7 @@ Document: [https://dannypsnl.github.io/rocket](https://dannypsnl.github.io/rocke
 package example
 
 import (
-    "github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket"
 )
 ```
 
@@ -32,7 +32,7 @@ package example
 
 import (
 	"fmt"
-	
+
 	"github.com/dannypsnl/rocket"
 )
 
@@ -42,9 +42,9 @@ type User struct {
 }
 
 var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
-    return fmt.Sprintf(
-    	"Hello, %s.\nYour age is %d.",
-    	u.Name, u.Age)
+	return fmt.Sprintf(
+		"Hello, %s.\nYour age is %d.",
+		u.Name, u.Age)
 })
 ```
 
@@ -66,9 +66,9 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 
 ```go
 rocket.Ignite(":8080"). // Setting port
-    Mount("/", index, static).
-    Mount("/hello", hello).
-    Launch() // Start Serve
+	Mount("/", index, static).
+	Mount("/hello", hello).
+	Launch() // Start Serve
 ```
 
 - func Ignite get a string to describe port.
