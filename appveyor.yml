@@ -1,0 +1,16 @@
+version: "{build}"
+
+platform: x64
+
+clone_folder: c:\gopath\src\github.com\dannypsnl\rocket
+
+environment:
+  GOPATH: c:\gopath
+  GO111MODULE: on
+
+build: false
+deploy: false
+
+test_script:
+  - go get -t -v ./...
+  - go test -v ./...
