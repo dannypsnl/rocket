@@ -15,6 +15,7 @@ type Rocket struct {
 	port         string
 	handlers     *Route
 	responseHook *fairing.ResponseDecorator
+	requestHook  *fairing.RequestDecorator
 
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
@@ -38,6 +39,8 @@ func (rk *Rocket) Attach(f interface{}) *Rocket {
 	switch v := f.(type) {
 	case *fairing.ResponseDecorator:
 		rk.responseHook = v
+	case *fairing.RequestDecorator:
+		rk.requestHook = v
 	default:
 		panic("not support fairing")
 	}
@@ -75,6 +78,10 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if rout != "" {
 			reqURL = append(reqURL, rout)
 		}
+	}
+
+	if rk.requestHook != nil {
+		r = rk.requestHook.Invoke(r)
 	}
 
 	// get response
