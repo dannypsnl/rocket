@@ -1,6 +1,7 @@
 # rocket
 
 [![Build Status](https://travis-ci.org/dannypsnl/rocket.svg)](https://travis-ci.org/dannypsnl/rocket)
+[![Build status](https://ci.appveyor.com/api/projects/status/pftm1me961io7hg4?svg=true)](https://ci.appveyor.com/project/dannypsnl/rocket)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dannypsnl/rocket)](https://goreportcard.com/report/github.com/dannypsnl/rocket)
 [![codecov](https://codecov.io/gh/dannypsnl/rocket/branch/master/graph/badge.svg)](https://codecov.io/gh/dannypsnl/rocket)<Paste>
 [![GoDoc](https://godoc.org/github.com/dannypsnl/rocket?status.svg)](https://godoc.org/github.com/dannypsnl/rocket)
