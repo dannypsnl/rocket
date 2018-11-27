@@ -14,7 +14,8 @@ func TestFairingRequestCanModifyRequest(t *testing.T) {
 	hook := fairing.OnRequest(func(r *http.Request) *http.Request {
 		assert.Eq(r.Method, "GET")
 		assert.Eq(r.Header.Get("accept"), "text/html")
-		helloCookie, _ := r.Cookie("HELLO")
+		helloCookie, err := r.Cookie("HELLO")
+		assert.NoErr(err)
 		assert.Eq(helloCookie.Value, "WORLD")
 
 		r.Header.Set("accept", "application/json")
@@ -39,6 +40,7 @@ func TestFairingRequestCanModifyRequest(t *testing.T) {
 
 	assert.Eq(r.Method, "POST")
 	assert.Eq(r.Header.Get("accept"), "application/json")
-	helloCookie, _ := r.Cookie("NEW_HELLO")
+	helloCookie, err := r.Cookie("NEW_HELLO")
+	assert.NoErr(err)
 	assert.Eq(helloCookie.Value, "NEW_WORLD")
 }
