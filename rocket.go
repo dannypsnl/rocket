@@ -36,6 +36,7 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 
 // Attach add fairing to lifecycle of each request to response
 func (rk *Rocket) Attach(f interface{}) *Rocket {
+	// TODO: panic if user attach same fairing type twice when we decide fairing can only attach once
 	switch v := f.(type) {
 	case *fairing.ResponseDecorator:
 		rk.responseHook = v
