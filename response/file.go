@@ -36,15 +36,14 @@ func File(filepath string) *FileResponser {
 	return r
 }
 
-func (r *FileResponser) ByFileSuffix(contentTypes map[string]string) *Response {
+func (r *FileResponser) SetContentType(contentType ContentType) *Response {
 	if r.err != nil {
 		r.resp.Status(http.StatusUnprocessableEntity)
 		return r.resp
 	}
 	r.resp.Status(http.StatusOK)
 	headers := Headers{}
-	i := strings.LastIndexByte(r.filepath, '.')
-	v, ok := contentTypes[r.filepath[i+1:]]
+	v, ok := contentType.ByFileName(r.filepath)
 	if !ok {
 		v = "text/plain"
 	}
@@ -54,7 +53,23 @@ func (r *FileResponser) ByFileSuffix(contentTypes map[string]string) *Response {
 	return r.resp
 }
 
-var DefaultContentTypes = map[string]string{
+type ContentType interface {
+	ByFileName(string) (string, bool)
+}
+
+func ByFileNameSuffix() *fileSuffix {
+	return &fileSuffix{}
+}
+
+type fileSuffix struct{}
+
+func (f *fileSuffix) ByFileName(fileName string) (string, bool) {
+	fileSuffix := fileName[strings.LastIndexByte(fileName, '.')+1:]
+	v, ok := defaultSuffixMapToContentTypes[fileSuffix]
+	return v, ok
+}
+
+var defaultSuffixMapToContentTypes = map[string]string{
 	"html": "text/html",
 	"css":  "text/css",
 	"js":   "application/javascript",
