@@ -54,7 +54,10 @@ func (r *FileResponser) SetContentType(contentType ContentType) *Response {
 }
 
 type ContentType interface {
-	ByFileName(string) (string, bool)
+	// ByFileName would receive a fileName, return contentType
+	// if you don't know how to handle the fileName then just return `false`
+	// it would fall back to `text/plain`
+	ByFileName(fileName string) (contentType string, handled bool)
 }
 
 func ByFileNameSuffix() *fileSuffix {
