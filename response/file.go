@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-type FileResponser struct {
+type FileResponder struct {
 	filepath string
 
 	resp *Response
 	err  error
 }
 
-func newFileResponser(filepath string) *FileResponser {
-	return &FileResponser{
+func newFileResponder(filepath string) *FileResponder {
+	return &FileResponder{
 		filepath: filepath,
 	}
 }
 
-func File(filepath string) *FileResponser {
-	r := newFileResponser(filepath)
+func File(filepath string) *FileResponder {
+	r := newFileResponder(filepath)
 	f, err := os.Open(filepath)
 	if err != nil {
 		r.err = err
@@ -36,7 +36,7 @@ func File(filepath string) *FileResponser {
 	return r
 }
 
-func (r *FileResponser) SetContentType(contentType ContentType) *Response {
+func (r *FileResponder) SetContentType(contentType ContentType) *Response {
 	if r.err != nil {
 		r.resp.Status(http.StatusUnprocessableEntity)
 		return r.resp
