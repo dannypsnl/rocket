@@ -43,7 +43,7 @@ func (rk *Rocket) Attach(f interface{}) *Rocket {
 	case *fairing.RequestDecorator:
 		rk.requestHook = v
 	default:
-		panic("not support fairing")
+		panic("not support fairing type")
 	}
 	return rk
 }
