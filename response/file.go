@@ -68,8 +68,8 @@ type fileSuffix struct{}
 
 func (f *fileSuffix) ByFileName(fileName string) (string, bool) {
 	fileSuffix := fileName[strings.LastIndexByte(fileName, '.')+1:]
-	v, ok := defaultSuffixMapToContentTypes[fileSuffix]
-	return v, ok
+	contentType, handled := defaultSuffixMapToContentTypes[fileSuffix]
+	return contentType, handled
 }
 
 var defaultSuffixMapToContentTypes = map[string]string{
