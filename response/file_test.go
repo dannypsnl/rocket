@@ -15,6 +15,6 @@ func TestFile(t *testing.T) {
 	})
 	t.Run("NoneExistFile", func(t *testing.T) {
 		response := File("test_data/test.html")
-		assert.Eq(response.statusCode, http.StatusUnprocessableEntity)
+		assert.Eq(response.statusCode, http.StatusNotFound)
 	})
 }
