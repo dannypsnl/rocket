@@ -10,6 +10,7 @@ import (
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
+
 	"github.com/gavv/httpexpect"
 )
 
@@ -168,6 +169,7 @@ func TestServer(t *testing.T) {
 			Expect().Status(http.StatusOK).
 			Body().Equal("css/css/index.css")
 	})
+
 	t.Run("MatchPathParameter", func(t *testing.T) {
 		e.GET("/static/index.js").
 			Expect().Status(http.StatusOK).
