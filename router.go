@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+var (
+	PanicDuplicateRoute = "Duplicate Route"
+)
+
 type Route struct {
 	// Children route can be nil
 	Children map[string]*Route
@@ -58,7 +62,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 				matchRoute.PathRouteHandler[h.method] = h
 				return
 			}
-			panic("Duplicated route")
+			panic(PanicDuplicateRoute)
 		} else if _, ok := child[r]; !ok {
 			child[r] = NewRoute()
 			matchRoute = child[r]
@@ -68,6 +72,9 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		child = matchRoute.Children
 	}
 
+	if _, ok := matchRoute.Handlers[h.method]; ok {
+		panic(PanicDuplicateRoute)
+	}
 	matchRoute.OwnHandler = true
 	matchRoute.Handlers[h.method] = h
 }
