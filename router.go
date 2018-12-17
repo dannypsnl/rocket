@@ -58,7 +58,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 				matchRoute.PathRouteHandler[h.method] = h
 				return
 			}
-			panic("Duplicated route")
+			panic(PanicDuplicateRoute)
 		} else if _, ok := child[r]; !ok {
 			child[r] = NewRoute()
 			matchRoute = child[r]
@@ -68,13 +68,12 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 		child = matchRoute.Children
 	}
 
+	if _, ok := matchRoute.Handlers[h.method]; ok {
+		panic(PanicDuplicateRoute)
+	}
 	matchRoute.OwnHandler = true
 	matchRoute.Handlers[h.method] = h
 }
-
-const (
-	ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
-)
 
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
