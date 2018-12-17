@@ -94,3 +94,20 @@ rocket.Ignite(":8080"). // Setting port
 		// Mount(...)
 		Launch()
 	```
+- **OnRequest** can help you modified all request at begin
+	Example:
+	```go
+	rocket.Ignite(":6060").
+		Attach(fairing.OnRequest(func(r *http.Request) *http.Request {
+			r.Header.Set("accept", "application/json")
+			r.Cookies()
+			r.AddCookie(&http.Cookie{
+				Name:  "NEW_HELLO",
+				Value: "NEW_WORLD",
+			})
+			r.Method = "POST"
+			return r
+		})).
+		// Mount(...)
+		Launch()
+	```
