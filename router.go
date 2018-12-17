@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-var (
-	PanicDuplicateRoute = "Duplicate Route"
-)
-
 type Route struct {
 	// Children route can be nil
 	Children map[string]*Route
@@ -78,10 +74,6 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	matchRoute.OwnHandler = true
 	matchRoute.Handlers[h.method] = h
 }
-
-const (
-	ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
-)
 
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
