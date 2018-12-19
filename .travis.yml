@@ -37,6 +37,7 @@ before_script:
 
 script:
   - go test
+  - go test -bench .
   - go test -coverprofile=coverage.txt -v ./...
 
 after_success:
