@@ -18,6 +18,8 @@ type Route struct {
 	PathRouteHandler map[string]*handler
 	//
 	Handlers map[string]*handler
+	//
+	optionsHandler *optionsHandler
 }
 
 func NewRoute() *Route {
@@ -54,6 +56,11 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 				matchRoute.PathRouteHandler = make(map[string]*handler)
 			}
 			if _, ok := matchRoute.PathRouteHandler[h.method]; !ok {
+				if matchRoute.optionsHandler == nil {
+					matchRoute.optionsHandler = newOptionsHandler()
+				}
+				matchRoute.optionsHandler.addMethod(h.method)
+				matchRoute.PathRouteHandler["OPTIONS"] = matchRoute.optionsHandler.build()
 				matchRoute.OwnHandler = true
 				matchRoute.PathRouteHandler[h.method] = h
 				return
@@ -71,6 +78,11 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	if _, ok := matchRoute.Handlers[h.method]; ok {
 		panic(PanicDuplicateRoute)
 	}
+	if matchRoute.optionsHandler == nil {
+		matchRoute.optionsHandler = newOptionsHandler()
+	}
+	matchRoute.optionsHandler.addMethod(h.method)
+	matchRoute.Handlers["OPTIONS"] = matchRoute.optionsHandler.build()
 	matchRoute.OwnHandler = true
 	matchRoute.Handlers[h.method] = h
 }
