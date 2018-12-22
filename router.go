@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+type routeTarget uint8
+
+const (
+	_ routeTarget = iota
+	wildcardRoute
+	normalRoute
+)
+
 type Route struct {
 	// Children route can be nil
 	Children map[string]*Route
@@ -18,6 +26,8 @@ type Route struct {
 	PathRouteHandler map[string]*handler
 	//
 	Handlers map[string]*handler
+	//
+	optionsHandler *optionsHandler
 }
 
 func NewRoute() *Route {
@@ -54,8 +64,7 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 				matchRoute.PathRouteHandler = make(map[string]*handler)
 			}
 			if _, ok := matchRoute.PathRouteHandler[h.method]; !ok {
-				matchRoute.OwnHandler = true
-				matchRoute.PathRouteHandler[h.method] = h
+				matchRoute.addHandler(h, wildcardRoute)
 				return
 			}
 			panic(PanicDuplicateRoute)
@@ -71,8 +80,23 @@ func (route *Route) addHandlerTo(routeStr string, h *handler) {
 	if _, ok := matchRoute.Handlers[h.method]; ok {
 		panic(PanicDuplicateRoute)
 	}
-	matchRoute.OwnHandler = true
-	matchRoute.Handlers[h.method] = h
+	matchRoute.addHandler(h, normalRoute)
+}
+
+func (route *Route) addHandler(h *handler, target routeTarget) {
+	if route.optionsHandler == nil {
+		route.optionsHandler = newOptionsHandler()
+	}
+	route.optionsHandler.addMethod(h.method)
+	switch target {
+	case wildcardRoute:
+		route.PathRouteHandler["OPTIONS"] = route.optionsHandler.build()
+		route.PathRouteHandler[h.method] = h
+	case normalRoute:
+		route.Handlers["OPTIONS"] = route.optionsHandler.build()
+		route.Handlers[h.method] = h
+	}
+	route.OwnHandler = true
 }
 
 func (route *Route) getHandler(requestUrl []string, method string) *handler {
