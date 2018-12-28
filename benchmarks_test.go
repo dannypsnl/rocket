@@ -9,18 +9,12 @@ import (
 	"github.com/dannypsnl/rocket/response"
 )
 
-var rk *rocket.Rocket
-
-func TestMain(m *testing.M) {
-	rk = rocket.Ignite(":8080")
-	m.Run()
-}
-
 func BenchmarkRequest(b *testing.B) {
 	b.Run("WithoutUserDefinedContext", func(b *testing.B) {
-		rk = rk.Mount("/home", rocket.Get("/", func() string {
-			return "welcome"
-		}))
+		rk := rocket.Ignite(":8080").
+			Mount("/home", rocket.Get("/", func() string {
+				return "welcome"
+			}))
 		Request(b, rk, "GET", "/home", nil)
 	})
 	b.Run("WithUserDefinedContext", func(b *testing.B) {
@@ -28,25 +22,28 @@ func BenchmarkRequest(b *testing.B) {
 			Name string `route:"name"`
 		}
 
-		rk = rk.Mount("/hello", rocket.Get("/:name", func(user *User) string {
-			return "welcome-" + user.Name
-		}))
+		rk := rocket.Ignite(":8080").
+			Mount("/hello", rocket.Get("/:name", func(user *User) string {
+				return "welcome-" + user.Name
+			}))
 		Request(b, rk, "GET", "/hello/kw", nil)
 	})
 	b.Run("WithCustomResponse", func(b *testing.B) {
-		rk = rk.Mount("/home", rocket.Get("/", func() *response.Response {
-			return response.New(`welcome-custom-response`).Headers(
-				response.Headers{
-					"Access-Control-Allow-Origin": "*",
-				},
-			)
-		}))
+		rk := rocket.Ignite(":8080").
+			Mount("/home", rocket.Get("/", func() *response.Response {
+				return response.New(`welcome-custom-response`).Headers(
+					response.Headers{
+						"Access-Control-Allow-Origin": "*",
+					},
+				)
+			}))
 		Request(b, rk, "GET", "/home", nil)
 	})
 	b.Run("WithHeader", func(b *testing.B) {
-		rk = rk.Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
-			return "Content-Type-is-" + header.Get("Content-Type")
-		}))
+		rk := rocket.Ignite(":8080").
+			Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
+				return "Content-Type-is-" + header.Get("Content-Type")
+			}))
 		Request(b, rk, "GET", "/home", nil)
 	})
 }
