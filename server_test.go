@@ -120,7 +120,7 @@ var (
 		if optionalContext.A == nil {
 			return "a is nil"
 		}
-		return "a is not nil"
+		return "a is " + *optionalContext.A
 	})
 )
 
@@ -304,5 +304,9 @@ func TestServer(t *testing.T) {
 		e.GET("/test/optional").
 			Expect().Status(http.StatusOK).
 			Body().Equal("a is nil")
+
+		e.GET("/test/optional").WithQuery("a", "a").
+			Expect().Status(http.StatusOK).
+			Body().Equal("a is a")
 	})
 }
