@@ -116,7 +116,7 @@ var (
 		return ""
 	})
 
-	optionalHandler = rocket.Get("/optional/:a", func(optionalContext *OptionalContext) string {
+	optionalHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
 			return "a is nil"
 		}
