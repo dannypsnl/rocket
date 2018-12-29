@@ -88,8 +88,7 @@ func TestParseParameter(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			rv := reflect.Zero(reflect.TypeOf(testCase.expectedValue))
-			v, err := parseParameter(rv.Type(), testCase.paramStr)
+			v, err := parseParameter(reflect.TypeOf(testCase.expectedValue), testCase.paramStr)
 			assert.Eq(err, nil)
 			assert.Eq(v.Interface(), testCase.expectedValue)
 		})
