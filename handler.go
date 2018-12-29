@@ -2,7 +2,6 @@ package rocket
 
 import (
 	"bytes"
-	"errors"
 	"net/http"
 	"reflect"
 
@@ -29,7 +28,7 @@ type handler struct {
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do: do,
+		do:                       do,
 		userDefinedContextOffset: -1,
 		cookiesOffset:            -1,
 		headerOffset:             -1,
@@ -45,8 +44,13 @@ func newErrorHandler(code int, content string) *handler {
 }
 
 func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
+	ctx, err := h.context(reqURL, r)
+	if err != nil {
+		return response.New(err.Error()).
+			Status(http.StatusBadRequest)
+	}
 	resp := h.do.Call(
-		h.context(reqURL, r),
+		ctx,
 	)[0].Interface()
 
 	switch v := resp.(type) {
@@ -76,7 +80,7 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
-func (h *handler) context(reqURL []string, req *http.Request) []reflect.Value {
+func (h *handler) context(reqURL []string, req *http.Request) ([]reflect.Value, error) {
 	param := make([]reflect.Value, h.do.Type().NumIn())
 	if h.hasUserDefinedContext() {
 		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
@@ -100,8 +104,7 @@ func (h *handler) context(reqURL []string, req *http.Request) []reflect.Value {
 				pipe(newFormFiller(h.formParams, req.Form))
 		}
 		if chain.error() != nil {
-			param[h.userDefinedContextOffset] = reflect.ValueOf(errors.New("400"))
-			return param
+			return nil, chain.error()
 		}
 		param[h.userDefinedContextOffset] = context
 	}
@@ -114,5 +117,5 @@ func (h *handler) context(reqURL []string, req *http.Request) []reflect.Value {
 		param[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
 	}
 
-	return param
+	return param, nil
 }

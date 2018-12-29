@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"errors"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -15,89 +16,102 @@ func verifyBase(route string) bool {
 	return true
 }
 
-func parseParameter(v reflect.Value, param string) reflect.Value {
-	switch v.Kind() {
+var (
+	invaildType = errors.New("invalid type")
+)
+
+func parseParameter(vt reflect.Type, param string) (reflect.Value, error) {
+	switch vt.Kind() {
 	case reflect.Bool:
 		r, err := strconv.ParseBool(param)
 		if err != nil {
-			return reflect.ValueOf((*bool)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(r)
+		return reflect.ValueOf(r), nil
 	case reflect.Int:
 		r, err := strconv.ParseInt(param, 10, 0)
 		if err != nil {
-			return reflect.ValueOf((*int)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(int(r))
+		return reflect.ValueOf(int(r)), nil
 	case reflect.Int8:
 		r, err := strconv.ParseInt(param, 10, 8)
 		if err != nil {
-			return reflect.ValueOf((*int8)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(int8(r))
+		return reflect.ValueOf(int8(r)), nil
 	case reflect.Int16:
 		r, err := strconv.ParseInt(param, 10, 16)
 		if err != nil {
-			return reflect.ValueOf((*int16)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(int16(r))
+		return reflect.ValueOf(int16(r)), nil
 	case reflect.Int32:
 		r, err := strconv.ParseInt(param, 10, 32)
 		if err != nil {
-			return reflect.ValueOf((*int32)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(int32(r))
+		return reflect.ValueOf(int32(r)), nil
 	case reflect.Int64:
 		r, err := strconv.ParseInt(param, 10, 64)
 		if err != nil {
-			return reflect.ValueOf((*int64)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(int64(r))
+		return reflect.ValueOf(int64(r)), nil
 	case reflect.Uint:
 		r, err := strconv.ParseUint(param, 10, 0)
 		if err != nil {
-			return reflect.ValueOf((*uint)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(uint(r))
+		return reflect.ValueOf(uint(r)), nil
 	case reflect.Uint8:
 		r, err := strconv.ParseUint(param, 10, 8)
 		if err != nil {
-			return reflect.ValueOf((*uint8)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(uint8(r))
+		return reflect.ValueOf(uint8(r)), nil
 	case reflect.Uint16:
 		r, err := strconv.ParseUint(param, 10, 16)
 		if err != nil {
-			return reflect.ValueOf((*uint16)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(uint16(r))
+		return reflect.ValueOf(uint16(r)), nil
 	case reflect.Uint32:
 		r, err := strconv.ParseUint(param, 10, 32)
 		if err != nil {
-			return reflect.ValueOf((*uint32)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(uint32(r))
+		return reflect.ValueOf(uint32(r)), nil
 	case reflect.Uint64:
 		r, err := strconv.ParseUint(param, 10, 64)
 		if err != nil {
-			return reflect.ValueOf((*uint64)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(r)
+		return reflect.ValueOf(r), nil
 	case reflect.Float32:
 		r, err := strconv.ParseFloat(param, 32)
 		if err != nil {
-			return reflect.ValueOf((*float32)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(float32(r))
+		return reflect.ValueOf(float32(r)), nil
 	case reflect.Float64:
 		r, err := strconv.ParseFloat(param, 64)
 		if err != nil {
-			return reflect.ValueOf((*float64)(nil))
+			return reflect.Zero(vt), invaildType
 		}
-		return reflect.ValueOf(r)
+		return reflect.ValueOf(r), nil
 	case reflect.String:
-		return reflect.ValueOf(param)
+		return reflect.ValueOf(param), nil
+	case reflect.Ptr:
+		// We use pointer represents optional field
+		parsedValue, err := parseParameter(vt.Elem(), param)
+		if err != nil {
+			return reflect.Zero(vt), err
+		}
+		ptrToVal := reflect.New(vt.Elem()) // ptrToVal := new(TypeOf(parsedValue))
+		ptrToVal.Elem().Set(parsedValue)   // *ptrToVal = parsedValue
+		return ptrToVal, nil
 	default:
-		panic("")
+		panic("unsupported parameter type")
 	}
 }

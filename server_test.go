@@ -38,6 +38,9 @@ type (
 		V        string `route:"var"`
 		FileName string `route:"filename"`
 	}
+	OptionalContext struct {
+		A *string `query:"a"`
+	}
 )
 
 type RouteWithJSON struct {
@@ -112,6 +115,13 @@ var (
 	context = rocket.Get("/context", func(header *rocket.Headers, cookies *rocket.Cookies) string {
 		return ""
 	})
+
+	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
+		if optionalContext.A == nil {
+			return "a is nil"
+		}
+		return "a is " + *optionalContext.A
+	})
 )
 
 func TestServer(t *testing.T) {
@@ -130,6 +140,7 @@ func TestServer(t *testing.T) {
 			deleteCookie,
 			routeWithJSON,
 			filesAndRoute,
+			optionalFieldHandler,
 		).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
@@ -287,5 +298,15 @@ func TestServer(t *testing.T) {
 			WithJSON(jsonObj).
 			Expect().Status(http.StatusOK).
 			Body().Equal("field query json")
+	})
+
+	t.Run("OptionalField", func(t *testing.T) {
+		e.GET("/test/optional").
+			Expect().Status(http.StatusOK).
+			Body().Equal("a is nil")
+
+		e.GET("/test/optional").WithQuery("a", "a").
+			Expect().Status(http.StatusOK).
+			Body().Equal("a is a")
 	})
 }
