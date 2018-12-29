@@ -116,7 +116,7 @@ var (
 		return ""
 	})
 
-	optionalHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
+	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
 			return "a is nil"
 		}
@@ -140,7 +140,7 @@ func TestServer(t *testing.T) {
 			deleteCookie,
 			routeWithJSON,
 			filesAndRoute,
-			optionalHandler,
+			optionalFieldHandler,
 		).
 		Mount("/custom-response-header", customResponseForHeader).
 		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
