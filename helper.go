@@ -103,6 +103,7 @@ func parseParameter(vt reflect.Type, param string) (reflect.Value, error) {
 	case reflect.String:
 		return reflect.ValueOf(param), nil
 	case reflect.Ptr:
+		// We use pointer represents optional field
 		parsedValue, err := parseParameter(vt.Elem(), param)
 		if err != nil {
 			return reflect.Zero(vt), err
