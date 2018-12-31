@@ -79,29 +79,27 @@ rocket.Ignite(":8080"). // Setting port
 
 #### Fairing(experimental release)
 
-- **OnResponse** can help you modified all response at final
-	Example:
+- **OnResponse** and **OnRequest**
+	An easy approach:
 	```go
+	import "net/http"
 	import "github.com/dannypsnl/rocket/response"
 	import "github.com/dannypsnl/rocket/fairing"
 
+	type Logger struct {
+		fairing.Fairing
+	}
+	func (l *Logger) OnRequest(r *http.Request) *http.Request {
+		log.Printf("request: %#v\n", r)
+		return r
+	}
+	func (l *Logger) OnResponse(r *response.Response) *response.Response {
+		log.Printf("response: %#v\n", r)
+		return r
+	}
 	rocket.Ignite(":6060").
-		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
-			return resp.Headers(response.Headers{
-				"x-fairing": "response",
-			})
-		})).
-		// Mount(...)
-		Launch()
-	```
-- **OnRequest** can help you modified all request at begin
-	Example:
-	```go
-	rocket.Ignite(":6060").
-		Attach(fairing.OnRequest(func(r *http.Request) *http.Request {
-			r.Method = "POST"
-			return r
-		})).
+		// Use Attach to emit, you can call Attach multiple time, but carefully at modify data, that might cause problem
+		Attach(&Logger{}).
 		// Mount(...)
 		Launch()
 	```
