@@ -8,7 +8,6 @@ import (
 
 	"github.com/dannypsnl/rocket"
 	"github.com/dannypsnl/rocket/cookie"
-	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
 
 	"github.com/gavv/httpexpect"
@@ -143,11 +142,6 @@ func TestServer(t *testing.T) {
 			optionalFieldHandler,
 		).
 		Mount("/custom-response-header", customResponseForHeader).
-		Attach(fairing.OnResponse(func(resp *response.Response) *response.Response {
-			return resp.Headers(response.Headers{
-				"x-fairing": "response",
-			})
-		})).
 		Default(func() response.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -281,12 +275,6 @@ func TestServer(t *testing.T) {
 	t.Run("PostHomePage", func(t *testing.T) {
 		e.POST("/").
 			Expect().Status(http.StatusMethodNotAllowed)
-	})
-
-	t.Run("AddHeaderAtResponseFairing", func(t *testing.T) {
-		e.GET("/").
-			Expect().Status(http.StatusOK).
-			Header("x-fairing").Equal("response")
 	})
 
 	t.Run("JSONTagCanWorkWithOtherTag", func(t *testing.T) {
