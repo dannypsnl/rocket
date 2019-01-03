@@ -17,7 +17,7 @@ func (h *headerGuard) VerifyRequest(r *http.Request) (rocket.Action, error) {
 	if r.Header.Get("Auth") == "user1" {
 		return rocket.Success, nil
 	}
-	return rocket.Failure, errors.New("")
+	return rocket.Failure, errors.New("not allowed")
 }
 
 func TestGuard(t *testing.T) {
