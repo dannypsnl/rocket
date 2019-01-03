@@ -12,10 +12,9 @@ import (
 
 // Rocket is our service.
 type Rocket struct {
-	port         string
-	handlers     *Route
-	responseHook *fairing.ResponseDecorator
-	requestHook  *fairing.RequestDecorator
+	port          string
+	handlers      *Route
+	listOfFairing []fairing.FairingInterface
 
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
@@ -35,16 +34,8 @@ func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
 }
 
 // Attach add fairing to lifecycle of each request to response
-func (rk *Rocket) Attach(f interface{}) *Rocket {
-	// TODO: panic if user attach same fairing type twice when we decide fairing can only attach once
-	switch v := f.(type) {
-	case *fairing.ResponseDecorator:
-		rk.responseHook = v
-	case *fairing.RequestDecorator:
-		rk.requestHook = v
-	default:
-		panic("not support fairing type")
-	}
+func (rk *Rocket) Attach(f fairing.FairingInterface) *Rocket {
+	rk.listOfFairing = append(rk.listOfFairing, f)
 	return rk
 }
 
@@ -62,8 +53,9 @@ func (rk *Rocket) Launch() {
 // Ignite initial service by port.
 func Ignite(port string) *Rocket {
 	return &Rocket{
-		port:     port,
-		handlers: NewRoute(),
+		port:          port,
+		handlers:      NewRoute(),
+		listOfFairing: make([]fairing.FairingInterface, 0),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
@@ -81,8 +73,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if rk.requestHook != nil {
-		r = rk.requestHook.Invoke(r)
+	for _, f := range rk.listOfFairing {
+		f.OnRequest(r)
 	}
 
 	// get response
@@ -94,8 +86,8 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp = rk.defaultResponse()
 	}
 
-	if rk.responseHook != nil {
-		resp = rk.responseHook.Hook(resp)
+	for _, f := range rk.listOfFairing {
+		resp = f.OnResponse(resp)
 	}
 	resp.WriteTo(w)
 }
