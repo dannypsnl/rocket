@@ -109,12 +109,19 @@ rocket.Ignite(":8080"). // Setting port
 Guard should be implemented by your **UserDefinedContext**.
 Here is an easy example:
 ```go
+import (
+	"errors"
+	"net/http"
+
+	"github.com/dannypsnl/rocket"
+)
+
 type User struct {}
 
 func (u *User) VerifyRequest(req *http.Request) (rocket.Action, error) {
 	if req.Header.Get("user") == "danny" {
 		return rocket.Success, nil
 	}
-	return rocket.Failure, errors.New("not allowed user")
+	return rocket.Failure, errors.New("not allowed")
 }
 ```
