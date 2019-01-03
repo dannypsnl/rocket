@@ -49,6 +49,12 @@ func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
 	}
+
+	if err := h.verify(ctx, r); err != nil {
+		return response.New(err.Error()).
+			Status(http.StatusBadRequest)
+	}
+
 	resp := h.do.Call(
 		ctx,
 	)[0].Interface()
@@ -59,6 +65,22 @@ func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
 	default:
 		return response.New(v)
 	}
+}
+
+func (h *handler) verify(ctx []reflect.Value, r *http.Request) error {
+	for _, c := range ctx {
+		guard, isGuard := c.Interface().(Guard)
+		if isGuard {
+			action, err := guard.VerifyRequest(r)
+			if action == Forward {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
