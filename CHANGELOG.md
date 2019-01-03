@@ -24,5 +24,6 @@
 
 - fix: "/" would let handler creating task fail since out of index
 - fix: let status code of response can't be changed twice
+- (#116) feature: request guard
 
 ## v0.12.9

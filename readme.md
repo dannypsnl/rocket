@@ -103,3 +103,18 @@ rocket.Ignite(":8080"). // Setting port
 		// Mount(...)
 		Launch()
 	```
+
+#### Guard
+
+Guard should be implemented by your **UserDefinedContext**.
+Here is an easy example:
+```go
+type User struct {}
+
+func (u *User) VerifyRequest(req *http.Request) (rocket.Action, error) {
+	if req.Header.Get("user") == "danny" {
+		return rocket.Success, nil
+	}
+	return rocket.Failure, errors.New("not allowed user")
+}
+```
