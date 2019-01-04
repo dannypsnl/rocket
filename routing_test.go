@@ -6,7 +6,9 @@ import (
 	"github.com/dannypsnl/rocket"
 )
 
-var hello = rocket.Get("/hello/*", func() string { return "" })
+var (
+	hello = rocket.Get("/hello/*", func() string { return "" })
+)
 
 func TestDuplicatedRoute(t *testing.T) {
 	defer func() {
