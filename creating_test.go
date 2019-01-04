@@ -6,6 +6,18 @@ import (
 	"github.com/dannypsnl/assert"
 )
 
+type (
+	TestContext struct {
+	}
+)
+
+func TestRootRouteWithUserDefinedContextWontPanic(t *testing.T) {
+	if r := recover(); r != nil {
+		t.Error(r)
+	}
+	Get("/", func(ctx *TestContext) string { return "" })
+}
+
 func TestHandlerCreatorHttpMethod(t *testing.T) {
 	testCases := []struct {
 		method         string
