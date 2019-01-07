@@ -22,4 +22,6 @@
 	```
 	And purpose would be more like logger than guard
 
+- fix: "/" would let handler creating task fail since out of index
+
 ## v0.12.9
