@@ -3,7 +3,6 @@ package rocket
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 type Route struct {
@@ -29,53 +28,49 @@ func NewRoute() *Route {
 	}
 }
 
-func (route *Route) addHandlerTo(routeStr string, h *handler) {
-	routes := append(
-		strings.Split(routeStr, "/")[1:],
-		h.routes...)
+func (route *Route) noVariableRoute() bool {
+	return route.VariableRoute == nil
+}
+func (route *Route) noWildcardRoute() bool {
+	return route.PathRouteHandler == nil
+}
 
-	rs := make([]string, 0)
-	for _, r := range routes {
-		if r != "" {
-			rs = append(rs, r)
-		}
-	}
-
-	baseRouteLen := (len(rs) - len(h.routes))
-	matchRoute := route
-	child := route.Children
-	for i, r := range rs {
+func (route *Route) addHandlerOn(baseRoute []string, h *handler) {
+	// rename route to root, then following code would be more readable
+	root := route
+	fullRoute := append(baseRoute, h.routes...)
+	currentMatchedRoute := root
+	for i, r := range fullRoute {
 		if isParameter(r) {
-			if matchRoute.VariableRoute == nil {
-				matchRoute.VariableRoute = NewRoute()
+			if currentMatchedRoute.noVariableRoute() {
+				currentMatchedRoute.VariableRoute = NewRoute()
 			}
-			matchRoute = matchRoute.VariableRoute
+			currentMatchedRoute = currentMatchedRoute.VariableRoute
 		} else if r[0] == '*' {
-			h.matchedPathIndex = i - baseRouteLen
-			if matchRoute.PathRouteHandler == nil {
-				matchRoute.PathRouteHandler = make(map[string]*handler)
+			h.matchedPathIndex = i - len(baseRoute)
+			if currentMatchedRoute.noWildcardRoute() {
+				currentMatchedRoute.PathRouteHandler = make(map[string]*handler)
 			}
-			if _, ok := matchRoute.PathRouteHandler[h.method]; !ok {
-				matchRoute.addHandler(h, matchRoute.PathRouteHandler)
+			if _, ok := currentMatchedRoute.PathRouteHandler[h.method]; !ok {
+				currentMatchedRoute.addHandlerTo(currentMatchedRoute.PathRouteHandler, h)
 				return
 			}
 			panic(PanicDuplicateRoute)
-		} else if _, ok := child[r]; !ok {
-			child[r] = NewRoute()
-			matchRoute = child[r]
+		} else if _, ok := currentMatchedRoute.Children[r]; !ok {
+			currentMatchedRoute.Children[r] = NewRoute()
+			currentMatchedRoute = currentMatchedRoute.Children[r]
 		} else {
-			matchRoute = child[r]
+			currentMatchedRoute = currentMatchedRoute.Children[r]
 		}
-		child = matchRoute.Children
 	}
 
-	if _, ok := matchRoute.Handlers[h.method]; ok {
+	if _, ok := currentMatchedRoute.Handlers[h.method]; ok {
 		panic(PanicDuplicateRoute)
 	}
-	matchRoute.addHandler(h, matchRoute.Handlers)
+	currentMatchedRoute.addHandlerTo(currentMatchedRoute.Handlers, h)
 }
 
-func (route *Route) addHandler(h *handler, m map[string]*handler) {
+func (route *Route) addHandlerTo(m map[string]*handler, h *handler) {
 	if route.optionsHandler == nil {
 		route.optionsHandler = newOptionsHandler()
 	}

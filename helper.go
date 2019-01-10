@@ -5,7 +5,18 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 )
+
+func convertToList(routeStr string) []string {
+	route := make([]string, 0)
+	for _, r := range strings.Split(strings.Trim(routeStr, "/"), "/") {
+		if r != "" {
+			route = append(route, r)
+		}
+	}
+	return route
+}
 
 func verifyBase(route string) bool {
 	r, _ := regexp.Compile(".*?[:*].*?")

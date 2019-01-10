@@ -2,14 +2,14 @@ package rocket
 
 import (
 	"reflect"
-	"strings"
 )
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
 	handlerDo := reflect.ValueOf(do)
 	h := newHandler(handlerDo)
 	h.method = method
-	h.routes = strings.Split(strings.Trim(*route, "/"), "/")
+
+	h.routes = convertToList(*route)
 	h.routeParams = make(map[int]int)
 	h.formParams = make(map[string]int)
 	h.queryParams = make(map[string]int)

@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"reflect"
-	"strings"
 
 	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
@@ -21,13 +20,14 @@ type Rocket struct {
 }
 
 // Mount add handler into our service.
-func (rk *Rocket) Mount(route string, h *handler, hs ...*handler) *Rocket {
-	verifyBase(route)
+func (rk *Rocket) Mount(routeStr string, h *handler, hs ...*handler) *Rocket {
+	verifyBase(routeStr)
 
-	rk.handlers.addHandlerTo(route, h)
+	route := convertToList(routeStr)
+	rk.handlers.addHandlerOn(route, h)
 
 	for _, h := range hs {
-		rk.handlers.addHandlerTo(route, h)
+		rk.handlers.addHandlerOn(route, h)
 	}
 
 	return rk
@@ -64,14 +64,7 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	splitRoutes := strings.Split(r.URL.Path, "/")[1:]
-
-	reqURL := make([]string, 0)
-	for _, rout := range splitRoutes {
-		if rout != "" {
-			reqURL = append(reqURL, rout)
-		}
-	}
+	reqURL := convertToList(r.URL.Path)
 
 	for _, f := range rk.listOfFairing {
 		f.OnRequest(r)
