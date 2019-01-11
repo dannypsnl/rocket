@@ -51,7 +51,7 @@ var validStatusCode = map[int]bool{
 	http.StatusRequestedRangeNotSatisfiable: true,
 	http.StatusExpectationFailed:            true,
 	http.StatusTeapot:                       true,
-	421:                                     true,
+	421:                                     true, // StatusMisdirectedRequest
 	http.StatusUnprocessableEntity:          true,
 	http.StatusLocked:                       true,
 	http.StatusFailedDependency:             true,
