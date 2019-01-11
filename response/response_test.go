@@ -36,3 +36,25 @@ func TestResponse(t *testing.T) {
 	// include content-type, set header, set cookie
 	assert.Eq(w.count, 3)
 }
+
+func TestStatusCodeCheck(t *testing.T) {
+	t.Run("ChangeStatusCodeTwice", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("should panic when status code be rewritten")
+			}
+		}()
+		response.New("").
+			Status(http.StatusNotFound).
+			Status(http.StatusOK)
+	})
+	t.Run("InvalidStatusCode", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("should panic when input code is invalid status code")
+			}
+		}()
+		response.New("").
+			Status(1)
+	})
+}
