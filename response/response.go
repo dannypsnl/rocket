@@ -27,7 +27,23 @@ func New(body interface{}) *Response {
 	}
 }
 
+// isValidStatusCode would return a status code is in valid range or not
+//
+// According to https://tools.ietf.org/html/rfc2616#section-6.1.1
+// > The Status-Code element is a 3-digit integer
+//
+// implements this check
+func isValidStatusCode(code int) bool {
+	return code > 99 && code < 1000
+}
+
 func (res *Response) Status(code int) *Response {
+	if !isValidStatusCode(code) {
+		panic(fmt.Errorf("reject invalid status code: %d", code))
+	}
+	if res.statusCode != 0 {
+		panic("status code already been set")
+	}
 	res.statusCode = code
 	return res
 }
