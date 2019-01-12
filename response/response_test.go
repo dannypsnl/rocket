@@ -55,6 +55,6 @@ func TestStatusCodeCheck(t *testing.T) {
 			}
 		}()
 		response.New("").
-			Status(1)
+			Status(1) // NOTE: status code should be a three-digit integer
 	})
 }
