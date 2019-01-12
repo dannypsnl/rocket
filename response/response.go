@@ -32,7 +32,7 @@ func (res *Response) Status(code int) *Response {
 		panic(fmt.Errorf("reject invalid status code: %d", code))
 	}
 	if res.statusCode != 0 {
-		panic("status code already be changed, you can't modify it twice!")
+		panic("status code already been set")
 	}
 	res.statusCode = code
 	return res
