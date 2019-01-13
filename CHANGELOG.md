@@ -23,5 +23,6 @@
 	And purpose would be more like logger than guard
 
 - fix: "/" would let handler creating task fail since out of index
+- fix: let status code of response can't be changed twice
 
 ## v0.12.9
