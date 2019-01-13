@@ -119,7 +119,8 @@ import (
 type User struct {}
 
 func (u *User) VerifyRequest(req *http.Request) (rocket.Action, error) {
-	if req.Header.Get("user") == "danny" {
+	user, password, ok := req.BasicAuth()
+	if ok && user == "danny" && password == "password" {
 		return rocket.Success, nil
 	}
 	return rocket.Failure, errors.New("not allowed")
