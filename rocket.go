@@ -15,6 +15,11 @@ type Rocket struct {
 	router        *router.Route
 	listOfFairing []fairingInterface
 
+	allowTLS bool
+	// TLS
+	certFile string
+	keyFile  string
+	// cache layer
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
 }
@@ -54,7 +59,14 @@ func (rk *Rocket) Launch() {
 		f.OnLaunch(rk)
 	}
 	http.HandleFunc("/", rk.ServeHTTP)
-	log.Fatal(http.ListenAndServe(rk.port, nil))
+	server := &http.Server{Addr: rk.port, Handler: rk}
+	defer server.Close()
+	switch {
+	case rk.allowTLS:
+		log.Fatal(server.ListenAndServeTLS(rk.certFile, rk.keyFile))
+	default:
+		log.Fatal(server.ListenAndServe())
+	}
 }
 
 // Ignite initial service by port. The format following native HTTP library `:port_number`
@@ -66,10 +78,19 @@ func Ignite(port string) *Rocket {
 			createNotAllowHandler,
 		),
 		listOfFairing: make([]fairingInterface, 0),
+		allowTLS:      false,
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
 	}
+}
+
+// EnableHTTPs would get certFile and keyFile to enable HTTPs
+func (rk *Rocket) EnableHTTPs(certFile, keyFile string) *Rocket {
+	rk.certFile = certFile
+	rk.keyFile = keyFile
+	rk.allowTLS = true
+	return rk
 }
 
 // ServeHTTP is prepare for http server trait, so that you could use `*rocket.Rocket` as `http.Handler`
