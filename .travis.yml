@@ -36,8 +36,7 @@ before_script:
   - go get -t -v ./...
 
 script:
-  - go test
-  - go test -bench .
+  - go test -failfast ./...
   - go test -coverprofile=coverage.txt -v ./...
 
 after_success:
