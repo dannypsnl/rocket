@@ -9,7 +9,7 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h := newHandler(handlerDo)
 	h.method = method
 
-	h.routes = convertToList(*route)
+	h.routes = splitBySlash(*route)
 	h.routeParams = make(map[int]int)
 	h.formParams = make(map[string]int)
 	h.queryParams = make(map[string]int)

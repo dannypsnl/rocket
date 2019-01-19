@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func convertToList(routeStr string) []string {
+func splitBySlash(routeStr string) []string {
 	route := make([]string, 0)
 	for _, r := range strings.Split(strings.Trim(routeStr, "/"), "/") {
 		if r != "" {
