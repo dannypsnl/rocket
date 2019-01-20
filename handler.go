@@ -13,13 +13,13 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
-	userDefinedContextOffset int
-	cookiesOffset            int
-	headerOffset             int
+	userContextsOffset []int
+	cookiesOffset      int
+	headerOffset       int
 
-	routeParams       map[int]int // Never custom it. It only for rocket inside.
-	formParams        map[string]int
-	queryParams       map[string]int
+	routeParams       map[int]map[int]int // Never custom it. It only for rocket inside.
+	formParams        map[int]map[string]int
+	queryParams       map[int]map[string]int
 	expectJsonRequest bool
 
 	matchedPath      string
@@ -28,11 +28,14 @@ type handler struct {
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do:                       do,
-		userDefinedContextOffset: -1,
-		cookiesOffset:            -1,
-		headerOffset:             -1,
-		matchedPathIndex:         -1,
+		do:                 do,
+		userContextsOffset: make([]int, 0),
+		cookiesOffset:      -1,
+		headerOffset:       -1,
+		matchedPathIndex:   -1,
+		routeParams:        make(map[int]map[int]int),
+		formParams:         make(map[int]map[string]int),
+		queryParams:        make(map[int]map[string]int),
 	}
 }
 
@@ -71,7 +74,7 @@ func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
 }
 
 func (h *handler) hasUserDefinedContext() bool {
-	return h.userDefinedContextOffset != -1
+	return len(h.userContextsOffset) != 0
 }
 func (h *handler) needCookies() bool {
 	return h.cookiesOffset != -1
@@ -82,31 +85,33 @@ func (h *handler) needHeader() bool {
 
 func (h *handler) context(reqURL []string, req *http.Request) ([]reflect.Value, error) {
 	param := make([]reflect.Value, h.do.Type().NumIn())
-	if h.hasUserDefinedContext() {
-		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
-		context := reflect.New(contextType)
+
+	req.ParseForm()
+	for i, offset := range h.userContextsOffset {
+		contextT := h.do.Type().In(offset).Elem()
+		context := reflect.New(contextT)
 
 		req.ParseForm() // required! Unless we won't get parsed req.Form
 		chain := newChain(context).
 			pipe(newRouteFiller(
 				h.routes,
 				reqURL,
-				h.routeParams,
+				h.routeParams[i],
 				h.matchedPathIndex,
 				h.matchedPath,
 			)).
-			pipe(newQueryFiller(h.queryParams, req.URL.Query()))
+			pipe(newQueryFiller(h.queryParams[i], req.URL.Query()))
 		if h.expectJsonRequest {
 			chain.
 				pipe(newJSONFiller(req.Body))
 		} else {
 			chain.
-				pipe(newFormFiller(h.formParams, req.Form))
+				pipe(newFormFiller(h.formParams[i], req.Form))
 		}
 		if chain.error() != nil {
 			return nil, chain.error()
 		}
-		param[h.userDefinedContextOffset] = context
+		param[offset] = context
 	}
 
 	if h.needCookies() {

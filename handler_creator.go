@@ -10,9 +10,6 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h.method = method
 
 	h.routes = splitBySlash(*route)
-	h.routeParams = make(map[int]int)
-	h.formParams = make(map[string]int)
-	h.queryParams = make(map[string]int)
 
 	handlerFuncT := reflect.TypeOf(do)
 
@@ -25,27 +22,30 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 			h.headerOffset = i
 		default:
 			// We not sure what is it, so just assume it's user defined context
-			h.userDefinedContextOffset = i
+			h.userContextsOffset = append(h.userContextsOffset, i)
 		}
 	}
 
-	if h.userDefinedContextOffset != -1 {
-		contextT := handlerFuncT.In(h.userDefinedContextOffset).Elem()
+	for i, contextOffset := range h.userContextsOffset {
+		contextT := handlerFuncT.In(contextOffset).Elem()
+		h.routeParams[i] = make(map[int]int)
+		h.formParams[i] = make(map[string]int)
+		h.queryParams[i] = make(map[string]int)
 
 		routeParams := make(map[string]int)
-		for i := 0; i < contextT.NumField(); i++ {
-			tagOfField := contextT.Field(i).Tag
+		for j := 0; j < contextT.NumField(); j++ {
+			tagOfField := contextT.Field(j).Tag
 			key, ok := tagOfField.Lookup("route")
 			if ok {
-				routeParams[key] = i
+				routeParams[key] = j
 			}
 			key, ok = tagOfField.Lookup("form")
 			if ok {
-				h.formParams[key] = i
+				h.formParams[i][key] = j
 			}
 			key, ok = tagOfField.Lookup("query")
 			if ok {
-				h.queryParams[key] = i
+				h.queryParams[i][key] = j
 			}
 			_, ok = tagOfField.Lookup("json")
 			if !h.expectJsonRequest && ok {
@@ -57,7 +57,10 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 			// a route part like `:name`
 			if r[0] == ':' || r[0] == '*' {
 				// r[1:] is `name`, that's the key we expected
-				h.routeParams[idx] = routeParams[r[1:]]
+				param := r[1:]
+				if _, ok := routeParams[param]; ok {
+					h.routeParams[i][idx] = routeParams[param]
+				}
 			}
 		}
 	}
