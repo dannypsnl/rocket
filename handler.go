@@ -73,9 +73,6 @@ func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
 	h.matchedPath = path.String()[:path.Len()-1]
 }
 
-func (h *handler) hasUserDefinedContext() bool {
-	return len(h.userContextsOffset) != 0
-}
 func (h *handler) needCookies() bool {
 	return h.cookiesOffset != -1
 }
