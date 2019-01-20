@@ -111,9 +111,6 @@ var (
 		}
 		return "not receive token"
 	})
-	context = rocket.Get("/context", func(header *rocket.Headers, cookies *rocket.Cookies) string {
-		return ""
-	})
 
 	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
@@ -134,7 +131,6 @@ func TestServer(t *testing.T) {
 			forPost,
 			handleCookies,
 			handlerHeaders,
-			context,
 			createCookie,
 			deleteCookie,
 			routeWithJSON,
@@ -265,11 +261,6 @@ func TestServer(t *testing.T) {
 			WithHeader("x-token", "token").
 			Expect().Status(http.StatusOK).
 			Body().Equal(expected)
-	})
-
-	t.Run("Context", func(t *testing.T) {
-		e.GET("/test/context").
-			Expect().Status(http.StatusOK)
 	})
 
 	t.Run("PostHomePage", func(t *testing.T) {
