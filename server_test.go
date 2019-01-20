@@ -289,4 +289,55 @@ func TestServer(t *testing.T) {
 			Expect().Status(http.StatusOK).
 			Body().Equal("a is a")
 	})
+
+	t.Run("MultipleContext", func(t *testing.T) {
+		type User struct {
+			ID   int    `route:"user_id"`
+			Name string `form:"user_name"`
+			Age  int    `query:"user_age"`
+		}
+		type Article struct {
+			ID        int    `route:"article_id"`
+			Name      string `form:"article_name"`
+			CreatedAt string `query:"article_created_at"`
+			AuthorID  int    `route:"user_id"`
+		}
+		rk := rocket.Ignite(":8081").
+			Mount("/users/", rocket.Post("/:user_id/articles/:article_id", func(user *User, article *Article) *response.Response {
+				resp := response.New("")
+				if user.Age != 18 {
+					resp.Status(400)
+				}
+				if user.ID != 1 {
+					resp.Status(400)
+				}
+				if user.Name != "hi" {
+					resp.Status(400)
+				}
+				if article.AuthorID != 1 {
+					resp.Status(400)
+				}
+				if article.CreatedAt != "1994" {
+					resp.Status(400)
+				}
+				if article.ID != 2 {
+					resp.Status(400)
+				}
+				if article.Name != "hello" {
+					resp.Status(400)
+				}
+				return resp
+			}))
+		ts := httptest.NewServer(rk)
+		defer ts.Close()
+
+		e := httpexpect.New(t, ts.URL)
+
+		e.POST("/users/1/articles/2").
+			WithFormField("user_name", "hi").
+			WithFormField("article_name", "hello").
+			WithQuery("user_age", "18").
+			WithQuery("article_created_at", "1994").
+			Expect().Status(http.StatusOK)
+	})
 }
