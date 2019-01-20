@@ -17,8 +17,9 @@ type (
 	User struct {
 		Name string `route:"name"`
 		Age  int    `route:"age"`
-
-		QueryName string `query:"name"`
+	}
+	Article struct {
+		ID string `query:"article_id"`
 	}
 
 	ForPost struct {
@@ -73,8 +74,8 @@ var (
 	user = rocket.Get("/name/:name/", func(u *User) string {
 		return u.Name
 	})
-	query = rocket.Get("/query", func(u *User) string {
-		return u.QueryName
+	query = rocket.Get("/query", func(u *Article) string {
+		return u.ID
 	})
 	endWithSlash = rocket.Get("/end-with-slash/", func() string {
 		return "you found me"
@@ -200,9 +201,9 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Query", func(t *testing.T) {
-		e.GET("/test/query").WithQuery("name", "Danny").
+		e.GET("/test/query").WithQuery("article_id", "123").
 			Expect().Status(http.StatusOK).
-			Body().Equal("Danny")
+			Body().Equal("123")
 	})
 
 	t.Run("Cookies", func(t *testing.T) {

@@ -62,6 +62,7 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 			if err != nil {
 				return err
 			}
+
 			field.Set(value)
 		}
 	}
