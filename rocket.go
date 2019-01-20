@@ -67,7 +67,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqURL := convertToList(r.URL.Path)
 
 	for _, f := range rk.listOfFairing {
-		f.OnRequest(r)
+		r = f.OnRequest(r)
 	}
 
 	// get response
