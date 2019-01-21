@@ -82,9 +82,12 @@ rocket.Ignite(":8080"). // Setting port
 - **OnResponse** and **OnRequest**
 	An easy approach:
 	```go
-	import "net/http"
-	import "github.com/dannypsnl/rocket/response"
-	import "github.com/dannypsnl/rocket/fairing"
+	import (
+		"net/http"
+
+		"github.com/dannypsnl/rocket/response"
+		"github.com/dannypsnl/rocket/fairing"
+	)
 
 	type Logger struct {
 		fairing.Fairing
