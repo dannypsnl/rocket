@@ -47,7 +47,7 @@ func newErrorHandler(code int, content string) *handler {
 }
 
 func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
-	ctx, err := h.context(reqURL, r)
+	ctx, err := h.getUserContexts(reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
@@ -80,8 +80,8 @@ func (h *handler) needHeader() bool {
 	return h.headerOffset != -1
 }
 
-func (h *handler) context(reqURL []string, req *http.Request) ([]reflect.Value, error) {
-	param := make([]reflect.Value, h.do.Type().NumIn())
+func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
+	userContexts := make([]reflect.Value, h.do.Type().NumIn())
 
 	req.ParseForm()
 	for i, offset := range h.userContextsOffset {
@@ -108,16 +108,16 @@ func (h *handler) context(reqURL []string, req *http.Request) ([]reflect.Value, 
 		if chain.error() != nil {
 			return nil, chain.error()
 		}
-		param[offset] = context
+		userContexts[offset] = context
 	}
 
 	if h.needCookies() {
-		param[h.cookiesOffset] = reflect.ValueOf(&Cookies{req: req})
+		userContexts[h.cookiesOffset] = reflect.ValueOf(&Cookies{req: req})
 	}
 
 	if h.needHeader() {
-		param[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
+		userContexts[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
 	}
 
-	return param, nil
+	return userContexts, nil
 }
