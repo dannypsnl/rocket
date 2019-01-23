@@ -12,59 +12,23 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h.routes = splitBySlash(*route)
 
 	handlerFuncT := reflect.TypeOf(do)
+	h.userContexts = make([]*UserContext, handlerFuncT.NumIn())
 
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
+		userContext := newUserContext()
 		switch {
 		case t.AssignableTo(reflect.TypeOf(Cookies{})):
-			h.cookiesOffset = i
+			userContext.isCookies = true
 		case t.AssignableTo(reflect.TypeOf(Headers{})):
-			h.headerOffset = i
+			userContext.isHeaders = true
 		default:
 			// We not sure what is it, so just assume it's user defined context
-			h.userContextsOffset = append(h.userContextsOffset, i)
+			contextT := handlerFuncT.In(i).Elem()
+			userContext.cacheParamsOffset(contextT, h.routes)
 		}
+		h.userContexts[i] = userContext
 	}
-
-	for i, contextOffset := range h.userContextsOffset {
-		contextT := handlerFuncT.In(contextOffset).Elem()
-		h.routeParams[i] = make(map[int]int)
-		h.formParams[i] = make(map[string]int)
-		h.queryParams[i] = make(map[string]int)
-
-		routeParams := make(map[string]int)
-		for j := 0; j < contextT.NumField(); j++ {
-			tagOfField := contextT.Field(j).Tag
-			key, ok := tagOfField.Lookup("route")
-			if ok {
-				routeParams[key] = j
-			}
-			key, ok = tagOfField.Lookup("form")
-			if ok {
-				h.formParams[i][key] = j
-			}
-			key, ok = tagOfField.Lookup("query")
-			if ok {
-				h.queryParams[i][key] = j
-			}
-			_, ok = tagOfField.Lookup("json")
-			if !h.expectJsonRequest && ok {
-				h.expectJsonRequest = ok
-			}
-		}
-
-		for idx, r := range h.routes {
-			// a route part like `:name`
-			if r[0] == ':' || r[0] == '*' {
-				// r[1:] is `name`, that's the key we expected
-				param := r[1:]
-				if _, ok := routeParams[param]; ok {
-					h.routeParams[i][idx] = routeParams[param]
-				}
-			}
-		}
-	}
-
 	return h
 }
 
