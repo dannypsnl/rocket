@@ -2,6 +2,8 @@ package rocket
 
 import (
 	"reflect"
+
+	"github.com/dannypsnl/rocket/internal"
 )
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
@@ -12,20 +14,20 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h.routes = splitBySlash(*route)
 
 	handlerFuncT := reflect.TypeOf(do)
-	h.userContexts = make([]*UserContext, handlerFuncT.NumIn())
+	h.userContexts = make([]*internal.UserContext, handlerFuncT.NumIn())
 
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
-		userContext := newUserContext()
+		userContext := internal.NewUserContext()
 		switch {
 		case t.AssignableTo(reflect.TypeOf(Cookies{})):
-			userContext.isCookies = true
+			userContext.IsCookies = true
 		case t.AssignableTo(reflect.TypeOf(Headers{})):
-			userContext.isHeaders = true
+			userContext.IsHeaders = true
 		default:
 			// We not sure what is it, so just assume it's user defined context
 			contextT := handlerFuncT.In(i).Elem()
-			userContext.cacheParamsOffset(contextT, h.routes)
+			userContext.CacheParamsOffset(contextT, h.routes)
 		}
 		h.userContexts[i] = userContext
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/dannypsnl/rocket/internal"
 	"github.com/dannypsnl/rocket/response"
 )
 
@@ -13,66 +14,10 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
-	userContexts []*UserContext
+	userContexts []*internal.UserContext
 
 	matchedPath      string
 	matchedPathIndex int
-}
-
-type UserContext struct {
-	contextType       reflect.Type
-	isCookies         bool
-	isHeaders         bool
-	routeParams       map[int]int
-	formParams        map[string]int
-	queryParams       map[string]int
-	expectJSONRequest bool
-}
-
-func newUserContext() *UserContext {
-	return &UserContext{
-		isCookies:         false,
-		isHeaders:         false,
-		routeParams:       make(map[int]int),
-		formParams:        make(map[string]int),
-		queryParams:       make(map[string]int),
-		expectJSONRequest: false,
-	}
-}
-
-func (ctx *UserContext) cacheParamsOffset(contextT reflect.Type, routes []string) {
-	ctx.contextType = contextT
-	routeParams := make(map[string]int)
-	for i := 0; i < contextT.NumField(); i++ {
-		tagOfField := contextT.Field(i).Tag
-		key, ok := tagOfField.Lookup("route")
-		if ok {
-			routeParams[key] = i
-		}
-		key, ok = tagOfField.Lookup("form")
-		if ok {
-			ctx.formParams[key] = i
-		}
-		key, ok = tagOfField.Lookup("query")
-		if ok {
-			ctx.queryParams[key] = i
-		}
-		_, ok = tagOfField.Lookup("json")
-		if !ctx.expectJSONRequest && ok {
-			ctx.expectJSONRequest = ok
-		}
-	}
-
-	for idx, r := range routes {
-		// a route part like `:name`
-		if r[0] == ':' || r[0] == '*' {
-			// r[1:] is `name`, that's the key we expected
-			param := r[1:]
-			if _, ok := routeParams[param]; ok {
-				ctx.routeParams[idx] = routeParams[param]
-			}
-		}
-	}
 }
 
 func newHandler(do reflect.Value) *handler {
@@ -121,27 +66,27 @@ func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect
 
 	req.ParseForm()
 	for i, userContext := range h.userContexts {
-		if userContext.isCookies {
+		if userContext.IsCookies {
 			userContexts[i] = reflect.ValueOf(&Cookies{req: req})
-		} else if userContext.isHeaders {
+		} else if userContext.IsHeaders {
 			userContexts[i] = reflect.ValueOf(&Headers{header: req.Header})
 		} else {
-			context := reflect.New(userContext.contextType)
+			context := reflect.New(userContext.ContextType)
 			chain := newChain(context).
 				pipe(newRouteFiller(
 					h.routes,
 					reqURL,
-					userContext.routeParams,
+					userContext.RouteParams,
 					h.matchedPathIndex,
 					h.matchedPath,
 				)).
-				pipe(newQueryFiller(userContext.queryParams, req.URL.Query()))
-			if userContext.expectJSONRequest {
+				pipe(newQueryFiller(userContext.QueryParams, req.URL.Query()))
+			if userContext.ExpectJSONRequest {
 				chain.
 					pipe(newJSONFiller(req.Body))
 			} else {
 				chain.
-					pipe(newFormFiller(userContext.formParams, req.Form))
+					pipe(newFormFiller(userContext.FormParams, req.Form))
 			}
 			if chain.error() != nil {
 				return nil, chain.error()
