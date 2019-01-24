@@ -10,16 +10,16 @@ import (
 	asserter "github.com/dannypsnl/assert"
 )
 
-type fakeRespWriter struct {
+type fakeHeaderCounter struct {
 	count int
 }
 
-func (w *fakeRespWriter) Header() http.Header {
+func (w *fakeHeaderCounter) Header() http.Header {
 	w.count++
 	return http.Header(map[string][]string{})
 }
-func (w *fakeRespWriter) Write([]byte) (int, error)  { return 1, nil }
-func (w *fakeRespWriter) WriteHeader(statusCode int) {}
+func (w *fakeHeaderCounter) Write([]byte) (int, error)  { return 1, nil }
+func (w *fakeHeaderCounter) WriteHeader(statusCode int) {}
 
 func TestResponse(t *testing.T) {
 	assert := asserter.NewTester(t)
@@ -31,10 +31,59 @@ func TestResponse(t *testing.T) {
 		Cookies(
 			cookie.New("testing", "hello"),
 		)
-	w := &fakeRespWriter{count: 0}
+	w := &fakeHeaderCounter{count: 0}
 	res.WriteTo(w)
 	// include content-type, set header, set cookie
 	assert.Eq(w.count, 3)
+}
+
+type fakeWriteCounter struct {
+	count int
+}
+
+func (w *fakeWriteCounter) Header() http.Header {
+	return http.Header(map[string][]string{})
+}
+func (w *fakeWriteCounter) Write([]byte) (int, error) {
+	w.count++
+	return 1, nil
+}
+func (w *fakeWriteCounter) WriteHeader(statusCode int) {}
+
+func TestHTTPPipelining(t *testing.T) {
+	assert := asserter.NewTester(t)
+
+	testCases := []struct {
+		name               string
+		expectedWriteTimes int
+		keepFunc           func(w http.ResponseWriter)
+	}{
+		{
+			name:               "no pipelining at least would write once",
+			expectedWriteTimes: 1,
+			keepFunc:           nil,
+		},
+		{
+			name:               "pipelining would keeping write data after response body flush",
+			expectedWriteTimes: 3,
+			keepFunc: func(w http.ResponseWriter) {
+				w.Write([]byte{})
+				w.Write([]byte{})
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			w := &fakeWriteCounter{count: 0}
+			res := response.New("")
+			if testCase.keepFunc != nil {
+				res.Keep(testCase.keepFunc)
+			}
+			res.WriteTo(w)
+			assert.Eq(w.count, testCase.expectedWriteTimes)
+		})
+	}
 }
 
 func TestStatusCodeCheck(t *testing.T) {
