@@ -56,19 +56,20 @@ func TestHTTPStreaming(t *testing.T) {
 	testCases := []struct {
 		name               string
 		expectedWriteTimes int
-		keepFunc           func(w http.ResponseWriter)
+		streamFunc         func(w chan<- []byte, stop func())
 	}{
 		{
-			name:               "no streaming at least would write once",
+			name:               "nil func should be ignore",
 			expectedWriteTimes: 1,
-			keepFunc:           nil,
+			streamFunc:         nil,
 		},
 		{
 			name:               "streaming would keeping write data after response body flush",
 			expectedWriteTimes: 3,
-			keepFunc: func(w http.ResponseWriter) {
-				w.Write([]byte{})
-				w.Write([]byte{})
+			streamFunc: func(w chan<- []byte, done func()) {
+				w <- []byte{}
+				w <- []byte{}
+				done()
 			},
 		},
 	}
@@ -76,10 +77,7 @@ func TestHTTPStreaming(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			w := &fakeWriteCounter{count: 0}
-			res := response.New("")
-			if testCase.keepFunc != nil {
-				res.Keep(testCase.keepFunc)
-			}
+			res := response.Stream(testCase.streamFunc)
 			res.WriteTo(w)
 			assert.Eq(w.count, testCase.expectedWriteTimes)
 		})

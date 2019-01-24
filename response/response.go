@@ -64,7 +64,7 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 	return res
 }
 
-func (res *Response) Keep(keepFunc func(w http.ResponseWriter)) *Response {
+func (res *Response) keep(keepFunc func(w http.ResponseWriter)) *Response {
 	res.keepFunc = keepFunc
 	return res
 }
@@ -95,4 +95,27 @@ func (res *Response) setStatusCode(w http.ResponseWriter) {
 	if res.statusCode != 0 {
 		w.WriteHeader(res.statusCode)
 	}
+}
+
+func Stream(f func(chan<- []byte, func())) *Response {
+	return New("").
+		keep(func(w http.ResponseWriter) {
+			ch := make(chan []byte)
+			stopCh := make(chan struct{})
+			done := func() {
+				stopCh <- struct{}{}
+			}
+			if f == nil {
+				return
+			}
+			go f(ch, done)
+			for {
+				select {
+				case data := <-ch:
+					fmt.Fprint(w, data)
+				case <-stopCh:
+					return
+				}
+			}
+		})
 }
