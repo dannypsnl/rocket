@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/dannypsnl/rocket/internal"
+	"github.com/dannypsnl/rocket/internal/context"
 	"github.com/dannypsnl/rocket/response"
 )
 
@@ -14,7 +14,7 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
-	userContexts []*internal.UserContext
+	userContexts []*context.UserContext
 
 	matchedPath      string
 	matchedPathIndex int

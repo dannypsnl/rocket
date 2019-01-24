@@ -3,7 +3,7 @@ package rocket
 import (
 	"reflect"
 
-	"github.com/dannypsnl/rocket/internal"
+	"github.com/dannypsnl/rocket/internal/context"
 )
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
@@ -14,11 +14,11 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h.routes = splitBySlash(*route)
 
 	handlerFuncT := reflect.TypeOf(do)
-	h.userContexts = make([]*internal.UserContext, handlerFuncT.NumIn())
+	h.userContexts = make([]*context.UserContext, handlerFuncT.NumIn())
 
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
-		userContext := internal.NewUserContext()
+		userContext := context.NewUserContext()
 		switch {
 		case t.AssignableTo(reflect.TypeOf(Cookies{})):
 			userContext.IsCookies = true
