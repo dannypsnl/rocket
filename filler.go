@@ -33,18 +33,14 @@ type (
 
 func (r *routeFiller) fill(ctx reflect.Value) error {
 	baseRouteLen := len(r.reqURL) - len(r.routes)
-	for idx, route := range r.routes {
-		if isParameter(route) {
-			if index, ok := r.routeParams[idx]; ok {
-				param := r.reqURL[baseRouteLen+idx]
-				field := ctx.Elem().Field(index)
-				v, err := parseParameter(field.Type(), param)
-				if err != nil {
-					return err
-				}
-				field.Set(v)
-			}
+	for idx, offset := range r.routeParams {
+		param := r.reqURL[baseRouteLen+idx]
+		field := ctx.Elem().Field(offset)
+		v, err := parseParameter(field.Type(), param)
+		if err != nil {
+			return err
 		}
+		field.Set(v)
 	}
 	if r.matchedPathIndex != -1 {
 		i := r.routeParams[r.matchedPathIndex]
