@@ -32,11 +32,7 @@
 	```
 - (#152) feature: HTTP/1.1 streaming
 	```go
-	import (
-		"net/http"
-
-		"github.com/dannypsnl/rocket/response"
-	)
+	import "github.com/dannypsnl/rocket/response"
 
 	// In your handler function
 	return response.
