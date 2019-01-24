@@ -13,6 +13,8 @@ type Response struct {
 
 	cookies    []*http.Cookie
 	statusCode int
+
+	keepFunc func(w http.ResponseWriter)
 }
 
 type Headers map[string]string
@@ -62,11 +64,19 @@ func (res *Response) Cookies(cs ...*cookie.Cookie) *Response {
 	return res
 }
 
+func (res *Response) Keep(keepFunc func(w http.ResponseWriter)) *Response {
+	res.keepFunc = keepFunc
+	return res
+}
+
 func (res *Response) WriteTo(w http.ResponseWriter) {
 	res.setHeaders(w)
 	res.setCookie(w)
 	res.setStatusCode(w)
 	fmt.Fprint(w, res.Body)
+	if res.keepFunc != nil {
+		res.keepFunc(w)
+	}
 }
 
 func (res *Response) setHeaders(w http.ResponseWriter) {
