@@ -24,5 +24,20 @@
 
 - fix: "/" would let handler creating task fail since out of index
 - fix: let status code of response can't be changed twice
+- (#152) feature: HTTP/1.1 pipelining
+	```go
+	import (
+		"net/http"
+
+		"github.com/dannypsnl/rocket/response"
+	)
+
+	// In your handler function
+	return response.New("Hello\n").
+		Keep(func(w http.ResponseWriter) {
+			w.Write("hello again\n")
+			w.Write("and again")
+		})
+	```
 
 ## v0.12.9
