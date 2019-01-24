@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/url"
 	"reflect"
+
+	"github.com/dannypsnl/rocket/internal/context"
 )
 
 type (
@@ -49,6 +51,7 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 	}
 	return nil
 }
+
 func (q *queryFiller) fill(ctx reflect.Value) error {
 	for k, idx := range q.queryParams {
 		field := ctx.Elem().Field(idx)
@@ -64,6 +67,7 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 	}
 	return nil
 }
+
 func (j *jsonFiller) fill(ctx reflect.Value) error {
 	v := ctx.Interface()
 	err := json.NewDecoder(j.body).Decode(v)
@@ -73,6 +77,7 @@ func (j *jsonFiller) fill(ctx reflect.Value) error {
 	ctx.Elem().Set(reflect.ValueOf(v).Elem())
 	return nil
 }
+
 func (f *formFiller) fill(ctx reflect.Value) error {
 	for k, idx := range f.formParams {
 		if v, ok := f.form[k]; ok {
@@ -88,26 +93,6 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 	return nil
 }
 
-type Chain struct {
-	ctx reflect.Value
-	err error
-}
-
-func newChain(ctx reflect.Value) *Chain {
-	return &Chain{ctx: ctx}
-}
-
-func (c *Chain) pipe(filler filler) *Chain {
-	if c.err == nil {
-		c.err = filler.fill(c.ctx)
-	}
-	return c
-}
-
-func (c *Chain) error() error {
-	return c.err
-}
-
 func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
 	return &routeFiller{
 		routes:           routes,
@@ -117,15 +102,28 @@ func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPat
 		matchedPath:      matchedPath,
 	}
 }
+
 func newQueryFiller(queryParams map[string]int, query url.Values) filler {
 	return &queryFiller{
 		queryParams: queryParams,
 		query:       query,
 	}
 }
+
 func newJSONFiller(body io.Reader) filler {
 	return &jsonFiller{body: body}
 }
+
 func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
+}
+
+func generateContext(userContext *context.UserContext, fillers ...filler) (reflect.Value, error) {
+	context := reflect.New(userContext.ContextType)
+	for _, filler := range fillers {
+		if err := filler.fill(context); err != nil {
+			return context, err
+		}
+	}
+	return context, nil
 }
