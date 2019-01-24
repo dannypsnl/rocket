@@ -32,13 +32,18 @@
 	```
 - (#152) feature: HTTP/1.1 streaming
 	```go
-	import "github.com/dannypsnl/rocket/response"
+	import (
+		"net/http"
+
+		"github.com/dannypsnl/rocket/response"
+	)
 
 	// In your handler function
 	return response.
 		Stream(func(w http.ResponseWriter) {
-			w.Write("hello again\n")
-			w.Write("and again")
+			w.Write([]byte("HI\n"))
+			w.Write([]byte("Hello again\n"))
+			w.Write([]byte("and again\n"))
 		})
 	```
 

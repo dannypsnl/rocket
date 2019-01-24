@@ -56,7 +56,7 @@ func TestHTTPStreaming(t *testing.T) {
 	testCases := []struct {
 		name               string
 		expectedWriteTimes int
-		streamFunc         func(w chan<- []byte, stop func())
+		streamFunc         func(w http.ResponseWriter)
 	}{
 		{
 			name:               "nil func should be ignore",
@@ -66,10 +66,9 @@ func TestHTTPStreaming(t *testing.T) {
 		{
 			name:               "streaming would keeping write data after response body flush",
 			expectedWriteTimes: 3,
-			streamFunc: func(w chan<- []byte, done func()) {
-				w <- []byte{}
-				w <- []byte{}
-				done()
+			streamFunc: func(w http.ResponseWriter) {
+				w.Write([]byte{})
+				w.Write([]byte{})
 			},
 		},
 	}

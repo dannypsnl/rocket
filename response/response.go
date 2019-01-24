@@ -97,25 +97,7 @@ func (res *Response) setStatusCode(w http.ResponseWriter) {
 	}
 }
 
-func Stream(f func(chan<- []byte, func())) *Response {
+func Stream(f func(http.ResponseWriter)) *Response {
 	return New("").
-		keep(func(w http.ResponseWriter) {
-			ch := make(chan []byte)
-			stopCh := make(chan struct{})
-			done := func() {
-				stopCh <- struct{}{}
-			}
-			if f == nil {
-				return
-			}
-			go f(ch, done)
-			for {
-				select {
-				case data := <-ch:
-					fmt.Fprint(w, data)
-				case <-stopCh:
-					return
-				}
-			}
-		})
+		keep(f)
 }
