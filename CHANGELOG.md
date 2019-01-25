@@ -24,5 +24,11 @@
 
 - fix: "/" would let handler creating task fail since out of index
 - fix: let status code of response can't be changed twice
+- (#87) feature: multiple contexts
+	```go
+	rocket.Get(func(ctx1 *Ctx1, ctx2 *Ctx2) string {
+		// ignore...
+	})
+	```
 
 ## v0.12.9
