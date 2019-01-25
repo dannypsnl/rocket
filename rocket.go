@@ -23,7 +23,7 @@ type Rocket struct {
 func (rk *Rocket) Mount(routeStr string, h *handler, hs ...*handler) *Rocket {
 	verifyBase(routeStr)
 
-	route := convertToList(routeStr)
+	route := splitBySlash(routeStr)
 	rk.handlers.addHandlerOn(route, h)
 
 	for _, h := range hs {
@@ -64,7 +64,7 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	reqURL := convertToList(r.URL.Path)
+	reqURL := splitBySlash(r.URL.Path)
 
 	for _, f := range rk.listOfFairing {
 		r = f.OnRequest(r)

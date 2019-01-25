@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/dannypsnl/rocket/internal/context"
 	"github.com/dannypsnl/rocket/response"
 )
 
@@ -13,14 +14,7 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
-	userDefinedContextOffset int
-	cookiesOffset            int
-	headerOffset             int
-
-	routeParams       map[int]int // Never custom it. It only for rocket inside.
-	formParams        map[string]int
-	queryParams       map[string]int
-	expectJsonRequest bool
+	userContexts []*context.UserContext
 
 	matchedPath      string
 	matchedPathIndex int
@@ -28,11 +22,8 @@ type handler struct {
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do:                       do,
-		userDefinedContextOffset: -1,
-		cookiesOffset:            -1,
-		headerOffset:             -1,
-		matchedPathIndex:         -1,
+		do:               do,
+		matchedPathIndex: -1,
 	}
 }
 
@@ -44,7 +35,7 @@ func newErrorHandler(code int, content string) *handler {
 }
 
 func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
-	ctx, err := h.context(reqURL, r)
+	ctx, err := h.getUserContexts(reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
@@ -70,52 +61,50 @@ func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
 	h.matchedPath = path.String()[:path.Len()-1]
 }
 
-func (h *handler) hasUserDefinedContext() bool {
-	return h.userDefinedContextOffset != -1
-}
-func (h *handler) needCookies() bool {
-	return h.cookiesOffset != -1
-}
-func (h *handler) needHeader() bool {
-	return h.headerOffset != -1
-}
+func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
+	userContexts := make([]reflect.Value, h.do.Type().NumIn())
 
-func (h *handler) context(reqURL []string, req *http.Request) ([]reflect.Value, error) {
-	param := make([]reflect.Value, h.do.Type().NumIn())
-	if h.hasUserDefinedContext() {
-		contextType := h.do.Type().In(h.userDefinedContextOffset).Elem()
-		context := reflect.New(contextType)
-
-		req.ParseForm() // required! Unless we won't get parsed req.Form
-		chain := newChain(context).
-			pipe(newRouteFiller(
-				h.routes,
-				reqURL,
-				h.routeParams,
-				h.matchedPathIndex,
-				h.matchedPath,
-			)).
-			pipe(newQueryFiller(h.queryParams, req.URL.Query()))
-		if h.expectJsonRequest {
-			chain.
-				pipe(newJSONFiller(req.Body))
+	req.ParseForm()
+	for i, userContext := range h.userContexts {
+		if userContext.IsCookies {
+			userContexts[i] = reflect.ValueOf(&Cookies{req: req})
+		} else if userContext.IsHeaders {
+			userContexts[i] = reflect.ValueOf(&Headers{header: req.Header})
+		} else if userContext.ExpectJSONRequest {
+			context, err := generateContext(
+				userContext,
+				newRouteFiller(
+					h.routes,
+					reqURL,
+					userContext.RouteParams,
+					h.matchedPathIndex,
+					h.matchedPath,
+				),
+				newQueryFiller(userContext.QueryParams, req.URL.Query()),
+				newJSONFiller(req.Body),
+			)
+			if err != nil {
+				return nil, err
+			}
+			userContexts[i] = context
 		} else {
-			chain.
-				pipe(newFormFiller(h.formParams, req.Form))
+			context, err := generateContext(
+				userContext,
+				newRouteFiller(
+					h.routes,
+					reqURL,
+					userContext.RouteParams,
+					h.matchedPathIndex,
+					h.matchedPath,
+				),
+				newQueryFiller(userContext.QueryParams, req.URL.Query()),
+				newFormFiller(userContext.FormParams, req.Form),
+			)
+			if err != nil {
+				return nil, err
+			}
+			userContexts[i] = context
 		}
-		if chain.error() != nil {
-			return nil, chain.error()
-		}
-		param[h.userDefinedContextOffset] = context
 	}
-
-	if h.needCookies() {
-		param[h.cookiesOffset] = reflect.ValueOf(&Cookies{req: req})
-	}
-
-	if h.needHeader() {
-		param[h.headerOffset] = reflect.ValueOf(&Headers{header: req.Header})
-	}
-
-	return param, nil
+	return userContexts, nil
 }

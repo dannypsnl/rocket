@@ -2,6 +2,8 @@ package rocket
 
 import (
 	"reflect"
+
+	"github.com/dannypsnl/rocket/internal/context"
 )
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
@@ -9,59 +11,26 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h := newHandler(handlerDo)
 	h.method = method
 
-	h.routes = convertToList(*route)
-	h.routeParams = make(map[int]int)
-	h.formParams = make(map[string]int)
-	h.queryParams = make(map[string]int)
+	h.routes = splitBySlash(*route)
 
 	handlerFuncT := reflect.TypeOf(do)
+	h.userContexts = make([]*context.UserContext, handlerFuncT.NumIn())
 
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
 		t := handlerFuncT.In(i).Elem()
+		userContext := context.NewUserContext()
 		switch {
 		case t.AssignableTo(reflect.TypeOf(Cookies{})):
-			h.cookiesOffset = i
+			userContext.IsCookies = true
 		case t.AssignableTo(reflect.TypeOf(Headers{})):
-			h.headerOffset = i
+			userContext.IsHeaders = true
 		default:
 			// We not sure what is it, so just assume it's user defined context
-			h.userDefinedContextOffset = i
+			contextT := handlerFuncT.In(i).Elem()
+			userContext.CacheParamsOffset(contextT, h.routes)
 		}
+		h.userContexts[i] = userContext
 	}
-
-	if h.userDefinedContextOffset != -1 {
-		contextT := handlerFuncT.In(h.userDefinedContextOffset).Elem()
-
-		routeParams := make(map[string]int)
-		for i := 0; i < contextT.NumField(); i++ {
-			tagOfField := contextT.Field(i).Tag
-			key, ok := tagOfField.Lookup("route")
-			if ok {
-				routeParams[key] = i
-			}
-			key, ok = tagOfField.Lookup("form")
-			if ok {
-				h.formParams[key] = i
-			}
-			key, ok = tagOfField.Lookup("query")
-			if ok {
-				h.queryParams[key] = i
-			}
-			_, ok = tagOfField.Lookup("json")
-			if !h.expectJsonRequest && ok {
-				h.expectJsonRequest = ok
-			}
-		}
-
-		for idx, r := range h.routes {
-			// a route part like `:name`
-			if r[0] == ':' || r[0] == '*' {
-				// r[1:] is `name`, that's the key we expected
-				h.routeParams[idx] = routeParams[r[1:]]
-			}
-		}
-	}
-
 	return h
 }
 

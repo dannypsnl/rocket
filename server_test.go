@@ -17,8 +17,9 @@ type (
 	User struct {
 		Name string `route:"name"`
 		Age  int    `route:"age"`
-
-		QueryName string `query:"name"`
+	}
+	Article struct {
+		ID string `query:"article_id"`
 	}
 
 	ForPost struct {
@@ -73,8 +74,8 @@ var (
 	user = rocket.Get("/name/:name/", func(u *User) string {
 		return u.Name
 	})
-	query = rocket.Get("/query", func(u *User) string {
-		return u.QueryName
+	query = rocket.Get("/query", func(u *Article) string {
+		return u.ID
 	})
 	endWithSlash = rocket.Get("/end-with-slash/", func() string {
 		return "you found me"
@@ -111,9 +112,6 @@ var (
 		}
 		return "not receive token"
 	})
-	context = rocket.Get("/context", func(header *rocket.Headers, cookies *rocket.Cookies) string {
-		return ""
-	})
 
 	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
@@ -134,7 +132,6 @@ func TestServer(t *testing.T) {
 			forPost,
 			handleCookies,
 			handlerHeaders,
-			context,
 			createCookie,
 			deleteCookie,
 			routeWithJSON,
@@ -204,9 +201,9 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Query", func(t *testing.T) {
-		e.GET("/test/query").WithQuery("name", "Danny").
+		e.GET("/test/query").WithQuery("article_id", "123").
 			Expect().Status(http.StatusOK).
-			Body().Equal("Danny")
+			Body().Equal("123")
 	})
 
 	t.Run("Cookies", func(t *testing.T) {
@@ -267,11 +264,6 @@ func TestServer(t *testing.T) {
 			Body().Equal(expected)
 	})
 
-	t.Run("Context", func(t *testing.T) {
-		e.GET("/test/context").
-			Expect().Status(http.StatusOK)
-	})
-
 	t.Run("PostHomePage", func(t *testing.T) {
 		e.POST("/").
 			Expect().Status(http.StatusMethodNotAllowed)
@@ -296,5 +288,56 @@ func TestServer(t *testing.T) {
 		e.GET("/test/optional").WithQuery("a", "a").
 			Expect().Status(http.StatusOK).
 			Body().Equal("a is a")
+	})
+
+	t.Run("MultipleContext", func(t *testing.T) {
+		type User struct {
+			ID   int    `route:"user_id"`
+			Name string `form:"user_name"`
+			Age  int    `query:"user_age"`
+		}
+		type Article struct {
+			ID        int    `route:"article_id"`
+			Name      string `form:"article_name"`
+			CreatedAt string `query:"article_created_at"`
+			AuthorID  int    `route:"user_id"`
+		}
+		rk := rocket.Ignite(":8081").
+			Mount("/users/", rocket.Post("/:user_id/articles/:article_id", func(user *User, article *Article) *response.Response {
+				resp := response.New("")
+				if user.Age != 18 {
+					resp.Status(400)
+				}
+				if user.ID != 1 {
+					resp.Status(400)
+				}
+				if user.Name != "hi" {
+					resp.Status(400)
+				}
+				if article.AuthorID != 1 {
+					resp.Status(400)
+				}
+				if article.CreatedAt != "1994" {
+					resp.Status(400)
+				}
+				if article.ID != 2 {
+					resp.Status(400)
+				}
+				if article.Name != "hello" {
+					resp.Status(400)
+				}
+				return resp
+			}))
+		ts := httptest.NewServer(rk)
+		defer ts.Close()
+
+		e := httpexpect.New(t, ts.URL)
+
+		e.POST("/users/1/articles/2").
+			WithFormField("user_name", "hi").
+			WithFormField("article_name", "hello").
+			WithQuery("user_age", "18").
+			WithQuery("article_created_at", "1994").
+			Expect().Status(http.StatusOK)
 	})
 }
