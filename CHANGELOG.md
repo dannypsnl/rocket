@@ -30,5 +30,21 @@
 		// ignore...
 	})
 	```
+- (#152) feature: HTTP/1.1 streaming
+	```go
+	import (
+		"net/http"
+
+		"github.com/dannypsnl/rocket/response"
+	)
+
+	// In your handler function
+	return response.
+		Stream(func(w http.ResponseWriter) {
+			w.Write([]byte("HI\n"))
+			w.Write([]byte("Hello again\n"))
+			w.Write([]byte("and again\n"))
+		})
+	```
 
 ## v0.12.9

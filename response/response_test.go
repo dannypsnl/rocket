@@ -37,6 +37,52 @@ func TestResponse(t *testing.T) {
 	assert.Eq(w.count, 3)
 }
 
+type fakeWriteCounter struct {
+	count int
+}
+
+func (w *fakeWriteCounter) Header() http.Header {
+	return http.Header(map[string][]string{})
+}
+func (w *fakeWriteCounter) Write([]byte) (int, error) {
+	w.count++
+	return 1, nil
+}
+func (w *fakeWriteCounter) WriteHeader(statusCode int) {}
+
+func TestHTTPStreaming(t *testing.T) {
+	assert := asserter.NewTester(t)
+
+	testCases := []struct {
+		name               string
+		expectedWriteTimes int
+		streamFunc         func(w http.ResponseWriter)
+	}{
+		{
+			name:               "nil func should be ignore",
+			expectedWriteTimes: 1,
+			streamFunc:         nil,
+		},
+		{
+			name:               "streaming would keeping write data after response body flush",
+			expectedWriteTimes: 3,
+			streamFunc: func(w http.ResponseWriter) {
+				w.Write([]byte{})
+				w.Write([]byte{})
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			w := &fakeWriteCounter{count: 0}
+			res := response.Stream(testCase.streamFunc)
+			res.WriteTo(w)
+			assert.Eq(w.count, testCase.expectedWriteTimes)
+		})
+	}
+}
+
 func TestStatusCodeCheck(t *testing.T) {
 	t.Run("ChangeStatusCodeTwice", func(t *testing.T) {
 		defer func() {
