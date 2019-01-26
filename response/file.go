@@ -19,10 +19,7 @@ func File(filepath string) *Response {
 	}
 	resp := New(string(b))
 	fileSuffix := filepath[strings.LastIndexByte(filepath, '.')+1:]
-	resp.Headers(Headers{
-		"Content-Type": defaultSuffixMapToContentTypes[fileSuffix],
-	})
-	return resp
+	return resp.ContentType(defaultSuffixMapToContentTypes[fileSuffix])
 }
 
 var defaultSuffixMapToContentTypes = map[string]string{
