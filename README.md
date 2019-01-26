@@ -49,9 +49,9 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 })
 ```
 
-- First argument of handler creator is a route string can have variant part. 
+- First argument of handler creator is a route string can have variant part.
 - Second argument is handler function.
-	- handler function can have a argument, that is a type you define to be request context
+	- handler function can have several parameters, these types are you defined to be request context
 		Tag in your type will load request value into it!
 		- route tag is `route:"name"`, if route contains `/:name`, then value is request URL at this place
 			e.g. `/Danny` will let value of `name` is string `Danny`
@@ -61,7 +61,7 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 		- `response.Html`: returns text as HTML(set Content-Type to `text/html`)
 		- `response.Json`: returns text as JSON(set Content-Type to `application/json`)
 		- `string`: returns text as plain text(set Content-Type to `text/plain`)
-- handler creator name is match to HTTP Method
+- handler creator name matchs to HTTP Method
 
 #### Mount and Start
 
