@@ -46,5 +46,6 @@
 			w.Write([]byte("and again\n"))
 		})
 	```
+- (#154) feature: `func (*response.Response) ContentType(contentType string) *response.Response`
 
 ## v0.12.9

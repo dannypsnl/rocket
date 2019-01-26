@@ -20,13 +20,11 @@ type Response struct {
 type Headers map[string]string
 
 func New(body interface{}) *Response {
-	return &Response{
-		headers: map[string]string{
-			"Content-Type": contentTypeOf(body),
-		},
+	return (&Response{
+		headers: make(map[string]string),
 		Body:    body,
 		cookies: make([]*http.Cookie, 0),
-	}
+	}).ContentType(contentTypeOf(body))
 }
 
 // isValidStatusCode would return a status code is in valid range or not
@@ -50,6 +48,11 @@ func (res *Response) Status(code int) *Response {
 	return res
 }
 
+func (res *Response) ContentType(value string) *Response {
+	return res.Headers(Headers{
+		"Content-Type": value,
+	})
+}
 func (res *Response) Headers(headers Headers) *Response {
 	for k, v := range headers {
 		res.headers[k] = v
