@@ -65,8 +65,7 @@ type AccessCookie struct {
 	Token *http.Cookie `cookie:"token"`
 }
 
-func TestGetCookie(t *testing.T) {
-	//assert := assert.NewTester(t)
+func TestGetCookieByUserDefinedContext(t *testing.T) {
 	rk := rocket.Ignite("").
 		Mount("/", rocket.Get("/", func(cookie *AccessCookie) string {
 			if cookie.Token == nil {
