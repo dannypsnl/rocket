@@ -1,6 +1,7 @@
 package context
 
 import (
+	"net/http"
 	"reflect"
 )
 
@@ -45,6 +46,9 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		}
 		key, ok = tagOfField.Lookup("cookie")
 		if ok {
+			if !contextT.Field(i).Type.AssignableTo(reflect.TypeOf(&http.Cookie{})) {
+				panic("type of fields those try to be a cookie must be `*http.Cookie`")
+			}
 			ctx.CookiesParams[key] = i
 		}
 		_, ok = tagOfField.Lookup("json")
