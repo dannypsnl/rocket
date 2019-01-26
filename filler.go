@@ -3,6 +3,7 @@ package rocket
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 	"reflect"
 
@@ -24,6 +25,10 @@ type (
 		queryParams map[string]int
 		query       url.Values
 	}
+	cookiesFiller struct {
+		cookiesParams map[string]int
+		req           *http.Request
+	}
 	jsonFiller struct {
 		body io.Reader
 	}
@@ -32,6 +37,38 @@ type (
 		form       url.Values
 	}
 )
+
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
+	return &routeFiller{
+		routes:           routes,
+		routeParams:      routeParams,
+		reqURL:           reqURL,
+		matchedPathIndex: matchedPathIndex,
+		matchedPath:      matchedPath,
+	}
+}
+
+func newQueryFiller(queryParams map[string]int, query url.Values) filler {
+	return &queryFiller{
+		queryParams: queryParams,
+		query:       query,
+	}
+}
+
+func newCookiesFiller(cookiesParams map[string]int, req *http.Request) filler {
+	return &cookiesFiller{
+		cookiesParams: cookiesParams,
+		req:           req,
+	}
+}
+
+func newJSONFiller(body io.Reader) filler {
+	return &jsonFiller{body: body}
+}
+
+func newFormFiller(formParams map[string]int, form url.Values) filler {
+	return &formFiller{formParams: formParams, form: form}
+}
 
 func (r *routeFiller) fill(ctx reflect.Value) error {
 	baseRouteLen := len(r.reqURL) - len(r.routes)
@@ -68,6 +105,18 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 	return nil
 }
 
+func (c *cookiesFiller) fill(ctx reflect.Value) error {
+	for key, fieldIndex := range c.cookiesParams {
+		field := ctx.Elem().Field(fieldIndex)
+		cookie, err := c.req.Cookie(key)
+		if err != nil {
+			return err
+		}
+		field.Set(reflect.ValueOf(cookie))
+	}
+	return nil
+}
+
 func (j *jsonFiller) fill(ctx reflect.Value) error {
 	v := ctx.Interface()
 	err := json.NewDecoder(j.body).Decode(v)
@@ -93,37 +142,27 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 	return nil
 }
 
-func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
-	return &routeFiller{
-		routes:           routes,
-		routeParams:      routeParams,
-		reqURL:           reqURL,
-		matchedPathIndex: matchedPathIndex,
-		matchedPath:      matchedPath,
+type pipeline struct {
+	fillers []filler
+}
+
+func newPipeline() *pipeline {
+	return &pipeline{
+		fillers: make([]filler, 0),
 	}
 }
 
-func newQueryFiller(queryParams map[string]int, query url.Values) filler {
-	return &queryFiller{
-		queryParams: queryParams,
-		query:       query,
-	}
+func (p *pipeline) pipe(f filler) *pipeline {
+	p.fillers = append(p.fillers, f)
+	return p
 }
 
-func newJSONFiller(body io.Reader) filler {
-	return &jsonFiller{body: body}
-}
-
-func newFormFiller(formParams map[string]int, form url.Values) filler {
-	return &formFiller{formParams: formParams, form: form}
-}
-
-func generateContext(userContext *context.UserContext, fillers ...filler) (reflect.Value, error) {
-	context := reflect.New(userContext.ContextType)
-	for _, filler := range fillers {
-		if err := filler.fill(context); err != nil {
-			return context, err
+func (p *pipeline) run(userContext *context.UserContext) (reflect.Value, error) {
+	ctx := reflect.New(userContext.ContextType)
+	for _, filler := range p.fillers {
+		if err := filler.fill(ctx); err != nil {
+			return ctx, err
 		}
 	}
-	return context, nil
+	return ctx, nil
 }

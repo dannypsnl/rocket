@@ -60,3 +60,25 @@ func TestRecorder(t *testing.T) {
 
 	assert.Eq(recorder.RecordRequestURL[0], "/")
 }
+
+type AccessCookie struct {
+	Token *http.Cookie `cookie:"token"`
+}
+
+func TestGetCookie(t *testing.T) {
+	//assert := assert.NewTester(t)
+	rk := rocket.Ignite("").
+		Mount("/", rocket.Get("/", func(cookie *AccessCookie) string {
+			if cookie.Token == nil {
+				return "token is nil"
+			}
+			return cookie.Token.Value
+		}))
+
+	ts := httptest.NewServer(rk)
+	defer ts.Close()
+	e := httpexpect.New(t, ts.URL)
+
+	e.GET("/").WithCookie("token", "123456").
+		Expect().Body().Equal("123456")
+}

@@ -66,45 +66,32 @@ func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect
 
 	req.ParseForm()
 	for i, userContext := range h.userContexts {
-		if userContext.IsCookies {
-			userContexts[i] = reflect.ValueOf(&Cookies{req: req})
-		} else if userContext.IsHeaders {
+		basicChain := newPipeline().
+			pipe(newRouteFiller(
+				h.routes,
+				reqURL,
+				userContext.RouteParams,
+				h.matchedPathIndex,
+				h.matchedPath,
+			)).
+			pipe(newQueryFiller(userContext.QueryParams, req.URL.Query()))
+		if userContext.IsHeaders {
 			userContexts[i] = reflect.ValueOf(&Headers{header: req.Header})
+			return userContexts, nil
 		} else if userContext.ExpectJSONRequest {
-			context, err := generateContext(
-				userContext,
-				newRouteFiller(
-					h.routes,
-					reqURL,
-					userContext.RouteParams,
-					h.matchedPathIndex,
-					h.matchedPath,
-				),
-				newQueryFiller(userContext.QueryParams, req.URL.Query()),
-				newJSONFiller(req.Body),
-			)
-			if err != nil {
-				return nil, err
-			}
-			userContexts[i] = context
+			basicChain.pipe(newJSONFiller(req.Body))
 		} else {
-			context, err := generateContext(
-				userContext,
-				newRouteFiller(
-					h.routes,
-					reqURL,
-					userContext.RouteParams,
-					h.matchedPathIndex,
-					h.matchedPath,
-				),
-				newQueryFiller(userContext.QueryParams, req.URL.Query()),
-				newFormFiller(userContext.FormParams, req.Form),
-			)
-			if err != nil {
-				return nil, err
-			}
-			userContexts[i] = context
+			basicChain.pipe(newFormFiller(userContext.FormParams, req.Form))
 		}
+		if userContext.ExpectCookies() {
+			basicChain.pipe(newCookiesFiller(userContext.CookiesParams, req))
+		}
+		ctx, err := basicChain.
+			run(userContext)
+		if err != nil {
+			return nil, err
+		}
+		userContexts[i] = ctx
 	}
 	return userContexts, nil
 }

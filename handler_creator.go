@@ -20,8 +20,6 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 		t := handlerFuncT.In(i).Elem()
 		userContext := context.NewUserContext()
 		switch {
-		case t.AssignableTo(reflect.TypeOf(Cookies{})):
-			userContext.IsCookies = true
 		case t.AssignableTo(reflect.TypeOf(Headers{})):
 			userContext.IsHeaders = true
 		default:

@@ -5,22 +5,23 @@ import (
 )
 
 type UserContext struct {
-	ContextType       reflect.Type
-	IsCookies         bool
-	IsHeaders         bool
-	RouteParams       map[int]int
-	FormParams        map[string]int
-	QueryParams       map[string]int
+	ContextType reflect.Type
+	IsHeaders   bool
+	RouteParams map[int]int
+	FormParams  map[string]int
+	QueryParams map[string]int
+	// `cookie:"token"`, would store "token" as key, field index as value
+	CookiesParams     map[string]int
 	ExpectJSONRequest bool
 }
 
 func NewUserContext() *UserContext {
 	return &UserContext{
-		IsCookies:         false,
 		IsHeaders:         false,
 		RouteParams:       make(map[int]int),
 		FormParams:        make(map[string]int),
 		QueryParams:       make(map[string]int),
+		CookiesParams:     make(map[string]int),
 		ExpectJSONRequest: false,
 	}
 }
@@ -42,6 +43,10 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		if ok {
 			ctx.QueryParams[key] = i
 		}
+		key, ok = tagOfField.Lookup("cookie")
+		if ok {
+			ctx.CookiesParams[key] = i
+		}
 		_, ok = tagOfField.Lookup("json")
 		if !ctx.ExpectJSONRequest && ok {
 			ctx.ExpectJSONRequest = ok
@@ -58,4 +63,8 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 			}
 		}
 	}
+}
+
+func (ctx *UserContext) ExpectCookies() bool {
+	return len(ctx.CookiesParams) > 0
 }
