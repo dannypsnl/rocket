@@ -47,5 +47,21 @@
 		})
 	```
 - (#154) feature: `func (*response.Response) ContentType(contentType string) *response.Response`
+- (#129) remove: `rocket.Header`
+- (#129) remove: `rocket.Cookies`
+- (#129) feature: use User Defined Context to access cookie and header
+	```go
+	import "net/http"
+	// This is your context
+	type Ctx struct {
+		Auth string `header:"Authorization"`
+		// Important thing is cookie only allowed type `*http.Cookie` as field
+		// This is because we want to reducing the complex if we introduce
+		//	`cookie>value:"token"`
+		//	`cookie>expire:"token"`
+		// to access cookie sub info
+		Token *http.Cookie `cookie:"token"`
+	}
+	```
 
 ## v0.12.9
