@@ -57,6 +57,9 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 			e.g. `/Danny` will let value of `name` is string `Danny`
 		- form tag is `form:"key"`, it get form value from form request
 		- json tag is `json:"key"`, it get POST/PUT body that is JSON
+		- header tag is `header:"key"`, it can get header value by key you given from Header
+		- cookie tag is `cookie:"key"`, it would get a `*http.Cookie` name is same as key you provided
+			remember this field must be `*http.Cookie`
 	- return type of handler function is meaningful
 		- `response.Html`: returns text as HTML(set Content-Type to `text/html`)
 		- `response.Json`: returns text as JSON(set Content-Type to `application/json`)
