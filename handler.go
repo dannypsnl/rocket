@@ -75,16 +75,16 @@ func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect
 				h.matchedPath,
 			)).
 			pipe(newQueryFiller(userContext.QueryParams, req.URL.Query()))
-		if userContext.IsHeaders {
-			userContexts[i] = reflect.ValueOf(&Headers{header: req.Header})
-			return userContexts, nil
-		} else if userContext.ExpectJSONRequest {
+		if userContext.ExpectJSONRequest {
 			basicChain.pipe(newJSONFiller(req.Body))
 		} else {
 			basicChain.pipe(newFormFiller(userContext.FormParams, req.Form))
 		}
 		if userContext.ExpectCookies() {
 			basicChain.pipe(newCookiesFiller(userContext.CookiesParams, req))
+		}
+		if userContext.ExpectHeader() {
+			basicChain.pipe(newHeaderFiller(userContext.HeaderParams, req.Header))
 		}
 		ctx, err := basicChain.
 			run(userContext)

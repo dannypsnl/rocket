@@ -93,13 +93,6 @@ var (
 			},
 		)
 	})
-	handlerHeaders = rocket.Get("/headers", func(header *rocket.Headers) string {
-		if header.Get("x-token") == "token" {
-			return "received token"
-		}
-		return "not receive token"
-	})
-
 	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
 			return "a is nil"
@@ -117,7 +110,6 @@ func TestServer(t *testing.T) {
 			endWithSlash,
 			forPatch,
 			forPost,
-			handlerHeaders,
 			deleteCookie,
 			routeWithJSON,
 			filesAndRoute,
@@ -221,14 +213,6 @@ func TestServer(t *testing.T) {
 		e.GET("/custom-response-header").
 			Expect().Status(http.StatusOK).
 			JSON().Equal(expected)
-	})
-
-	t.Run("Header", func(t *testing.T) {
-		expected := "received token"
-		e.GET("/test/headers").
-			WithHeader("x-token", "token").
-			Expect().Status(http.StatusOK).
-			Body().Equal(expected)
 	})
 
 	t.Run("PostHomePage", func(t *testing.T) {

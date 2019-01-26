@@ -79,5 +79,25 @@ func TestGetCookieByUserDefinedContext(t *testing.T) {
 	e := httpexpect.New(t, ts.URL)
 
 	e.GET("/").WithCookie("token", "123456").
-		Expect().Body().Equal("123456")
+		Expect().Status(http.StatusOK).
+		Body().Equal("123456")
+}
+
+type AccessHeader struct {
+	Auth string `header:"Authorization"`
+}
+
+func TestGetHeaderByUserDefinedContext(t *testing.T) {
+	rk := rocket.Ignite("").
+		Mount("/", rocket.Get("/", func(header *AccessHeader) string {
+			return header.Auth
+		}))
+
+	ts := httptest.NewServer(rk)
+	defer ts.Close()
+	e := httpexpect.New(t, ts.URL)
+
+	e.GET("/").WithHeader("Authorization", "Bear jwt.token.lalala").
+		Expect().Status(http.StatusOK).
+		Body().Equal("Bear jwt.token.lalala")
 }

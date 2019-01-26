@@ -12,7 +12,9 @@ type UserContext struct {
 	FormParams  map[string]int
 	QueryParams map[string]int
 	// `cookie:"token"`, would store "token" as key, field index as value
-	CookiesParams     map[string]int
+	CookiesParams map[string]int
+	// `header:"Content-Type"`, would store "Content-Type" as key, field index as value
+	HeaderParams      map[string]int
 	ExpectJSONRequest bool
 }
 
@@ -23,11 +25,12 @@ func NewUserContext() *UserContext {
 		FormParams:        make(map[string]int),
 		QueryParams:       make(map[string]int),
 		CookiesParams:     make(map[string]int),
+		HeaderParams:      make(map[string]int),
 		ExpectJSONRequest: false,
 	}
 }
 
-func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string) {
+func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string) *UserContext {
 	ctx.ContextType = contextT
 	routeParams := make(map[string]int)
 	for i := 0; i < contextT.NumField(); i++ {
@@ -51,6 +54,10 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 			}
 			ctx.CookiesParams[key] = i
 		}
+		key, ok = tagOfField.Lookup("header")
+		if ok {
+			ctx.HeaderParams[key] = i
+		}
 		_, ok = tagOfField.Lookup("json")
 		if !ctx.ExpectJSONRequest && ok {
 			ctx.ExpectJSONRequest = ok
@@ -67,8 +74,14 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 			}
 		}
 	}
+
+	return ctx
 }
 
 func (ctx *UserContext) ExpectCookies() bool {
 	return len(ctx.CookiesParams) > 0
+}
+
+func (ctx *UserContext) ExpectHeader() bool {
+	return len(ctx.HeaderParams) > 0
 }

@@ -25,6 +25,10 @@ type (
 		queryParams map[string]int
 		query       url.Values
 	}
+	headerFiller struct {
+		headerParams map[string]int
+		header       http.Header
+	}
 	cookiesFiller struct {
 		cookiesParams map[string]int
 		req           *http.Request
@@ -52,6 +56,13 @@ func newQueryFiller(queryParams map[string]int, query url.Values) filler {
 	return &queryFiller{
 		queryParams: queryParams,
 		query:       query,
+	}
+}
+
+func newHeaderFiller(headerParams map[string]int, header http.Header) filler {
+	return &headerFiller{
+		headerParams: headerParams,
+		header:       header,
 	}
 }
 
@@ -101,6 +112,19 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 
 			field.Set(value)
 		}
+	}
+	return nil
+}
+
+func (h *headerFiller) fill(ctx reflect.Value) error {
+	for key, fieldIndex := range h.headerParams {
+		field := ctx.Elem().Field(fieldIndex)
+		param := h.header.Get(key)
+		value, err := parseParameter(field.Type(), param)
+		if err != nil {
+			return err
+		}
+		field.Set(value)
 	}
 	return nil
 }
