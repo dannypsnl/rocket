@@ -122,13 +122,15 @@ import (
 	"github.com/dannypsnl/rocket"
 )
 
-type User struct {}
+type User struct {
+	Auth *string `header:"Authorization"`
+}
 
-func (u *User) VerifyRequest(req *http.Request) (rocket.Action, error) {
-	user, password, ok := req.BasicAuth()
-	if ok && user == "danny" && password == "password" {
-		return rocket.Success, nil
+func (u *User) VerifyRequest() (rocket.Action, error) {
+	// Assuming we have a JWT verify helper function
+	if verifyAuthByJWT(u.Auth) {
+		return nil
 	}
-	return rocket.Failure, errors.New("not allowed")
+	return errors.New("not allowed")
 }
 ```
