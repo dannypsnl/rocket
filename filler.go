@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-
-	"github.com/dannypsnl/rocket/internal/context"
 )
 
 type (
@@ -164,29 +162,4 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 		}
 	}
 	return nil
-}
-
-type pipeline struct {
-	fillers []filler
-}
-
-func newPipeline() *pipeline {
-	return &pipeline{
-		fillers: make([]filler, 0),
-	}
-}
-
-func (p *pipeline) pipe(f filler) *pipeline {
-	p.fillers = append(p.fillers, f)
-	return p
-}
-
-func (p *pipeline) run(userContext *context.UserContext) (reflect.Value, error) {
-	ctx := reflect.New(userContext.ContextType)
-	for _, filler := range p.fillers {
-		if err := filler.fill(ctx); err != nil {
-			return ctx, err
-		}
-	}
-	return ctx, nil
 }
