@@ -62,11 +62,7 @@ func (h *handler) verify(ctx []reflect.Value, r *http.Request) error {
 	for _, c := range ctx {
 		guard, isGuard := c.Interface().(Guard)
 		if isGuard {
-			action, err := guard.VerifyRequest(r)
-			if action == Forward {
-				continue
-			}
-			if err != nil {
+			if err := guard.VerifyRequest(); err != nil {
 				return err
 			}
 		}

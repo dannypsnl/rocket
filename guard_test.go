@@ -11,19 +11,15 @@ import (
 	"github.com/gavv/httpexpect"
 )
 
-type headerGuard struct{}
-
-func (h *headerGuard) VerifyRequest(r *http.Request) (rocket.Action, error) {
-	if r.Header.Get("Auth") == "user1" {
-		return rocket.Success, nil
-	}
-	return rocket.Failure, errors.New("not allowed")
+type headerGuard struct {
+	Auth *string `header:"Auth"`
 }
 
-type forwardGuard struct{}
-
-func (f *forwardGuard) VerifyRequest(r *http.Request) (rocket.Action, error) {
-	return rocket.Forward, nil
+func (h *headerGuard) VerifyRequest() error {
+	if h.Auth != nil && *h.Auth == "user1" {
+		return nil
+	}
+	return errors.New("not allowed")
 }
 
 func TestGuard(t *testing.T) {
@@ -47,11 +43,6 @@ func TestGuard(t *testing.T) {
 			name:           "invalid request won't pass guard",
 			handlerFunc:    func(*headerGuard) string { return "" },
 			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name:           "action forward is give up decision right",
-			handlerFunc:    func(*forwardGuard) string { return "" },
-			expectedStatus: http.StatusOK,
 		},
 	}
 
