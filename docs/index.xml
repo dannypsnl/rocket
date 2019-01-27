@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rocket</title>
+    <link>http://dannypsnl.github.io/rocket/</link>
+    <description>Recent content on Rocket</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 25 Sep 2018 21:16:07 +0800</lastBuildDate>
+    
+	<atom:link href="http://dannypsnl.github.io/rocket/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Server</title>
+      <link>http://dannypsnl.github.io/rocket/documents/server/</link>
+      <pubDate>Tue, 25 Sep 2018 21:16:07 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/server/</guid>
+      <description>To create a server, we have to start from Ignite.
+rocket.Ignite(&amp;quot;:8080&amp;quot;)  We use the same pattern as Go native http package.
+So I think it won&amp;rsquo;t be to hard to notice :8080 means listen port 8080.
+Then we will use Mount mounts some handlers.
+rocket.Ignite(&amp;quot;:8080&amp;quot;). Mount(&amp;quot;/&amp;quot;, handler)  The first argument of Mount is base route. This is a leading route for following handlers mounted under this route.
+For example, if base route is &amp;quot;/base&amp;quot;, route of handler is &amp;quot;/hello&amp;quot;, the final route is &amp;quot;/base/hello&amp;quot;</description>
+    </item>
+    
+    <item>
+      <title>Handler &amp; Context</title>
+      <link>http://dannypsnl.github.io/rocket/documents/handler_and_context/</link>
+      <pubDate>Tue, 25 Sep 2018 21:33:47 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/handler_and_context/</guid>
+      <description>Rocket&amp;rsquo;s handler contains two parts.
+ variant route handle function  Basically, we have the creator for handler. It uses like:
+var h = rocket.Get(&amp;quot;/hello&amp;quot;, func() string { return &amp;quot;&amp;quot; })  Now we have a handler variable h, it contains a variant route &amp;quot;/hello&amp;quot;, the second argument of Get is it&amp;rsquo;s handle function. When request path matches this route, the response is handle function&amp;rsquo;s response.
+We have following creator mapping to HTTP method currently.</description>
+    </item>
+    
+    <item>
+      <title>Response</title>
+      <link>http://dannypsnl.github.io/rocket/documents/response/</link>
+      <pubDate>Fri, 28 Sep 2018 23:55:05 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/response/</guid>
+      <description>Note: In following context, we only show handle function
+ Basically rocket contains some type to help you return value more easier
+For example, response.Html
+func() response.Html { return `&amp;lt;h1&amp;gt;Title&amp;lt;/h1&amp;gt;` }  Then your response when with header Content-Type is text/html
+Currently we have:
+ response.Html, return text/html response.Json, return application/json go func() response.Json { return ` { &amp;quot;just&amp;quot;: &amp;quot;a json&amp;quot; } ` }  string, return text/plain  Response is defined under github.</description>
+    </item>
+    
+    <item>
+      <title>Minimum Example</title>
+      <link>http://dannypsnl.github.io/rocket/quick_start/minimum_example/</link>
+      <pubDate>Sun, 23 Sep 2018 23:51:06 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/quick_start/minimum_example/</guid>
+      <description>Before you write down any code. You need to import the package.
+import ( &amp;quot;github.com/dannypsnl/rocket&amp;quot; )  With Rocket, you will create a lots of handler, here is a basic handler with user-defined context.
+type User struct { Name string `route:&amp;quot;name&amp;quot;` Age uint64 `route:&amp;quot;age&amp;quot;` } var hello = rocket.Get(&amp;quot;/:name/:age&amp;quot;, func(u *User) string { return &amp;quot;Hello &amp;quot; + u.Name + &amp;quot;, your age is &amp;quot; + strconv.FormatUint(u.Age, 10) })  How to let it work?</description>
+    </item>
+    
+  </channel>
+</rss>

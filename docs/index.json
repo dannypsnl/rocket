@@ -1,0 +1,64 @@
+[
+{
+	"uri": "http://dannypsnl.github.io/rocket/quick_start/",
+	"title": "QuickStart",
+	"tags": [],
+	"description": "",
+	"content": " Rocket Quick Start Discover what the Rocket can do for you.\n"
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/documents/",
+	"title": "Documents",
+	"tags": [],
+	"description": "",
+	"content": " Rocket Documents Explain how to use Rocket\n"
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/documents/server/",
+	"title": "Server",
+	"tags": [],
+	"description": "",
+	"content": "To create a server, we have to start from Ignite.\nrocket.Ignite(\u0026quot;:8080\u0026quot;)  We use the same pattern as Go native http package.\nSo I think it won\u0026rsquo;t be to hard to notice :8080 means listen port 8080.\nThen we will use Mount mounts some handlers.\nrocket.Ignite(\u0026quot;:8080\u0026quot;). Mount(\u0026quot;/\u0026quot;, handler)  The first argument of Mount is base route. This is a leading route for following handlers mounted under this route.\nFor example, if base route is \u0026quot;/base\u0026quot;, route of handler is \u0026quot;/hello\u0026quot;, the final route is \u0026quot;/base/hello\u0026quot;\nThen one thing you should know is you can mount several handlers at one Mount call. For example:\nrocket.Ignite(\u0026quot;:8080\u0026quot;). Mount(\u0026quot;/\u0026quot;, handler1, handler2) // and below  Next is handling Not Found: 404, we use Default to handle this.\nrocket.Ignite(\u0026quot;:8080\u0026quot;). // some mounts Default(func() rocket.Html { return `\u0026lt;h1\u0026gt;Page Not Found\u0026lt;/h1\u0026gt;` })  Then when rocket can\u0026rsquo;t find any route in router, it will use this function\u0026rsquo;s response. This is optional, so you can omit it, we have default for default, lol.\np.s. rocket.Html is response magic in rocket, it will set header Content-Type as text/html. Then you will see the browser render respnose as HTML\nFinal, we start our server.\nrocket.Ignite(\u0026quot;:8080\u0026quot;). // some mounts \u0026amp; default Launch()  Call Launch will start our server, now you can use any HTTP client to see localhost:8080\n"
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/documents/handler_and_context/",
+	"title": "Handler &amp; Context",
+	"tags": [],
+	"description": "",
+	"content": " Rocket\u0026rsquo;s handler contains two parts.\n variant route handle function  Basically, we have the creator for handler. It uses like:\nvar h = rocket.Get(\u0026quot;/hello\u0026quot;, func() string { return \u0026quot;\u0026quot; })  Now we have a handler variable h, it contains a variant route \u0026quot;/hello\u0026quot;, the second argument of Get is it\u0026rsquo;s handle function. When request path matches this route, the response is handle function\u0026rsquo;s response.\nWe have following creator mapping to HTTP method currently.\n Get HTTP Method GET Post HTTP Method POST Put HTTP Method PUT Patch HTTP Method PATCH Delete HTTP Method DELETE  Now you already know how to create handler has different method. Let\u0026rsquo;s look the most interesting feature of rocket User-defined Context\nSo the question is, how to have one in rocket?\ntype User struct { Name string `route:\u0026quot;name\u0026quot;` Age uint64 `route:\u0026quot;age\u0026quot;` }  Don\u0026rsquo;t be surprised, that\u0026rsquo;s all, and then we use the type you create as parameter of your handle function\nrocket.Get(\u0026quot;/:name/:age\u0026quot;, func(u *User) string { return \u0026quot;Hello \u0026quot; + u.Name + \u0026quot;, your age is \u0026quot; + strconv.FormatUint(u.Age, 10) })  Ok, we know how to use the field of context, but where is it came from?\nLet\u0026rsquo;s return to \u0026quot;/:name/:age\u0026quot;, this is how we fill your context, in variant route, what you defined as :key things, will be the value of tag route:\u0026quot;key\u0026quot;\nAt here, we got route:\u0026quot;name\u0026quot; \u0026amp; route:\u0026quot;age\u0026quot;, so request path Danny/21 will let your context got string Danny \u0026amp; uint64 21\np.s. type of Age this field is uint64, so we will try to parsing the value of request path. If it\u0026rsquo;s not an uint64, then we return HTTP Status Code: 400.\nBut just route? Nope, we also have:\n query:\u0026quot;key\u0026quot; for request path /path/to/route?key=value form:\u0026quot;key\u0026quot; for FORM request json:\u0026quot;key\u0026quot; for request body is JSON(here has some problem, we can also handle GET method just need JSON body, this is a bug, it should only work with POST, PUT, PATCH with application/json) header:\u0026quot;key\u0026quot;, to getting header like Content-Type, Authorization cookie:\u0026quot;key\u0026quot;, a very important fact of cookie tag is it only accept you use *http.Cookie as field type, e.g.\nimport \u0026quot;net/http\u0026quot; type UserToken struct { token *http.Cookie `cookie:\u0026quot;token\u0026quot;` }  and it would get the most matched cookie, so avoid using duplicate cookie name in your application would be better, another important thing is if no cookie matched, this tag won\u0026rsquo;t follow the optional contract, so don\u0026rsquo;t use cookie tag in a general purpose context would help you avoid Bad Request\n  Optional field We still have one thing haven\u0026rsquo;t been mentioned, optional field, just like its name, it allowed you omit the field and won\u0026rsquo;t cause HTTP Status Code: 400.\nExample context definition:\ntype Transaction struct { Amount uint64 `form:\u0026quot;amount\u0026quot;` Canceled *bool `form:\u0026quot;canceled\u0026quot;` }  At here, the field Canceled would be nil if you didn\u0026rsquo;t give it a value.\nMultiple Contexts Multiple contexts allows you put more than one contexs in your handler function, this make you can reuse more contexts, for example, here is a proxy of kubernetes List API:\nimport ( \u0026quot;net/http\u0026quot; corev1 \u0026quot;k8s.io/api/core/v1\u0026quot; metav1 \u0026quot;k8s.io/apimachinery/pkg/apis/meta/v1\u0026quot; scheme \u0026quot;k8s.io/client-go/kubernetes/scheme\u0026quot; \u0026quot;github.com/dannypsnl/rocket\u0026quot; \u0026quot;github.com/dannypsnl/rocket/response\u0026quot; ) type ( CheckWatch struct { IsWatch *bool `query:\u0026quot;watch\u0026quot;` } Resource struct { Namespace string `route:\u0026quot;namespace\u0026quot;` Kind string `route:\u0026quot;kind\u0026quot;` } ) // ignore all errors var kubernetesProxy = rocket.Get(\u0026quot;namespaces/:namespace/:kind\u0026quot;, func(c *CheckWatch, r *Resource) response.Json { opts := \u0026amp;metav1.ListOptions{} if c.IsWatch != nil \u0026amp;\u0026amp; *c.IsWatch { return response.Stream(func(w http.ResponseWriter) { opts.Watch = true watchInterface, err := kubeClient.CoreV1().RESTClient().Get(). Namespace(r.Namespace). Resource(r.Kind). VersionedParams(opts, scheme.ParameterCodec). Watch() for { select { case event := \u0026lt;- watchInterface.ResultChan(): data, err := json.Marshal(event.Object) w.Write(data) } } }). Headers(response.Headers{ \u0026quot;Content-Type\u0026quot;: \u0026quot;application/json\u0026quot;, }) } // We should create result by Kind actually, but just let me use hard code here as an example result := \u0026amp;corev1.EndpointsList{} // ignore how to initialize kubeClient err := kubeClient.CoreV1().RESTClient().Get(). Namespace(r.Namespace). Resource(r.Kind). VersionedParams(opts, scheme.ParameterCodec). Do(). Into(result) data, err := json.Marshal(result) return response.Json(data) }) rocket. // ignore Mount(\u0026quot;/api/v1\u0026quot;, kubernetesProxy). Launch()  "
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/documents/response/",
+	"title": "Response",
+	"tags": [],
+	"description": "",
+	"content": " Note: In following context, we only show handle function\n Basically rocket contains some type to help you return value more easier\nFor example, response.Html\nfunc() response.Html { return `\u0026lt;h1\u0026gt;Title\u0026lt;/h1\u0026gt;` }  Then your response when with header Content-Type is text/html\nCurrently we have:\n response.Html, return text/html response.Json, return application/json go func() response.Json { return ` { \u0026quot;just\u0026quot;: \u0026quot;a json\u0026quot; } ` }  string, return text/plain  Response is defined under github.com/dannypsnl/rocket/response this package\nimport \u0026quot;github.com/dannypsnl/rocket/response\u0026quot; func() *response.Response { html := response.Html(` \u0026lt;h1\u0026gt;Title\u0026lt;/h1\u0026gt; `) return response.New(html) }  As you can see, you can keep your awesome response type feature with Response\nFactory functions:\n New, accept a response type of rocket\nresponse.New(\u0026quot;what your user get\u0026quot;)  Stream, create a streamable responder by allowing you keep writing data into http.ResponseWriter\nresponse.Stream(func(w http.ResponseWriter) { for { w.Write([]byte(`hello\\n`)) } })  This is because Go http package help you could use HTTP/1.1 connection as streaming by ignoring EOF, and somehow we found this is really useful so we keep this ability in rocket\n  Here is all methods of Response:\n Headers, accept a header map\nresponse.New(\u0026quot;\u0026quot;).Headers(response.Headers{ \u0026quot;Access-Control-Allow-Origin\u0026quot;: \u0026quot;*\u0026quot;, })  Cookies, accept a cookie list\nresponse.New(\u0026quot;\u0026quot;).Cookies( cookie.New(\u0026quot;a\u0026quot;, \u0026quot;cookie\u0026quot;). Expires(time.Now().Add(time.Hour * 24)), cookie.New(\u0026quot;more\u0026quot;, \u0026quot;cookie\u0026quot;). Expires(time.Now().Add(time.Hour * 24)), )  Status, accept a new status code, it would panic when you give a invalid status code(by RFC, it should be a 3 digit integer) or you try to rewrite it\nresponse.New(\u0026quot;Bas request\u0026quot;). Status(http.StatusBadRequest)  ContentType, let you modify content-type of response easier(compare to setting header directly)\nresponse.Stream(func(w http.ResponseWriter) { // ignore }). ContentType(\u0026quot;application/json\u0026quot;)   "
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/quick_start/minimum_example/",
+	"title": "Minimum Example",
+	"tags": [],
+	"description": "",
+	"content": "Before you write down any code. You need to import the package.\nimport ( \u0026quot;github.com/dannypsnl/rocket\u0026quot; )  With Rocket, you will create a lots of handler, here is a basic handler with user-defined context.\ntype User struct { Name string `route:\u0026quot;name\u0026quot;` Age uint64 `route:\u0026quot;age\u0026quot;` } var hello = rocket.Get(\u0026quot;/:name/:age\u0026quot;, func(u *User) string { return \u0026quot;Hello \u0026quot; + u.Name + \u0026quot;, your age is \u0026quot; + strconv.FormatUint(u.Age, 10) })  How to let it work?\n// main.go func main() { rocket.Ignite(\u0026quot;:8080\u0026quot;). Mount(\u0026quot;/user\u0026quot;, hello). Launch() }  Now execute go run main.go, open your browser to localhost:8080/user/Danny/21.\nThen you will see Hello Danny, your age is 21.\nOr use curl:\n$ curl localhost:8080/user/Danny/21 Hello Danny, your age is 21  "
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/",
+	"title": "",
+	"tags": [],
+	"description": "",
+	"content": " Rocket Document "
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/categories/",
+	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "http://dannypsnl.github.io/rocket/tags/",
+	"title": "Tags",
+	"tags": [],
+	"description": "",
+	"content": ""
+}]
