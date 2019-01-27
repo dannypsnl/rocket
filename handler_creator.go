@@ -17,19 +17,9 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h.userContexts = make([]*context.UserContext, handlerFuncT.NumIn())
 
 	for i := 0; i < handlerFuncT.NumIn(); i++ {
-		t := handlerFuncT.In(i).Elem()
-		userContext := context.NewUserContext()
-		switch {
-		case t.AssignableTo(reflect.TypeOf(Cookies{})):
-			userContext.IsCookies = true
-		case t.AssignableTo(reflect.TypeOf(Headers{})):
-			userContext.IsHeaders = true
-		default:
-			// We not sure what is it, so just assume it's user defined context
-			contextT := handlerFuncT.In(i).Elem()
-			userContext.CacheParamsOffset(contextT, h.routes)
-		}
-		h.userContexts[i] = userContext
+		contextT := handlerFuncT.In(i).Elem()
+		h.userContexts[i] = context.NewUserContext().
+			CacheParamsOffset(contextT, h.routes)
 	}
 	return h
 }

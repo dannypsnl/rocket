@@ -9,6 +9,10 @@ import (
 	"github.com/dannypsnl/rocket/response"
 )
 
+type GetContentType struct {
+	ContentType string `header:"Content-Type"`
+}
+
 func BenchmarkRequest(b *testing.B) {
 	b.Run("WithoutUserDefinedContext", func(b *testing.B) {
 		rk := rocket.Ignite(":8080").
@@ -41,8 +45,8 @@ func BenchmarkRequest(b *testing.B) {
 	})
 	b.Run("WithHeader", func(b *testing.B) {
 		rk := rocket.Ignite(":8080").
-			Mount("/home", rocket.Get("/", func(header *rocket.Headers) string {
-				return "Content-Type-is-" + header.Get("Content-Type")
+			Mount("/home", rocket.Get("/", func(header *GetContentType) string {
+				return "Content-Type-is-" + header.ContentType
 			}))
 		Request(b, rk, "GET", "/home", nil)
 	})

@@ -3,10 +3,9 @@ package rocket
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 	"reflect"
-
-	"github.com/dannypsnl/rocket/internal/context"
 )
 
 type (
@@ -24,6 +23,14 @@ type (
 		queryParams map[string]int
 		query       url.Values
 	}
+	headerFiller struct {
+		headerParams map[string]int
+		header       http.Header
+	}
+	cookiesFiller struct {
+		cookiesParams map[string]int
+		req           *http.Request
+	}
 	jsonFiller struct {
 		body io.Reader
 	}
@@ -32,6 +39,45 @@ type (
 		form       url.Values
 	}
 )
+
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
+	return &routeFiller{
+		routes:           routes,
+		routeParams:      routeParams,
+		reqURL:           reqURL,
+		matchedPathIndex: matchedPathIndex,
+		matchedPath:      matchedPath,
+	}
+}
+
+func newQueryFiller(queryParams map[string]int, query url.Values) filler {
+	return &queryFiller{
+		queryParams: queryParams,
+		query:       query,
+	}
+}
+
+func newHeaderFiller(headerParams map[string]int, header http.Header) filler {
+	return &headerFiller{
+		headerParams: headerParams,
+		header:       header,
+	}
+}
+
+func newCookiesFiller(cookiesParams map[string]int, req *http.Request) filler {
+	return &cookiesFiller{
+		cookiesParams: cookiesParams,
+		req:           req,
+	}
+}
+
+func newJSONFiller(body io.Reader) filler {
+	return &jsonFiller{body: body}
+}
+
+func newFormFiller(formParams map[string]int, form url.Values) filler {
+	return &formFiller{formParams: formParams, form: form}
+}
 
 func (r *routeFiller) fill(ctx reflect.Value) error {
 	baseRouteLen := len(r.reqURL) - len(r.routes)
@@ -68,6 +114,31 @@ func (q *queryFiller) fill(ctx reflect.Value) error {
 	return nil
 }
 
+func (h *headerFiller) fill(ctx reflect.Value) error {
+	for key, fieldIndex := range h.headerParams {
+		field := ctx.Elem().Field(fieldIndex)
+		param := h.header.Get(key)
+		value, err := parseParameter(field.Type(), param)
+		if err != nil {
+			return err
+		}
+		field.Set(value)
+	}
+	return nil
+}
+
+func (c *cookiesFiller) fill(ctx reflect.Value) error {
+	for key, fieldIndex := range c.cookiesParams {
+		field := ctx.Elem().Field(fieldIndex)
+		cookie, err := c.req.Cookie(key)
+		if err != nil {
+			return err
+		}
+		field.Set(reflect.ValueOf(cookie))
+	}
+	return nil
+}
+
 func (j *jsonFiller) fill(ctx reflect.Value) error {
 	v := ctx.Interface()
 	err := json.NewDecoder(j.body).Decode(v)
@@ -91,39 +162,4 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 		}
 	}
 	return nil
-}
-
-func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
-	return &routeFiller{
-		routes:           routes,
-		routeParams:      routeParams,
-		reqURL:           reqURL,
-		matchedPathIndex: matchedPathIndex,
-		matchedPath:      matchedPath,
-	}
-}
-
-func newQueryFiller(queryParams map[string]int, query url.Values) filler {
-	return &queryFiller{
-		queryParams: queryParams,
-		query:       query,
-	}
-}
-
-func newJSONFiller(body io.Reader) filler {
-	return &jsonFiller{body: body}
-}
-
-func newFormFiller(formParams map[string]int, form url.Values) filler {
-	return &formFiller{formParams: formParams, form: form}
-}
-
-func generateContext(userContext *context.UserContext, fillers ...filler) (reflect.Value, error) {
-	context := reflect.New(userContext.ContextType)
-	for _, filler := range fillers {
-		if err := filler.fill(context); err != nil {
-			return context, err
-		}
-	}
-	return context, nil
 }

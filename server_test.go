@@ -80,19 +80,6 @@ var (
 	endWithSlash = rocket.Get("/end-with-slash/", func() string {
 		return "you found me"
 	})
-	handleCookies = rocket.Get("cookies", func(cs *rocket.Cookies) string {
-		_, err := cs.Get("cookie")
-		if err != nil || len(cs.List()) != 1 {
-			return "incorrect!"
-		}
-		return "cookies"
-	})
-	createCookie = rocket.Get("/new_cookie", func(cs *rocket.Cookies) *response.Response {
-		return response.New(``).Cookies(
-			cookie.New("set", "set").
-				Expires(time.Now().Add(time.Hour * 24)),
-		)
-	})
 	deleteCookie = rocket.Delete("/cookies", func() *response.Response {
 		return response.New(``).Cookies(
 			cookie.Forget("set"),
@@ -106,13 +93,6 @@ var (
 			},
 		)
 	})
-	handlerHeaders = rocket.Get("/headers", func(header *rocket.Headers) string {
-		if header.Get("x-token") == "token" {
-			return "received token"
-		}
-		return "not receive token"
-	})
-
 	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
 		if optionalContext.A == nil {
 			return "a is nil"
@@ -130,9 +110,6 @@ func TestServer(t *testing.T) {
 			endWithSlash,
 			forPatch,
 			forPost,
-			handleCookies,
-			handlerHeaders,
-			createCookie,
 			deleteCookie,
 			routeWithJSON,
 			filesAndRoute,
@@ -206,30 +183,12 @@ func TestServer(t *testing.T) {
 			Body().Equal("123")
 	})
 
-	t.Run("Cookies", func(t *testing.T) {
-		e.GET("/test/cookies").WithCookie("cookie", "cookie").
-			Expect().Status(http.StatusOK).
-			Body().Equal("cookies")
-	})
 	t.Run("DeleteCookie", func(t *testing.T) {
 		c := e.DELETE("/test/cookies").WithCookie("set", "set").
 			Expect().Status(http.StatusOK).
 			Cookie("set")
 
 		c.Expires().Equal(time.Unix(0, 0))
-	})
-	t.Run("CreateNewCookie", func(t *testing.T) {
-		startTime := time.Now()
-
-		c := e.GET("/test/new_cookie").
-			Expect().Status(http.StatusOK).
-			Cookie("set")
-
-		c.Name().Equal("set")
-		c.Value()
-		c.Path()
-		c.Domain()
-		c.Expires().InRange(startTime, startTime.Add(time.Hour*24))
 	})
 
 	t.Run("EndWithSlash", func(t *testing.T) {
@@ -254,14 +213,6 @@ func TestServer(t *testing.T) {
 		e.GET("/custom-response-header").
 			Expect().Status(http.StatusOK).
 			JSON().Equal(expected)
-	})
-
-	t.Run("Header", func(t *testing.T) {
-		expected := "received token"
-		e.GET("/test/headers").
-			WithHeader("x-token", "token").
-			Expect().Status(http.StatusOK).
-			Body().Equal(expected)
 	})
 
 	t.Run("PostHomePage", func(t *testing.T) {

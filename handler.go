@@ -66,45 +66,34 @@ func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect
 
 	req.ParseForm()
 	for i, userContext := range h.userContexts {
-		if userContext.IsCookies {
-			userContexts[i] = reflect.ValueOf(&Cookies{req: req})
-		} else if userContext.IsHeaders {
-			userContexts[i] = reflect.ValueOf(&Headers{header: req.Header})
-		} else if userContext.ExpectJSONRequest {
-			context, err := generateContext(
-				userContext,
-				newRouteFiller(
-					h.routes,
-					reqURL,
-					userContext.RouteParams,
-					h.matchedPathIndex,
-					h.matchedPath,
-				),
-				newQueryFiller(userContext.QueryParams, req.URL.Query()),
-				newJSONFiller(req.Body),
-			)
-			if err != nil {
-				return nil, err
-			}
-			userContexts[i] = context
-		} else {
-			context, err := generateContext(
-				userContext,
-				newRouteFiller(
-					h.routes,
-					reqURL,
-					userContext.RouteParams,
-					h.matchedPathIndex,
-					h.matchedPath,
-				),
-				newQueryFiller(userContext.QueryParams, req.URL.Query()),
-				newFormFiller(userContext.FormParams, req.Form),
-			)
-			if err != nil {
-				return nil, err
-			}
-			userContexts[i] = context
+		basicChain := []filler{
+			newRouteFiller(
+				h.routes,
+				reqURL,
+				userContext.RouteParams,
+				h.matchedPathIndex,
+				h.matchedPath,
+			),
+			newQueryFiller(userContext.QueryParams, req.URL.Query()),
 		}
+		if userContext.ExpectJSONRequest {
+			basicChain = append(basicChain, newJSONFiller(req.Body))
+		} else {
+			basicChain = append(basicChain, newFormFiller(userContext.FormParams, req.Form))
+		}
+		if userContext.ExpectCookies() {
+			basicChain = append(basicChain, newCookiesFiller(userContext.CookiesParams, req))
+		}
+		if userContext.ExpectHeader() {
+			basicChain = append(basicChain, newHeaderFiller(userContext.HeaderParams, req.Header))
+		}
+		ctx := reflect.New(userContext.ContextType)
+		for _, filler := range basicChain {
+			if err := filler.fill(ctx); err != nil {
+				return nil, err
+			}
+		}
+		userContexts[i] = ctx
 	}
 	return userContexts, nil
 }
