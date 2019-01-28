@@ -126,7 +126,7 @@ type User struct {
 	Auth *string `header:"Authorization"`
 }
 
-func (u *User) VerifyRequest() (rocket.Action, error) {
+func (u *User) VerifyRequest() error {
 	// Assuming we have a JWT verify helper function
 	if verifyAuthByJWT(u.Auth) {
 		return nil
