@@ -1,12 +1,13 @@
 package rocket_test
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/dannypsnl/rocket"
+
+	asserter "github.com/dannypsnl/assert"
 
 	"github.com/gavv/httpexpect"
 )
@@ -19,7 +20,7 @@ func (h *headerGuard) VerifyRequest() error {
 	if h.Auth != nil && *h.Auth == "user1" {
 		return nil
 	}
-	return errors.New("not allowed")
+	return rocket.AuthError("not allowed")
 }
 
 func TestGuard(t *testing.T) {
@@ -42,7 +43,7 @@ func TestGuard(t *testing.T) {
 		{
 			name:           "invalid request won't pass guard",
 			guard:          &headerGuard{},
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusForbidden,
 		},
 	}
 
@@ -64,4 +65,13 @@ func TestGuard(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestVerifyError(t *testing.T) {
+	assert := asserter.NewTester(t)
+
+	err := rocket.AuthError("auth failed")
+	assert.Eq(err.Status(), http.StatusForbidden)
+	err = rocket.ValidateError("validate failed")
+	assert.Eq(err.Status(), http.StatusBadRequest)
 }

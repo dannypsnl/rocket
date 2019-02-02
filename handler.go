@@ -42,6 +42,10 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	}
 
 	if err := h.verify(reqURL, r); err != nil {
+		if err, ok := err.(*VerifyError); ok {
+			return response.New(err.Error()).
+				Status(err.Status())
+		}
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
 	}
