@@ -13,8 +13,8 @@ type Route struct {
 	// OwnHandler means this Route has route, so not found handler would be 403(wrong method),
 	// else is 404
 	OwnHandler bool
-	// PathRouteHandler is the handler of route `*path`
-	PathRouteHandler map[string]*handler
+	// WildcardRoute is the handler of route `*path`
+	WildcardRoute map[string]*handler
 	//
 	Handlers map[string]*handler
 	//
@@ -32,7 +32,7 @@ func (route *Route) noVariableRoute() bool {
 	return route.VariableRoute == nil
 }
 func (route *Route) noWildcardRoute() bool {
-	return route.PathRouteHandler == nil
+	return route.WildcardRoute == nil
 }
 
 func (route *Route) addHandlerOn(baseRoute []string, h *handler) {
@@ -49,10 +49,10 @@ func (route *Route) addHandlerOn(baseRoute []string, h *handler) {
 		} else if r[0] == '*' {
 			h.matchedPathIndex = i - len(baseRoute)
 			if currentMatchedRoute.noWildcardRoute() {
-				currentMatchedRoute.PathRouteHandler = make(map[string]*handler)
+				currentMatchedRoute.WildcardRoute = make(map[string]*handler)
 			}
-			if _, ok := currentMatchedRoute.PathRouteHandler[h.method]; !ok {
-				currentMatchedRoute.addHandlerTo(currentMatchedRoute.PathRouteHandler, h)
+			if _, ok := currentMatchedRoute.WildcardRoute[h.method]; !ok {
+				currentMatchedRoute.addHandlerTo(currentMatchedRoute.WildcardRoute, h)
 				return
 			}
 			panic(PanicDuplicateRoute)
@@ -90,17 +90,18 @@ func (route *Route) getHandler(requestUrl []string, method string) *handler {
 		}
 		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
 	}
+
 	next := route
 	for i, r := range requestUrl {
 		if router, ok := next.Children[r]; ok {
 			next = router
 		} else if next.VariableRoute != nil {
 			next = next.VariableRoute
-		} else if next.PathRouteHandler != nil {
+		} else if next.WildcardRoute != nil {
 			if !route.OwnHandler {
 				return nil
 			}
-			if h, hasPathRouteHandler := next.PathRouteHandler[method]; hasPathRouteHandler {
+			if h, hasPathRouteHandler := next.WildcardRoute[method]; hasPathRouteHandler {
 				// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
 				h.addMatchedPathValueIntoContext(requestUrl[i:]...)
 				return h
