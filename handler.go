@@ -14,6 +14,7 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
+	guards       []*context.UserContext
 	userContexts []*context.UserContext
 
 	matchedPath      string
@@ -28,20 +29,19 @@ func newHandler(do reflect.Value) *handler {
 }
 
 func newErrorHandler(code int, content string) *handler {
-	h := newHandler(reflect.ValueOf(func() *response.Response {
+	return newHandler(reflect.ValueOf(func() *response.Response {
 		return response.New(content).Status(code)
 	}))
-	return h
 }
 
 func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
-	ctx, err := h.getUserContexts(reqURL, r)
+	ctx, err := h.fillByCachedUserContexts(h.userContexts, reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
 	}
 
-	if err := h.verify(ctx, r); err != nil {
+	if err := h.verify(reqURL, r); err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
 	}
@@ -58,13 +58,33 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	}
 }
 
-func (h *handler) verify(ctx []reflect.Value, r *http.Request) error {
+func (h *handler) Guard(guard Guard) *handler {
+	if h.guards == nil {
+		h.guards = make([]*context.UserContext, 0)
+	}
+	contextT := reflect.TypeOf(guard).Elem()
+	h.guards = append(h.guards,
+		context.
+			NewUserContext().
+			CacheParamsOffset(contextT, h.routes),
+	)
+	return h
+}
+
+func (h *handler) verify(reqURL []string, r *http.Request) error {
+	// no guards
+	if h.guards == nil {
+		return nil
+	}
+	ctx, err := h.fillByCachedUserContexts(h.guards, reqURL, r)
+	if err != nil {
+		return err
+	}
 	for _, c := range ctx {
-		guard, isGuard := c.Interface().(Guard)
-		if isGuard {
-			if err := guard.VerifyRequest(); err != nil {
-				return err
-			}
+		// without check since we already do the static checking by method signature
+		guard := c.Interface().(Guard)
+		if err := guard.VerifyRequest(); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -79,11 +99,11 @@ func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
 	h.matchedPath = path.String()[:path.Len()-1]
 }
 
-func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
-	userContexts := make([]reflect.Value, h.do.Type().NumIn())
+func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqURL []string, req *http.Request) ([]reflect.Value, error) {
+	userContexts := make([]reflect.Value, len(contexts))
 
 	req.ParseForm()
-	for i, userContext := range h.userContexts {
+	for i, userContext := range contexts {
 		basicChain := []filler{
 			newRouteFiller(
 				h.routes,

@@ -31,7 +31,7 @@ func TestGuard(t *testing.T) {
 	}{
 		{
 			name:        "valid request would pass guard",
-			handlerFunc: func(*headerGuard) string { return "" },
+			handlerFunc: func() string { return "" },
 			testFunc: func(r *httpexpect.Request) {
 				r.WithHeader("Auth", "user1").
 					Expect().
@@ -41,7 +41,7 @@ func TestGuard(t *testing.T) {
 		},
 		{
 			name:           "invalid request won't pass guard",
-			handlerFunc:    func(*headerGuard) string { return "" },
+			handlerFunc:    func() string { return "" },
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -49,7 +49,8 @@ func TestGuard(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			rk := rocket.Ignite("").
-				Mount("/", rocket.Get("/", testCase.handlerFunc))
+				Mount("/", rocket.Get("/", testCase.handlerFunc).
+					Guard(&headerGuard{}))
 			ts := httptest.NewServer(rk)
 			defer ts.Close()
 			e := httpexpect.New(t, ts.URL)
