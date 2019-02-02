@@ -133,4 +133,9 @@ func (u *User) VerifyRequest() error {
 	}
 	return errors.New("not allowed")
 }
+
+var handler = rocket.Get("/user_data", func() string {
+    // return data if pass `VerifyRequest`
+}).
+    Guard(&User{})
 ```
