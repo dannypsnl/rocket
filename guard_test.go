@@ -25,13 +25,13 @@ func (h *headerGuard) VerifyRequest() error {
 func TestGuard(t *testing.T) {
 	testCases := []struct {
 		name           string
-		handlerFunc    interface{}
+		guard          rocket.Guard
 		testFunc       func(*httpexpect.Request)
 		expectedStatus int
 	}{
 		{
-			name:        "valid request would pass guard",
-			handlerFunc: func() string { return "" },
+			name:  "valid request would pass guard",
+			guard: &headerGuard{},
 			testFunc: func(r *httpexpect.Request) {
 				r.WithHeader("Auth", "user1").
 					Expect().
@@ -41,7 +41,7 @@ func TestGuard(t *testing.T) {
 		},
 		{
 			name:           "invalid request won't pass guard",
-			handlerFunc:    func() string { return "" },
+			guard:          &headerGuard{},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -49,8 +49,8 @@ func TestGuard(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			rk := rocket.Ignite("").
-				Mount("/", rocket.Get("/", testCase.handlerFunc).
-					Guard(&headerGuard{}))
+				Mount("/", rocket.Get("/", func() string { return "" }).
+					Guard(testCase.guard))
 			ts := httptest.NewServer(rk)
 			defer ts.Close()
 			e := httpexpect.New(t, ts.URL)
