@@ -131,7 +131,7 @@ func (u *User) VerifyRequest() error {
 	if verifyAuthByJWT(u.Auth) {
 		return nil
 	}
-	return errors.New("not allowed")
+	return rocket.AuthError("not allowed")
 }
 
 var handler = rocket.Get("/user_data", func() string {
