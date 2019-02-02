@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/rocket/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/rocket/images/favicon.png" type="image/x-icon" />
-    <title>Server :: Rocket</title>
+    <title>Fairing :: Rocket</title>
 
     
     <link href="/rocket/css/nucleus.css?1549119312" rel="stylesheet">
@@ -34,7 +34,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/rocket/documents/server/">
+  <body class="" data-url="/rocket/documents/fairing/">
     <nav id="sidebar" class="">
 
 
@@ -168,7 +168,7 @@
  
   
     
-      <li data-nav-id="/rocket/documents/server/" title="Server" class="dd-item active">
+      <li data-nav-id="/rocket/documents/server/" title="Server" class="dd-item ">
         <a href="/rocket/documents/server/">
         Server
         
@@ -225,7 +225,7 @@
  
   
     
-      <li data-nav-id="/rocket/documents/fairing/" title="Fairing" class="dd-item ">
+      <li data-nav-id="/rocket/documents/fairing/" title="Fairing" class="dd-item active">
         <a href="/rocket/documents/fairing/">
         Fairing
         
@@ -305,7 +305,7 @@
             
           
           
-            <a href='/rocket/'></a> > <a href='/rocket/documents/'>Documents</a> > Server
+            <a href='/rocket/'></a> > <a href='/rocket/documents/'>Documents</a> > Fairing
           
          
           
@@ -330,61 +330,50 @@
         
         <div id="body-inner">
           
-            <h1>Server</h1>
+            <h1>Fairing</h1>
           
 
         
 
 
-<p>To create a server, we have to start from <code>Ignite</code>.</p>
+<p>What&rsquo;s fairing? It&rsquo;s an abstraction to avoid over-using the middleware.</p>
 
-<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;)
-</code></pre>
+<p>But we still need some hooks to record some data or modifying the input/output for certain purpose, to keep this ability, we made fairing, this is how it looks like:</p>
 
-<p>We use the same pattern as Go native <code>http</code> package.</p>
+<pre><code class="language-go">type Logger struct {
+    fairing.Fairing
+}
 
-<p>So I think it won&rsquo;t be to hard to notice <code>:8080</code> means listen port <code>8080</code>.</p>
-
-<p>Then we will use <code>Mount</code> mounts some handlers.</p>
-
-<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    Mount(&quot;/&quot;, handler)
-</code></pre>
-
-<p>The first argument of <code>Mount</code> is base route. This is a leading route for following handlers mounted under this route.</p>
-
-<p>For example, if base route is <code>&quot;/base&quot;</code>, route of handler is <code>&quot;/hello&quot;</code>, the final route is <code>&quot;/base/hello&quot;</code></p>
-
-<p>Then one thing you should know is you can mount several handlers at one <code>Mount</code> call.
-For example:</p>
-
-<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    Mount(&quot;/&quot;, handler1, handler2) // and below
-</code></pre>
-
-<p>Next is handling <strong>Not Found: 404</strong>, we use <code>Default</code> to handle this.</p>
-
-<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    // some mounts
-    Default(func() rocket.Html {
-        return `&lt;h1&gt;Page Not Found&lt;/h1&gt;`
-    })
-</code></pre>
-
-<p>Then when rocket can&rsquo;t find any route in router, it will use this function&rsquo;s response.
-This is optional, so you can omit it, we have default for default, lol.</p>
-
-<p>p.s. <code>rocket.Html</code> is response magic in rocket, it will set header <code>Content-Type</code> as <code>text/html</code>.
-Then you will see the browser render respnose as HTML</p>
-
-<p>Final, we start our server.</p>
-
-<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    // some mounts &amp; default
+func (l *Logger) OnRequest(r *http.Request) *http.Request {
+    log.Printf(&quot;request: %#v\n&quot;, r)
+    return r
+}
+func (l *Logger) OnResponse(r *response.Response) *response.Response {
+    log.Printf(&quot;response: %#v\n&quot;, r)
+    return r
+}
+// in main function or entrypoint
+rocket.Ignite(&quot;:8080&quot;).
+    Attach(&amp;Logger{}).
+    // Mount...
     Launch()
 </code></pre>
 
-<p>Call <code>Launch</code> will start our server, now you can use any HTTP client to see <code>localhost:8080</code></p>
+<p>We can see some points, first, we can implement two kinds of fairing callbacks</p>
+
+<ul>
+<li><p><code>func OnRequest(r *http.Request) *http.Request</code></p>
+
+<p>this would be called before handlers get request</p></li>
+
+<li><p><code>func OnResponse(r *response.Response) *response.Response</code></p>
+
+<p>this would be called after handlers done handling</p></li>
+</ul>
+
+<p>then we can use the fairing implementor by using <code>Attach</code> method to emit it. We can call <code>Attach</code> several times, but carefully with it since it could modify request and response!</p>
+
+<p>Why embedded <code>fairing.Fairing</code>? It would provide default behavior for <code>OnRequest</code> and <code>OnResponse</code> if you didn&rsquo;t provide one, so it&rsquo;s a good practice to embedded since we could add more fairing methods into it.</p>
 
 
 <footer class=" footline" >
@@ -472,23 +461,6 @@ Then you will see the browser render respnose as HTML</p>
             
                 
                     
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
                         
                         
                     
@@ -523,6 +495,23 @@ Then you will see the browser render respnose as HTML</p>
             
             
                 
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
                     
                 
                 
@@ -547,10 +536,10 @@ Then you will see the browser render respnose as HTML</p>
 	 
 	 
 		
-			<a class="nav nav-prev" href="/rocket/documents/" title="Documents"> <i class="fa fa-chevron-left"></i></a>
+			<a class="nav nav-prev" href="/rocket/documents/response/" title="Response"> <i class="fa fa-chevron-left"></i></a>
 		
 		
-			<a class="nav nav-next" href="/rocket/documents/handler_and_context/" title="Handler &amp; Context" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+			<a class="nav nav-next" href="/rocket/documents/server/" title="Server" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
 		
 	
     </div>
