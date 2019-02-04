@@ -51,5 +51,16 @@ Currently we have:
  response.Html, return text/html response.Json, return application/json go func() response.Json { return ` { &amp;quot;just&amp;quot;: &amp;quot;a json&amp;quot; } ` }  string, return text/plain  Response is defined under github.</description>
     </item>
     
+    <item>
+      <title>Fairing</title>
+      <link>http://dannypsnl.github.io/rocket/documents/fairing/</link>
+      <pubDate>Sat, 02 Feb 2019 22:39:18 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/fairing/</guid>
+      <description>What&amp;rsquo;s fairing? It&amp;rsquo;s an abstraction to avoid over-using the middleware.
+But we still need some hooks to record some data or modifying the input/output for certain purpose, to keep this ability, we made fairing, this is how it looks like:
+type Logger struct { fairing.Fairing } func (l *Logger) OnRequest(r *http.Request) *http.Request { log.Printf(&amp;quot;request: %#v\n&amp;quot;, r) return r } func (l *Logger) OnResponse(r *response.Response) *response.Response { log.Printf(&amp;quot;response: %#v\n&amp;quot;, r) return r } // in main function or entrypoint rocket.</description>
+    </item>
+    
   </channel>
 </rss>
