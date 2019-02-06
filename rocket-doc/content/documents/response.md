@@ -7,6 +7,8 @@ draft: false
 
 > Note: In following context, we only show handle function
 
+> Warning: Don't use `*response.Response` cross goroutine, it's not designed to be thread-safe(and it don't have to be)
+
 Basically rocket contains some type to help you return value more easier
 
 For example, `response.Html`
