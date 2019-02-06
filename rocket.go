@@ -13,7 +13,7 @@ import (
 type Rocket struct {
 	port          string
 	handlers      *Route
-	listOfFairing []fairing.FairingInterface
+	listOfFairing []fairing.Interface
 
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
@@ -33,12 +33,15 @@ func (rk *Rocket) Mount(routeStr string, h *handler, hs ...*handler) *Rocket {
 	return rk
 }
 
-// Attach add fairing to lifecycle of each request to response
-func (rk *Rocket) Attach(f fairing.FairingInterface) *Rocket {
+// Attach add fairing to lifecycle for each request and response
+func (rk *Rocket) Attach(f fairing.Interface) *Rocket {
 	rk.listOfFairing = append(rk.listOfFairing, f)
 	return rk
 }
 
+// Default receive a function that have signature `func() <T>` for custom response when no route matched,
+// <T> means a legal response Type of rocket, e.g. `*response.Response`, `response.Json`
+// by default that(status code 404) would returns `"page not found"` when no set this function,
 func (rk *Rocket) Default(do interface{}) *Rocket {
 	rk.defaultHandler = reflect.ValueOf(do)
 	return rk
@@ -50,19 +53,19 @@ func (rk *Rocket) Launch() {
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
 
-// Ignite initial service by port.
+// Ignite initial service by port. The format following native HTTP library `:port_number`
 func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:          port,
 		handlers:      NewRoute(),
-		listOfFairing: make([]fairing.FairingInterface, 0),
+		listOfFairing: make([]fairing.Interface, 0),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
 	}
 }
 
-// ServeHTTP is prepare for http server trait, but the plan change, it need a new name.
+// ServeHTTP is prepare for http server trait, so that you could use `*rocket.Rocket` as `http.Handler`
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqURL := splitBySlash(r.URL.Path)
 
@@ -74,7 +77,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler := rk.handlers.getHandler(reqURL, r.Method)
 	var resp *response.Response
 	if handler != nil {
-		resp = handler.Handle(reqURL, r)
+		resp = handler.handle(reqURL, r)
 	} else {
 		resp = rk.defaultResponse()
 	}

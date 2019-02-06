@@ -34,7 +34,7 @@ func newErrorHandler(code int, content string) *handler {
 	return h
 }
 
-func (h *handler) Handle(reqURL []string, r *http.Request) *response.Response {
+func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	ctx, err := h.getUserContexts(reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
@@ -96,4 +96,32 @@ func (h *handler) getUserContexts(reqURL []string, req *http.Request) ([]reflect
 		userContexts[i] = ctx
 	}
 	return userContexts, nil
+}
+
+type optionsHandler struct {
+	methods []string
+}
+
+func newOptionsHandler() *optionsHandler {
+	return &optionsHandler{
+		methods: make([]string, 0),
+	}
+}
+
+func (o *optionsHandler) addMethod(method string) *optionsHandler {
+	o.methods = append(o.methods, method)
+	return o
+}
+
+func (o *optionsHandler) build() *handler {
+	allowMethods := "OPTIONS"
+	for _, m := range o.methods {
+		allowMethods += ", " + m
+	}
+	return newHandler(reflect.ValueOf(func() *response.Response {
+		return response.New("").
+			Headers(response.Headers{
+				"Allow": allowMethods,
+			})
+	}))
 }

@@ -15,7 +15,7 @@ type fakeFairing struct {
 }
 
 func TestFairingAssign(t *testing.T) {
-	var f fairing.FairingInterface
+	var f fairing.Interface
 	fakeF := &fakeFairing{}
 	f = fakeF
 	_ = f
@@ -34,7 +34,7 @@ func (c *counter) OnRequest(req *http.Request) *http.Request {
 
 func TestFairingCounter(t *testing.T) {
 	assert := asserter.NewTester(t)
-	var c fairing.FairingInterface = &counter{count: 0}
+	var c fairing.Interface = &counter{count: 0}
 	c.OnRequest(&http.Request{})
 	assert.Eq(c.(*counter).count, uint64(1))
 }
@@ -42,7 +42,7 @@ func TestFairingCounter(t *testing.T) {
 func TestDefaultFairing(t *testing.T) {
 	assert := asserter.NewTester(t)
 
-	var f fairing.FairingInterface = fairing.Fairing{}
+	var f fairing.Interface = fairing.Fairing{}
 	request := &http.Request{}
 	requestViaDefaultFairing := f.OnRequest(request)
 	assert.Eq(request, requestViaDefaultFairing)

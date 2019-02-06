@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Cookie provides an abstraction of cookie in rocket
 type Cookie struct {
 	name, value string
 	path        string
@@ -23,6 +24,7 @@ func Forget(name string) *Cookie {
 		Expires(time.Unix(0, 0))
 }
 
+// New create a new cookie
 func New(name, value string) *Cookie {
 	return &Cookie{
 		name:  name,
@@ -30,10 +32,13 @@ func New(name, value string) *Cookie {
 	}
 }
 
+// Path set path of cookie
 func (c *Cookie) Path(path string) *Cookie {
 	c.path = path
 	return c
 }
+
+// Domain set domain of cookie
 func (c *Cookie) Domain(domain string) *Cookie {
 	c.domain = domain
 	return c
@@ -50,11 +55,14 @@ func (c *Cookie) MaxAge(maxAge int) *Cookie {
 	c.maxAge = maxAge
 	return c
 }
-func (c *Cookie) Expires(t time.Time) *Cookie {
-	c.expires = t
+
+// Expires set expires of cookie
+func (c *Cookie) Expires(time time.Time) *Cookie {
+	c.expires = time
 	return c
 }
 
+// Generate is not prepare for you
 func (c *Cookie) Generate() *http.Cookie {
 	return &http.Cookie{
 		Name:    c.name,
