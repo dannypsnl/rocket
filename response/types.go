@@ -1,5 +1,13 @@
 package response
 
+type (
+	// Html is a mark for text is HTML
+	// return "Content-Type": "text/html"
+	Html string
+	// Json will return "Content-Type": "application/json"
+	Json string
+)
+
 func contentTypeOf(response interface{}) string {
 	switch response.(type) {
 	case Html:
@@ -12,10 +20,3 @@ func contentTypeOf(response interface{}) string {
 		return "text/plain"
 	}
 }
-
-// Html is a mark for text is HTML
-// return "Content-Type": "text/html"
-type Html string
-
-// Json will return "Content-Type": "application/json"
-type Json string

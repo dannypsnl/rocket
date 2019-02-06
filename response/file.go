@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// File would create a response for file resource by provided filepath
 func File(filepath string) *Response {
 	var err error
 	f, err := os.Open(filepath)
