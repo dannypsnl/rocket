@@ -44,11 +44,12 @@ We have following creator mapping to HTTP method currently.</description>
       
       <guid>http://dannypsnl.github.io/rocket/documents/response/</guid>
       <description>Note: In following context, we only show handle function
+Warning: Don&amp;rsquo;t use *response.Response cross goroutine, it&amp;rsquo;s not designed to be thread-safe(and it don&amp;rsquo;t have to be)
  Basically rocket contains some type to help you return value more easier
 For example, response.Html
 func() response.Html { return `&amp;lt;h1&amp;gt;Title&amp;lt;/h1&amp;gt;` }  Then your response when with header Content-Type is text/html
 Currently we have:
- response.Html, return text/html response.Json, return application/json go func() response.Json { return ` { &amp;quot;just&amp;quot;: &amp;quot;a json&amp;quot; } ` }  string, return text/plain  Response is defined under github.</description>
+ response.Html, return text/html response.Json, return application/json go func() response.</description>
     </item>
     
     <item>
