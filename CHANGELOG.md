@@ -63,5 +63,6 @@
 		Token *http.Cookie `cookie:"token"`
 	}
 	```
+- (#147) fix: matching won't fallback bug
 
 ## v0.12.9
