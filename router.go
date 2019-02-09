@@ -103,7 +103,7 @@ func (r *Route) getHandler(requestUrl []string, method string) *handler {
 		}
 	}
 	if r.wildcardRoute != nil {
-		if h, hasPathRouteHandler := r.wildcardRoute[method]; hasPathRouteHandler {
+		if h, hasWildcardRouteHandler := r.wildcardRoute[method]; hasWildcardRouteHandler {
 			// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
 			h.addMatchedPathValueIntoContext(requestUrl...)
 			return h
