@@ -47,7 +47,7 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 				Status(err.Status())
 		}
 		return response.New(err.Error()).
-			Status(http.StatusBadRequest)
+			Status(http.StatusInternalServerError)
 	}
 
 	resp := h.do.Call(
