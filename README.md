@@ -109,3 +109,33 @@ rocket.Ignite(":8080"). // Setting port
 		// Mount(...)
 		Launch()
 	```
+
+#### Guard
+
+Guard should be implemented by your **UserDefinedContext**.
+Here is an easy example:
+```go
+import (
+	"errors"
+	"net/http"
+
+	"github.com/dannypsnl/rocket"
+)
+
+type User struct {
+	Auth *string `header:"Authorization"`
+}
+
+func (u *User) VerifyRequest() error {
+	// Assuming we have a JWT verify helper function
+	if verifyAuthByJWT(u.Auth) {
+		return nil
+	}
+	return rocket.AuthError("not allowed")
+}
+
+var handler = rocket.Get("/user_data", func() string {
+    // return data if pass `VerifyRequest`
+}).
+    Guard(&User{})
+```

@@ -64,5 +64,6 @@
 	}
 	```
 - (#147) fix: matching won't fallback bug
+- (#116) feature: request guard
 
 ## v0.12.9
