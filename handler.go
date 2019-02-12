@@ -35,7 +35,7 @@ func newErrorHandler(code int, content string) *handler {
 }
 
 func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
-	ctx, err := h.fillByCachedUserContexts(h.userContexts, reqURL, r)
+	ctx, err := h.getContexts(reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
@@ -80,7 +80,7 @@ func (h *handler) verify(reqURL []string, r *http.Request) error {
 	if h.guards == nil {
 		return nil
 	}
-	ctx, err := h.fillByCachedUserContexts(h.guards, reqURL, r)
+	ctx, err := h.getGuards(reqURL, r)
 	if err != nil {
 		return err
 	}
@@ -101,6 +101,14 @@ func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
 		path.WriteRune('/')
 	}
 	h.matchedPath = path.String()[:path.Len()-1]
+}
+
+func (h *handler) getContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
+	return h.fillByCachedUserContexts(h.userContexts, reqURL, req)
+}
+
+func (h *handler) getGuards(reqURL []string, req *http.Request) ([]reflect.Value, error) {
+	return h.fillByCachedUserContexts(h.guards, reqURL, req)
 }
 
 func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqURL []string, req *http.Request) ([]reflect.Value, error) {
