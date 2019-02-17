@@ -30,22 +30,6 @@
 		// ignore...
 	})
 	```
-- (#152) feature: HTTP/1.1 streaming
-	```go
-	import (
-		"net/http"
-
-		"github.com/dannypsnl/rocket/response"
-	)
-
-	// In your handler function
-	return response.
-		Stream(func(w http.ResponseWriter) {
-			w.Write([]byte("HI\n"))
-			w.Write([]byte("Hello again\n"))
-			w.Write([]byte("and again\n"))
-		})
-	```
 - (#154) feature: `func (*response.Response) ContentType(contentType string) *response.Response`
 - (#129) remove: `rocket.Header`
 - (#129) remove: `rocket.Cookies`
@@ -65,5 +49,25 @@
 	```
 - (#147) fix: matching won't fallback bug
 - (#116) feature: request guard
+- (#123) feature: HTTP/1.1 streaming
+	```go
+	import (
+		"net/http"
+
+		"github.com/dannypsnl/rocket/response"
+	)
+
+	// In your handler function
+	return response.
+		Stream(func(w http.ResponseWriter) (keep bool) {
+			// keep writing until failed
+			_, err := w.Write([]byte("HI\n"))
+			if err != nil {
+				return false
+			}
+			return true
+		})
+	```
+
 
 ## v0.12.9
