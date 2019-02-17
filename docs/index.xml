@@ -64,6 +64,17 @@ type Logger struct { fairing.Fairing } func (l *Logger) OnRequest(r *http.Reques
     </item>
     
     <item>
+      <title>Guard</title>
+      <link>http://dannypsnl.github.io/rocket/documents/guard/</link>
+      <pubDate>Sun, 17 Feb 2019 14:09:30 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/guard/</guid>
+      <description>A guard is a type that implemented the interface rocket.Guard, it can reject a request by returning an error.
+Here is an easy example:
+type User struct { Authorization *string `header:&amp;quot;Authorization&amp;quot;` } func (u *User) VerifyRequest() error { // Assuming we have a JWT verify helper function if verifyAuthByJWT(u.Auth) { return nil } return rocket.AuthError(&amp;quot;not allowed&amp;quot;) } var handler = rocket.Get(&amp;quot;/user_data&amp;quot;, func() string { // would return data if `VerifyRequest` do not return any errors }).</description>
+    </item>
+    
+    <item>
       <title>Minimum Example</title>
       <link>http://dannypsnl.github.io/rocket/quick_start/minimum_example/</link>
       <pubDate>Sun, 23 Sep 2018 23:51:06 +0800</pubDate>
