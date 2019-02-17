@@ -41,6 +41,10 @@ type fakeWriteCounter struct {
 	count int
 }
 
+func (w *fakeWriteCounter) Flush() {}
+func (w *fakeWriteCounter) CloseNotify() <-chan bool {
+	return make(<-chan bool)
+}
 func (w *fakeWriteCounter) Header() http.Header {
 	return http.Header(map[string][]string{})
 }
@@ -56,7 +60,7 @@ func TestHTTPStreaming(t *testing.T) {
 	testCases := []struct {
 		name               string
 		expectedWriteTimes int
-		streamFunc         func(w http.ResponseWriter)
+		streamFunc         response.KeepFunc
 	}{
 		{
 			name:               "nil func should be ignore",
@@ -66,9 +70,10 @@ func TestHTTPStreaming(t *testing.T) {
 		{
 			name:               "streaming would keeping write data after response body flush",
 			expectedWriteTimes: 3,
-			streamFunc: func(w http.ResponseWriter) {
+			streamFunc: func(w http.ResponseWriter) bool {
 				w.Write([]byte{})
 				w.Write([]byte{})
+				return false
 			},
 		},
 	}

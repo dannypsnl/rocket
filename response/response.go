@@ -7,6 +7,8 @@ import (
 	"github.com/dannypsnl/rocket/cookie"
 )
 
+type KeepFunc func(w http.ResponseWriter) (keep bool)
+
 // Response provide an abstraction for detailed HTTP response
 type Response struct {
 	headers map[string]string
@@ -15,7 +17,7 @@ type Response struct {
 	cookies    []*http.Cookie
 	statusCode int
 
-	keepFunc func(w http.ResponseWriter)
+	keepFunc KeepFunc
 }
 
 // Headers helps code be more readable
@@ -80,7 +82,7 @@ func (res *Response) Cookies(cookies ...*cookie.Cookie) *Response {
 	return res
 }
 
-func (res *Response) keep(keepFunc func(w http.ResponseWriter)) *Response {
+func (res *Response) keep(keepFunc KeepFunc) *Response {
 	res.keepFunc = keepFunc
 	return res
 }
@@ -92,7 +94,19 @@ func (res *Response) WriteTo(w http.ResponseWriter) {
 	res.setStatusCode(w)
 	fmt.Fprint(w, res.Body)
 	if res.keepFunc != nil {
-		res.keepFunc(w)
+		connDone := w.(http.CloseNotifier).CloseNotify()
+		for {
+			select {
+			case <-connDone:
+				return
+			default:
+				keeping := res.keepFunc(w)
+				w.(http.Flusher).Flush()
+				if !keeping {
+					return
+				}
+			}
+		}
 	}
 }
 
@@ -114,7 +128,7 @@ func (res *Response) setStatusCode(w http.ResponseWriter) {
 	}
 }
 
-func Stream(f func(http.ResponseWriter)) *Response {
+func Stream(f KeepFunc) *Response {
 	return New("").
 		keep(f)
 }
