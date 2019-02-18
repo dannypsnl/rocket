@@ -87,17 +87,15 @@ func (res *Response) keep(keepFunc KeepFunc) *Response {
 	return res
 }
 
-// WriteTo is not exported for you, so do not call it directly
-func (res *Response) WriteTo(w http.ResponseWriter) {
+func (res *Response) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res.setHeaders(w)
 	res.setCookie(w)
 	res.setStatusCode(w)
 	fmt.Fprint(w, res.Body)
 	if res.keepFunc != nil {
-		connDone := w.(http.CloseNotifier).CloseNotify()
 		for {
 			select {
-			case <-connDone:
+			case <-r.Context().Done():
 				return
 			default:
 				keeping := res.keepFunc(w)

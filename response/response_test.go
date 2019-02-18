@@ -32,7 +32,7 @@ func TestResponse(t *testing.T) {
 			cookie.New("testing", "hello"),
 		)
 	w := &fakeRespWriter{count: 0}
-	res.WriteTo(w)
+	res.ServeHTTP(w, &http.Request{})
 	// include content-type, set header, set cookie
 	assert.Eq(w.count, 3)
 }
@@ -82,7 +82,7 @@ func TestHTTPStreaming(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			w := &fakeWriteCounter{count: 0}
 			res := response.Stream(testCase.streamFunc)
-			res.WriteTo(w)
+			res.ServeHTTP(w, &http.Request{})
 			assert.Eq(w.count, testCase.expectedWriteTimes)
 		})
 	}
