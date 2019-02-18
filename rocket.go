@@ -85,7 +85,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, f := range rk.listOfFairing {
 		resp = f.OnResponse(resp)
 	}
-	resp.WriteTo(w)
+	resp.ServeHTTP(w, r)
 }
 
 func (rk *Rocket) defaultResponse() *response.Response {

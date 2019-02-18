@@ -32,7 +32,7 @@ func TestResponse(t *testing.T) {
 			cookie.New("testing", "hello"),
 		)
 	w := &fakeRespWriter{count: 0}
-	res.WriteTo(w)
+	res.ServeHTTP(w, &http.Request{})
 	// include content-type, set header, set cookie
 	assert.Eq(w.count, 3)
 }
@@ -41,6 +41,10 @@ type fakeWriteCounter struct {
 	count int
 }
 
+func (w *fakeWriteCounter) Flush() {}
+func (w *fakeWriteCounter) CloseNotify() <-chan bool {
+	return make(<-chan bool)
+}
 func (w *fakeWriteCounter) Header() http.Header {
 	return http.Header(map[string][]string{})
 }
@@ -56,7 +60,7 @@ func TestHTTPStreaming(t *testing.T) {
 	testCases := []struct {
 		name               string
 		expectedWriteTimes int
-		streamFunc         func(w http.ResponseWriter)
+		streamFunc         response.KeepFunc
 	}{
 		{
 			name:               "nil func should be ignore",
@@ -66,9 +70,10 @@ func TestHTTPStreaming(t *testing.T) {
 		{
 			name:               "streaming would keeping write data after response body flush",
 			expectedWriteTimes: 3,
-			streamFunc: func(w http.ResponseWriter) {
+			streamFunc: func(w http.ResponseWriter) bool {
 				w.Write([]byte{})
 				w.Write([]byte{})
+				return false
 			},
 		},
 	}
@@ -77,7 +82,7 @@ func TestHTTPStreaming(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			w := &fakeWriteCounter{count: 0}
 			res := response.Stream(testCase.streamFunc)
-			res.WriteTo(w)
+			res.ServeHTTP(w, &http.Request{})
 			assert.Eq(w.count, testCase.expectedWriteTimes)
 		})
 	}

@@ -12,19 +12,19 @@
     <title>Guard :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1550384278" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1550384278" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1550468845" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1550384278" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1550468845" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1550384278"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1550468845"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1550384278"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1550384278"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1550468845"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1550384278"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1550468845"></script>
 
     
   </div>
@@ -376,15 +376,15 @@ it can reject a request by returning an error.</p>
 <p>Here is an easy example:</p>
 
 <pre><code class="language-go">type User struct {
-	Authorization *string `header:&quot;Authorization&quot;`
+    Authorization *string `header:&quot;Authorization&quot;`
 }
 
 func (u *User) VerifyRequest() error {
-	// Assuming we have a JWT verify helper function
-	if verifyAuthByJWT(u.Auth) {
-		return nil
-	}
-	return rocket.AuthError(&quot;not allowed&quot;)
+    // Assuming we have a JWT verify helper function
+    if verifyAuthByJWT(u.Auth) {
+        return nil
+    }
+    return rocket.AuthError(&quot;not allowed&quot;)
 }
 
 var handler = rocket.Get(&quot;/user_data&quot;, func() string {
@@ -598,20 +598,20 @@ var handler = rocket.Get(&quot;/user_data&quot;, func() string {
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1550384278"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1550384278"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1550384278"></script>
-    <script src="/rocket/js/jquery.sticky.js?1550384278"></script>
-    <script src="/rocket/js/featherlight.min.js?1550384278"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1550384278"></script>
-    <script src="/rocket/js/highlight.pack.js?1550384278"></script>
+    <script src="/rocket/js/clipboard.min.js?1550468845"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1550468845"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1550468845"></script>
+    <script src="/rocket/js/jquery.sticky.js?1550468845"></script>
+    <script src="/rocket/js/featherlight.min.js?1550468845"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1550468845"></script>
+    <script src="/rocket/js/highlight.pack.js?1550468845"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1550384278"></script>
-    <script src="/rocket/js/learn.js?1550384278"></script>
-    <script src="/rocket/js/hugo-learn.js?1550384278"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1550468845"></script>
+    <script src="/rocket/js/learn.js?1550468845"></script>
+    <script src="/rocket/js/hugo-learn.js?1550468845"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1550384278" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1550384278"></script>
+    <link href="/rocket/mermaid/mermaid.css?1550468845" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1550468845"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

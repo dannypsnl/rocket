@@ -60,10 +60,12 @@ Factory functions:
 - `Stream`, create a streamable responder by allowing you keep writing data into `http.ResponseWriter`
 
     ```go
-    response.Stream(func(w http.ResponseWriter) {
-        for {
-            w.Write([]byte(`hello\n`))
+    response.Stream(func(w http.ResponseWriter) (keep bool) {
+        _, err := w.Write([]byte(`hello\n`))
+        if err != nil {
+            return false
         }
+        return true
     })
     ```
     This is because Go `http` package help you could use HTTP/1.1 connection as streaming by ignoring __EOF__,
@@ -97,7 +99,7 @@ Here is all methods of `Response`:
 - `ContentType`, let you modify content-type of response easier(compare to setting __header__ directly)
 
     ```go
-    response.Stream(func(w http.ResponseWriter) {
+    response.Stream(func(w http.ResponseWriter) bool {
         // ignore
     }).
         ContentType("application/json")
