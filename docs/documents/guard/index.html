@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/rocket/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/rocket/images/favicon.png" type="image/x-icon" />
-    <title>Minimum Example :: Rocket</title>
+    <title>Guard :: Rocket</title>
 
     
     <link href="/rocket/css/nucleus.css?1550384278" rel="stylesheet">
@@ -34,7 +34,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/rocket/quick_start/minimum_example/">
+  <body class="" data-url="/rocket/documents/guard/">
     <nav id="sidebar" class="">
 
 
@@ -93,7 +93,7 @@
   
     
     <li data-nav-id="/rocket/quick_start/" title="QuickStart" class="dd-item 
-        parent
+        
         
         
         ">
@@ -117,7 +117,7 @@
  
   
     
-      <li data-nav-id="/rocket/quick_start/minimum_example/" title="Minimum Example" class="dd-item active">
+      <li data-nav-id="/rocket/quick_start/minimum_example/" title="Minimum Example" class="dd-item ">
         <a href="/rocket/quick_start/minimum_example/">
         Minimum Example
         
@@ -144,7 +144,7 @@
   
     
     <li data-nav-id="/rocket/documents/" title="Documents" class="dd-item 
-        
+        parent
         
         
         ">
@@ -244,7 +244,7 @@
  
   
     
-      <li data-nav-id="/rocket/documents/guard/" title="Guard" class="dd-item ">
+      <li data-nav-id="/rocket/documents/guard/" title="Guard" class="dd-item active">
         <a href="/rocket/documents/guard/">
         Guard
         
@@ -324,7 +324,7 @@
             
           
           
-            <a href='/rocket/'></a> > <a href='/rocket/quick_start/'>QuickStart</a> > Minimum Example
+            <a href='/rocket/'></a> > <a href='/rocket/documents/'>Documents</a> > Guard
           
          
           
@@ -337,7 +337,20 @@
                 
                     <div class="progress">
     <div class="wrapper">
-
+<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#possible-errors">Possible Errors</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
     </div>
 </div>
 
@@ -349,50 +362,51 @@
         
         <div id="body-inner">
           
-            <h1>Minimum Example</h1>
+            <h1>Guard</h1>
           
 
         
 
 
-<p>Before you write down any code. You need to import the package.</p>
 
-<pre><code class="language-go">import (
-    &quot;github.com/dannypsnl/rocket&quot;
-)
-</code></pre>
 
-<p>With Rocket, you will create a lots of handler,
-here is a basic handler with user-defined context.</p>
+<p>A guard is a type that implemented the interface <code>rocket.Guard</code>,
+it can reject a request by returning an error.</p>
+
+<p>Here is an easy example:</p>
 
 <pre><code class="language-go">type User struct {
-    Name string `route:&quot;name&quot;`
-    Age  uint64 `route:&quot;age&quot;`
+	Authorization *string `header:&quot;Authorization&quot;`
 }
-var hello = rocket.Get(&quot;/:name/:age&quot;, func(u *User) string {
-    return &quot;Hello &quot; + u.Name + &quot;, your age is &quot; + strconv.FormatUint(u.Age, 10)
-})
-</code></pre>
 
-<p>How to let it work?</p>
-
-<pre><code class="language-go">// main.go
-func main() {
-    rocket.Ignite(&quot;:8080&quot;).
-        Mount(&quot;/user&quot;, hello).
-        Launch()
+func (u *User) VerifyRequest() error {
+	// Assuming we have a JWT verify helper function
+	if verifyAuthByJWT(u.Auth) {
+		return nil
+	}
+	return rocket.AuthError(&quot;not allowed&quot;)
 }
+
+var handler = rocket.Get(&quot;/user_data&quot;, func() string {
+    // would return data if `VerifyRequest` do not return any errors
+}).Guard(&amp;User{})
 </code></pre>
 
-<p>Now execute <code>go run main.go</code>, open your browser to <code>localhost:8080/user/Danny/21</code>.</p>
+<h4 id="possible-errors">Possible Errors</h4>
 
-<p>Then you will see <code>Hello Danny, your age is 21</code>.</p>
+<ul>
+<li>normal error: usually should be returned by helper function in your <code>VerifyRequest</code> method, since it would make Status be <code>500 Internal Server Error</code></li>
 
-<p>Or use <code>curl</code>:</p>
+<li><p><code>rocket.AuthError</code>: should be returned when you believe it&rsquo;s an Authorization error, it would bring <code>403 Forbidden</code></p>
 
-<pre><code class="language-bash">$ curl localhost:8080/user/Danny/21
-Hello Danny, your age is 21
-</code></pre>
+<pre><code class="language-go">rocket.AuthError(&quot;auth error, error: %s&quot;, err)
+</code></pre></li>
+
+<li><p><code>rocket.ValidateError</code>: should be returned when you think the request was something wrong, it would return <code>400 Bad Request</code></p>
+
+<pre><code class="language-go">rocket.ValidateError(&quot;auth error, error: %s&quot;, err)
+</code></pre></li>
+</ul>
 
 
 <footer class=" footline" >
@@ -431,40 +445,6 @@ Hello Danny, your age is 21
             
                 
                     
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
                         
                         
                     
@@ -492,10 +472,30 @@ Hello Danny, your age is 21
             
         
                     
+            
+        
+                    
                         
             
             
                 
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
                     
                 
                 
@@ -544,6 +544,23 @@ Hello Danny, your age is 21
             
             
                 
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
                     
                 
                 
@@ -568,10 +585,10 @@ Hello Danny, your age is 21
 	 
 	 
 		
-			<a class="nav nav-prev" href="/rocket/quick_start/" title="QuickStart"> <i class="fa fa-chevron-left"></i></a>
+			<a class="nav nav-prev" href="/rocket/documents/fairing/" title="Fairing"> <i class="fa fa-chevron-left"></i></a>
 		
 		
-			<a class="nav nav-next" href="/rocket/documents/" title="Documents" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+			<a class="nav nav-next" href="/rocket/documents/server/" title="Server" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
 		
 	
     </div>

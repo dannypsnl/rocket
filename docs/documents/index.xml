@@ -63,5 +63,16 @@ But we still need some hooks to record some data or modifying the input/output f
 type Logger struct { fairing.Fairing } func (l *Logger) OnRequest(r *http.Request) *http.Request { log.Printf(&amp;quot;request: %#v\n&amp;quot;, r) return r } func (l *Logger) OnResponse(r *response.Response) *response.Response { log.Printf(&amp;quot;response: %#v\n&amp;quot;, r) return r } // in main function or entrypoint rocket.</description>
     </item>
     
+    <item>
+      <title>Guard</title>
+      <link>http://dannypsnl.github.io/rocket/documents/guard/</link>
+      <pubDate>Sun, 17 Feb 2019 14:09:30 +0800</pubDate>
+      
+      <guid>http://dannypsnl.github.io/rocket/documents/guard/</guid>
+      <description>A guard is a type that implemented the interface rocket.Guard, it can reject a request by returning an error.
+Here is an easy example:
+type User struct { Authorization *string `header:&amp;quot;Authorization&amp;quot;` } func (u *User) VerifyRequest() error { // Assuming we have a JWT verify helper function if verifyAuthByJWT(u.Auth) { return nil } return rocket.AuthError(&amp;quot;not allowed&amp;quot;) } var handler = rocket.Get(&amp;quot;/user_data&amp;quot;, func() string { // would return data if `VerifyRequest` do not return any errors }).</description>
+    </item>
+    
   </channel>
 </rss>
