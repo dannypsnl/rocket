@@ -1,5 +1,7 @@
 ## Latest
 
+## v0.13.0
+
 - fix: wildcard route matching
 - `func (*cookie.Cookie) MaxAge(int)`: use to modified max age field of the cookie
 - feat: `func File(filepath string) *Response` at package `response`, use to create a file response with default content-type
