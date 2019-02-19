@@ -12,7 +12,7 @@ import (
 // Rocket is our service.
 type Rocket struct {
 	port          string
-	handlers      *Route
+	router        *Route
 	listOfFairing []fairing.Interface
 
 	defaultHandler reflect.Value
@@ -24,10 +24,10 @@ func (rk *Rocket) Mount(routeStr string, h *handler, hs ...*handler) *Rocket {
 	verifyBase(routeStr)
 
 	route := splitBySlash(routeStr)
-	rk.handlers.addHandlerOn(route, h)
+	rk.router.addHandler(route, h)
 
 	for _, h := range hs {
-		rk.handlers.addHandlerOn(route, h)
+		rk.router.addHandler(route, h)
 	}
 
 	return rk
@@ -57,7 +57,7 @@ func (rk *Rocket) Launch() {
 func Ignite(port string) *Rocket {
 	return &Rocket{
 		port:          port,
-		handlers:      NewRoute(),
+		router:        NewRoute(),
 		listOfFairing: make([]fairing.Interface, 0),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
@@ -74,7 +74,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get response
-	handler := rk.handlers.getHandler(reqURL, r.Method)
+	handler := rk.router.getHandler(reqURL, r.Method)
 	var resp *response.Response
 	if handler != nil {
 		resp = handler.handle(reqURL, r)

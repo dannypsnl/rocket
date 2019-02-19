@@ -65,9 +65,8 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 	}
 
 	for idx, r := range routes {
-		// a route part like `:name`
 		if r[0] == ':' || r[0] == '*' {
-			// r[1:] is `name`, that's the key we expected
+			// what if r is ":name", r[1:] is "name", that's the key we expected
 			param := r[1:]
 			if _, ok := routeParams[param]; ok {
 				ctx.RouteParams[idx] = routeParams[param]
