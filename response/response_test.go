@@ -2,39 +2,60 @@ package response_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
+	"github.com/gavv/httpexpect"
 
 	asserter "github.com/dannypsnl/assert"
 )
 
-type fakeRespWriter struct {
-	count int
-}
+func TestRespAsHTTPHandler(t *testing.T) {
+	testCases := []struct {
+		name    string
+		resp    *response.Response
+		expectF func(r *httpexpect.Request)
+	}{
+		{
+			name: "say hello",
+			resp: response.New("hello"),
+			expectF: func(r *httpexpect.Request) {
+				r.Expect().Body().Contains("hello")
+			},
+		},
+		{
+			name: "header and cookie",
+			resp: response.New("").
+				Headers(response.Headers{
+					"x-testing": "hello",
+				}).
+				Cookies(
+					cookie.New("testing", "hello"),
+				),
+			expectF: func(r *httpexpect.Request) {
+				r.Expect().Header("x-testing").Equal("hello")
+				r.Expect().Cookie("testing").Value().Equal("hello")
+			},
+		},
+		{
+			name: "status code",
+			resp: response.New("").Status(http.StatusNotFound),
+			expectF: func(r *httpexpect.Request) {
+				r.Expect().Status(http.StatusNotFound)
+			},
+		},
+	}
 
-func (w *fakeRespWriter) Header() http.Header {
-	w.count++
-	return http.Header(map[string][]string{})
-}
-func (w *fakeRespWriter) Write([]byte) (int, error)  { return 1, nil }
-func (w *fakeRespWriter) WriteHeader(statusCode int) {}
-
-func TestResponse(t *testing.T) {
-	assert := asserter.NewTester(t)
-
-	res := response.New("").
-		Headers(response.Headers{
-			"x-testing": "hello",
-		}).
-		Cookies(
-			cookie.New("testing", "hello"),
-		)
-	w := &fakeRespWriter{count: 0}
-	res.ServeHTTP(w, &http.Request{})
-	// include content-type, set header, set cookie
-	assert.Eq(w.count, 3)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ts := httptest.NewServer(testCase.resp)
+			defer ts.Close()
+			e := httpexpect.New(t, ts.URL)
+			testCase.expectF(e.GET("/"))
+		})
+	}
 }
 
 type fakeWriteCounter struct {
