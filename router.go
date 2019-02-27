@@ -3,6 +3,9 @@ package rocket
 import (
 	"fmt"
 	"net/http"
+	"reflect"
+
+	"github.com/dannypsnl/rocket/response"
 )
 
 type Route struct {
@@ -13,64 +16,63 @@ type Route struct {
 	// ownHandler means this Route has route, so not found handler would be 403(wrong method),
 	// else is 404
 	ownHandler bool
-	// wildcardRoute is the handler of route `*path`
-	wildcardRoute map[string]*handler
-	// handlers stores map Method to handler of this route
-	handlers map[string]*handler
+	// wildcardMethodHandlers is the handler of route `*path`
+	wildcardMethodHandlers map[string]*handler
+	// methodHandlers stores map Method to handler of this route
+	methodHandlers map[string]*handler
 	// optionsHandler stores a special handler for OPTION method handling
 	optionsHandler *optionsHandler
 }
 
 func NewRoute() *Route {
 	return &Route{
-		children: make(map[string]*Route),
-		handlers: make(map[string]*handler),
+		children:       make(map[string]*Route),
+		methodHandlers: make(map[string]*handler),
 	}
 }
 
-func (r *Route) noVariableRoute() bool {
-	return r.variableRoute == nil
+func (r *Route) mustGetVariableRoute() *Route {
+	if r.variableRoute == nil {
+		r.variableRoute = NewRoute()
+	}
+	return r.variableRoute
 }
-func (r *Route) noWildcardRoute() bool {
-	return r.wildcardRoute == nil
+func (r *Route) prepareWildcardRoute() {
+	if r.wildcardMethodHandlers == nil {
+		r.wildcardMethodHandlers = make(map[string]*handler)
+	}
 }
 
-func (r *Route) addHandlerOn(baseRoute []string, h *handler) {
-	// rename r to root, then following code would be more readable
-	root := r
+const PanicDuplicateRoute = "Duplicate Route"
+
+func (root *Route) addHandler(baseRoute []string, h *handler) {
 	fullRoute := append(baseRoute, h.routes...)
-	currentMatchedRoute := root
+	curRoute := root
 	for i, r := range fullRoute {
-		if isParameter(r) {
-			if currentMatchedRoute.noVariableRoute() {
-				currentMatchedRoute.variableRoute = NewRoute()
-			}
-			currentMatchedRoute = currentMatchedRoute.variableRoute
+		if r[0] == ':' {
+			curRoute = curRoute.mustGetVariableRoute()
+			continue
 		} else if r[0] == '*' {
 			h.matchedPathIndex = i - len(baseRoute)
-			if currentMatchedRoute.noWildcardRoute() {
-				currentMatchedRoute.wildcardRoute = make(map[string]*handler)
+			curRoute.prepareWildcardRoute()
+			if _, ok := curRoute.wildcardMethodHandlers[h.method]; ok {
+				panic(PanicDuplicateRoute)
 			}
-			if _, ok := currentMatchedRoute.wildcardRoute[h.method]; !ok {
-				currentMatchedRoute.addHandlerTo(currentMatchedRoute.wildcardRoute, h)
-				return
-			}
-			panic(PanicDuplicateRoute)
-		} else if _, ok := currentMatchedRoute.children[r]; !ok {
-			currentMatchedRoute.children[r] = NewRoute()
-			currentMatchedRoute = currentMatchedRoute.children[r]
-		} else {
-			currentMatchedRoute = currentMatchedRoute.children[r]
+			curRoute.addHandlerOn(curRoute.wildcardMethodHandlers, h)
+			return
+		} else if _, ok := curRoute.children[r]; !ok {
+			curRoute.children[r] = NewRoute()
 		}
+		curRoute = curRoute.children[r]
 	}
 
-	if _, ok := currentMatchedRoute.handlers[h.method]; ok {
+	if _, ok := curRoute.methodHandlers[h.method]; ok {
 		panic(PanicDuplicateRoute)
 	}
-	currentMatchedRoute.addHandlerTo(currentMatchedRoute.handlers, h)
+	curRoute.addHandlerOn(curRoute.methodHandlers, h)
 }
 
-func (r *Route) addHandlerTo(m map[string]*handler, h *handler) {
+func (r *Route) addHandlerOn(m map[string]*handler, h *handler) {
 	if r.optionsHandler == nil {
 		r.optionsHandler = newOptionsHandler()
 	}
@@ -80,40 +82,44 @@ func (r *Route) addHandlerTo(m map[string]*handler, h *handler) {
 	r.ownHandler = true
 }
 
+const ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
+
 func (r *Route) getHandler(requestUrl []string, method string) *handler {
 	if len(requestUrl) == 0 {
 		if !r.ownHandler {
 			return nil
 		}
-		if h, ok := r.handlers[method]; ok {
+		if h, ok := r.methodHandlers[method]; ok {
 			return h
 		}
-		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
+		return responseNotAllowed(method)
 	}
 
-	head, restRequestUrl := requestUrl[0], requestUrl[1:]
-	if router, ok := r.children[head]; ok {
-		if handler := router.getHandler(restRequestUrl, method); handler != nil {
-			return handler
+	headOfUrl, onRestUrl := requestUrl[0], requestUrl[1:]
+	if router, ok := r.children[headOfUrl]; ok {
+		if h := router.getHandler(onRestUrl, method); h != nil {
+			return h
 		}
 	}
 	if r.variableRoute != nil {
-		if handler := r.variableRoute.getHandler(restRequestUrl, method); handler != nil {
-			return handler
+		if h := r.variableRoute.getHandler(onRestUrl, method); h != nil {
+			return h
 		}
 	}
-	if r.wildcardRoute != nil {
-		if h, hasWildcardRouteHandler := r.wildcardRoute[method]; hasWildcardRouteHandler {
+	if r.wildcardMethodHandlers != nil {
+		if h, hasWildcardRouteHandler := r.wildcardMethodHandlers[method]; hasWildcardRouteHandler {
 			// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
 			h.addMatchedPathValueIntoContext(requestUrl...)
 			return h
 		}
-		return newErrorHandler(http.StatusMethodNotAllowed, fmt.Sprintf(ErrorMessageForMethodNotAllowed, method))
+		return responseNotAllowed(method)
 	} else {
 		return nil
 	}
 }
 
-func isParameter(route string) bool {
-	return route[0] == ':'
+func responseNotAllowed(method string) *handler {
+	return newHandler(reflect.ValueOf(func() *response.Response {
+		return response.New(fmt.Sprintf(ErrorMessageForMethodNotAllowed, method)).Status(http.StatusMethodNotAllowed)
+	}))
 }

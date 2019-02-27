@@ -28,12 +28,6 @@ func newHandler(do reflect.Value) *handler {
 	}
 }
 
-func newErrorHandler(code int, content string) *handler {
-	return newHandler(reflect.ValueOf(func() *response.Response {
-		return response.New(content).Status(code)
-	}))
-}
-
 func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	ctx, err := h.getContexts(reqURL, r)
 	if err != nil {
