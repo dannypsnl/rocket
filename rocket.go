@@ -21,13 +21,10 @@ type Rocket struct {
 
 // Mount add handler into our service.
 func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
-	route := splitBySlash("")
-	rk.router.addHandler(route, h)
-
+	rk.router.addHandler(h)
 	for _, h := range hs {
-		rk.router.addHandler(route, h)
+		rk.router.addHandler(h)
 	}
-
 	return rk
 }
 

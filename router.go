@@ -45,15 +45,15 @@ func (r *Route) prepareWildcardRoute() {
 
 const PanicDuplicateRoute = "Duplicate Route"
 
-func (root *Route) addHandler(baseRoute []string, h *handler) {
-	fullRoute := append(baseRoute, h.routes...)
+func (root *Route) addHandler(h *handler) {
+	fullRoute := h.routes
 	curRoute := root
 	for i, r := range fullRoute {
 		if r[0] == ':' {
 			curRoute = curRoute.mustGetVariableRoute()
 			continue
 		} else if r[0] == '*' {
-			h.matchedPathIndex = i - len(baseRoute)
+			h.matchedPathIndex = i
 			curRoute.prepareWildcardRoute()
 			if _, ok := curRoute.wildcardMethodHandlers[h.method]; ok {
 				panic(PanicDuplicateRoute)
