@@ -1,5 +1,17 @@
 ## Latest
 
+- remove base route from design, NOTE: it's a big break change
+
+	New style example:
+	```go
+	rocket.Ignite(":8080").
+		Mount(
+			rocket.Get("/", home),
+			rocket.Get("/static/*filepath", staticFiles)
+	 	).
+		Launch()
+	```
+
 ## v0.13.0
 
 - fix: wildcard route matching
