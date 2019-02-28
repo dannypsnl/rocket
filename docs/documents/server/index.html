@@ -12,19 +12,19 @@
     <title>Server :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1551372881" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1550468845" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1551372881" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1550468845"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1551372881"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1550468845"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1551372881"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1551372881"></script>
 
     
   </div>
@@ -367,19 +367,25 @@
 <p>Then we will use <code>Mount</code> mounts some handlers.</p>
 
 <pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    Mount(&quot;/&quot;, handler)
+    Mount(handler)
 </code></pre>
 
-<p>The first argument of <code>Mount</code> is base route. This is a leading route for following handlers mounted under this route.</p>
-
-<p>For example, if base route is <code>&quot;/base&quot;</code>, route of handler is <code>&quot;/hello&quot;</code>, the final route is <code>&quot;/base/hello&quot;</code></p>
-
-<p>Then one thing you should know is you can mount several handlers at one <code>Mount</code> call.
+<p>The thing you should know is you can mount several handlers at one <code>Mount</code> call.
 For example:</p>
 
 <pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
-    Mount(&quot;/&quot;, handler1, handler2) // and below
+    Mount(handler1, handler2) // and below
 </code></pre>
+
+<p>And the important thing is we high recommended you writing like:</p>
+
+<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
+    Mount(
+        rocket.Get(&quot;/&quot;, handlerFunction),
+    )
+</code></pre>
+
+<p>To make route visible when you defining them.</p>
 
 <p>Next is handling <strong>Not Found: 404</strong>, we use <code>Default</code> to handle this.</p>
 
@@ -595,20 +601,20 @@ Then you will see the browser render respnose as HTML</p>
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1550468845"></script>
-    <script src="/rocket/js/jquery.sticky.js?1550468845"></script>
-    <script src="/rocket/js/featherlight.min.js?1550468845"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1550468845"></script>
-    <script src="/rocket/js/highlight.pack.js?1550468845"></script>
+    <script src="/rocket/js/clipboard.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1551372881"></script>
+    <script src="/rocket/js/jquery.sticky.js?1551372881"></script>
+    <script src="/rocket/js/featherlight.min.js?1551372881"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1551372881"></script>
+    <script src="/rocket/js/highlight.pack.js?1551372881"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1550468845"></script>
-    <script src="/rocket/js/learn.js?1550468845"></script>
-    <script src="/rocket/js/hugo-learn.js?1550468845"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1551372881"></script>
+    <script src="/rocket/js/learn.js?1551372881"></script>
+    <script src="/rocket/js/hugo-learn.js?1551372881"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1550468845" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1550468845"></script>
+    <link href="/rocket/mermaid/mermaid.css?1551372881" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1551372881"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

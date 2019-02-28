@@ -12,19 +12,19 @@
     <title>Handler &amp; Context :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1551372881" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1550468845" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1551372881" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1550468845"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1551372881"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1550468845"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1551372881"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1551372881"></script>
 
     
   </div>
@@ -380,10 +380,13 @@
 
 <p>Basically, we have the creator for handler. It uses like:</p>
 
-<pre><code class="language-go">var h = rocket.Get(&quot;/hello&quot;, func() string { return &quot;&quot; })
+<pre><code class="language-go">func handler() string { return &quot;&quot; }
+// In `Mount`
+rocket.Get(&quot;/hello&quot;, handler)
 </code></pre>
 
-<p>Now we have a handler variable <code>h</code>, it contains a variant route <code>&quot;/hello&quot;</code>, the second argument of <code>Get</code> is it&rsquo;s handle function. When request path matches this route, the response is handle function&rsquo;s response.</p>
+<p>Now we have a handler function <code>handler</code>, and we can use a route <code>&quot;/hello</code> and <code>handler</code> to create a new Rocket&rsquo;s handler.
+When request path matches this route, the response is response of handler function.</p>
 
 <p>We have following creator mapping to HTTP method currently.</p>
 
@@ -487,7 +490,7 @@ type (
 )
 
 // ignore all errors
-var kubernetesProxy = rocket.Get(&quot;namespaces/:namespace/:kind&quot;, func(c *CheckWatch, r *Resource) response.Json {
+func kubernetesProxy(c *CheckWatch, r *Resource) response.Json {
     opts := &amp;metav1.ListOptions{}
     if c.IsWatch != nil &amp;&amp; *c.IsWatch {
         return response.Stream(func(w http.ResponseWriter) {
@@ -521,11 +524,13 @@ var kubernetesProxy = rocket.Get(&quot;namespaces/:namespace/:kind&quot;, func(c
         Into(result)
     data, err := json.Marshal(result)
     return response.Json(data)
-})
+}
 
 rocket.
     // ignore
-    Mount(&quot;/api/v1&quot;, kubernetesProxy).
+    Mount(
+        rocket.Get(&quot;/api/v1/namespaces/:namespace/:kind&quot;, kubernetesProxy),
+    ).
     Launch()
 </code></pre>
 
@@ -722,20 +727,20 @@ rocket.
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1550468845"></script>
-    <script src="/rocket/js/jquery.sticky.js?1550468845"></script>
-    <script src="/rocket/js/featherlight.min.js?1550468845"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1550468845"></script>
-    <script src="/rocket/js/highlight.pack.js?1550468845"></script>
+    <script src="/rocket/js/clipboard.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1551372881"></script>
+    <script src="/rocket/js/jquery.sticky.js?1551372881"></script>
+    <script src="/rocket/js/featherlight.min.js?1551372881"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1551372881"></script>
+    <script src="/rocket/js/highlight.pack.js?1551372881"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1550468845"></script>
-    <script src="/rocket/js/learn.js?1550468845"></script>
-    <script src="/rocket/js/hugo-learn.js?1550468845"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1551372881"></script>
+    <script src="/rocket/js/learn.js?1551372881"></script>
+    <script src="/rocket/js/hugo-learn.js?1551372881"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1550468845" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1550468845"></script>
+    <link href="/rocket/mermaid/mermaid.css?1551372881" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1551372881"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

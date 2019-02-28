@@ -12,19 +12,19 @@
     <title>Minimum Example :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1550468845" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1550468845" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1551372881" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1550468845" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1551372881" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1550468845"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1551372881"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1550468845"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1551372881"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1550468845"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1551372881"></script>
 
     
   </div>
@@ -362,16 +362,16 @@
 )
 </code></pre>
 
-<p>With Rocket, you will create a lots of handler,
-here is a basic handler with user-defined context.</p>
+<p>With Rocket, you will create a lots of handler function,
+here is a basic handler function with user-defined context.</p>
 
 <pre><code class="language-go">type User struct {
     Name string `route:&quot;name&quot;`
     Age  uint64 `route:&quot;age&quot;`
 }
-var hello = rocket.Get(&quot;/:name/:age&quot;, func(u *User) string {
+func hello(u *User) string {
     return &quot;Hello &quot; + u.Name + &quot;, your age is &quot; + strconv.FormatUint(u.Age, 10)
-})
+}
 </code></pre>
 
 <p>How to let it work?</p>
@@ -379,7 +379,10 @@ var hello = rocket.Get(&quot;/:name/:age&quot;, func(u *User) string {
 <pre><code class="language-go">// main.go
 func main() {
     rocket.Ignite(&quot;:8080&quot;).
-        Mount(&quot;/user&quot;, hello).
+        Mount(
+            // put `hello` under a path `/user/:name/:age`, where `:name` and `:age` are variant parameters
+            rocket.Get(&quot;/user/:name/:age&quot;, hello),
+        ).
         Launch()
 }
 </code></pre>
@@ -581,20 +584,20 @@ Hello Danny, your age is 21
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1550468845"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1550468845"></script>
-    <script src="/rocket/js/jquery.sticky.js?1550468845"></script>
-    <script src="/rocket/js/featherlight.min.js?1550468845"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1550468845"></script>
-    <script src="/rocket/js/highlight.pack.js?1550468845"></script>
+    <script src="/rocket/js/clipboard.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1551372881"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1551372881"></script>
+    <script src="/rocket/js/jquery.sticky.js?1551372881"></script>
+    <script src="/rocket/js/featherlight.min.js?1551372881"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1551372881"></script>
+    <script src="/rocket/js/highlight.pack.js?1551372881"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1550468845"></script>
-    <script src="/rocket/js/learn.js?1550468845"></script>
-    <script src="/rocket/js/hugo-learn.js?1550468845"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1551372881"></script>
+    <script src="/rocket/js/learn.js?1551372881"></script>
+    <script src="/rocket/js/hugo-learn.js?1551372881"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1550468845" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1550468845"></script>
+    <link href="/rocket/mermaid/mermaid.css?1551372881" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1551372881"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

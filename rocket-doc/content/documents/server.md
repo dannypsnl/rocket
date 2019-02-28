@@ -17,19 +17,24 @@ So I think it won't be to hard to notice `:8080` means listen port `8080`.
 Then we will use `Mount` mounts some handlers.
 ```go
 rocket.Ignite(":8080").
-    Mount("/", handler)
+    Mount(handler)
 ```
 
-The first argument of `Mount` is base route. This is a leading route for following handlers mounted under this route.
-
-For example, if base route is `"/base"`, route of handler is `"/hello"`, the final route is `"/base/hello"`
-
-Then one thing you should know is you can mount several handlers at one `Mount` call.
+The thing you should know is you can mount several handlers at one `Mount` call.
 For example:
 ```go
 rocket.Ignite(":8080").
-    Mount("/", handler1, handler2) // and below
+    Mount(handler1, handler2) // and below
 ```
+
+And the important thing is we high recommended you writing like:
+```go
+rocket.Ignite(":8080").
+    Mount(
+        rocket.Get("/", handlerFunction),
+    )
+```
+To make route visible when you defining them.
 
 Next is handling **Not Found: 404**, we use `Default` to handle this.
 ```go
