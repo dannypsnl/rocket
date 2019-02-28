@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"github.com/dannypsnl/rocket/router"
 	"testing"
 
 	"github.com/dannypsnl/assert"
@@ -63,7 +64,7 @@ func TestDuplicatedRoute(t *testing.T) {
 
 func TestDuplicateRoutePanic(t *testing.T) {
 	defer func() {
-		if r := recover(); r != PanicDuplicateRoute {
+		if r := recover(); r != router.PanicDuplicateRoute {
 			t.Error("panic message is wrong or didn't panic")
 		}
 	}()

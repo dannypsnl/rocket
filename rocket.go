@@ -7,12 +7,13 @@ import (
 
 	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
+	"github.com/dannypsnl/rocket/router"
 )
 
 // Rocket is our service.
 type Rocket struct {
 	port          string
-	router        *Route
+	router        *router.Route
 	listOfFairing []fairing.Interface
 
 	defaultHandler reflect.Value
@@ -21,9 +22,15 @@ type Rocket struct {
 
 // Mount add handler into our service.
 func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
-	rk.router.addHandler(h)
+	err := rk.router.AddHandler(h)
+	if err != nil {
+		panic(err)
+	}
 	for _, h := range hs {
-		rk.router.addHandler(h)
+		err := rk.router.AddHandler(h)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return rk
 }
@@ -51,8 +58,11 @@ func (rk *Rocket) Launch() {
 // Ignite initial service by port. The format following native HTTP library `:port_number`
 func Ignite(port string) *Rocket {
 	return &Rocket{
-		port:          port,
-		router:        NewRoute(),
+		port: port,
+		router: router.New(
+			&optionsHandler{},
+			notAllowHandler,
+		),
 		listOfFairing: make([]fairing.Interface, 0),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
@@ -69,10 +79,10 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get response
-	handler := rk.router.getHandler(reqURL, r.Method)
+	hand := rk.router.GetHandler(reqURL, r.Method)
 	var resp *response.Response
-	if handler != nil {
-		resp = handler.handle(reqURL, r)
+	if h, ok := hand.(*handler); ok && h != nil {
+		resp = h.handle(reqURL, r)
 	} else {
 		resp = rk.defaultResponse()
 	}

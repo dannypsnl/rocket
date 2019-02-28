@@ -1,11 +1,13 @@
 package rocket
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 
 	"github.com/dannypsnl/rocket/internal/context"
 	"github.com/dannypsnl/rocket/response"
+	"github.com/dannypsnl/rocket/router"
 )
 
 type handler struct {
@@ -130,30 +132,37 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 	return userContexts, nil
 }
 
-type optionsHandler struct {
-	methods []string
+const ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
+
+func notAllowHandler(method string) router.Handler {
+	return newHandler(reflect.ValueOf(func() *response.Response {
+		return response.New(fmt.Sprintf(ErrorMessageForMethodNotAllowed, method)).Status(http.StatusMethodNotAllowed)
+	}))
 }
 
-func newOptionsHandler() *optionsHandler {
-	return &optionsHandler{
-		methods: make([]string, 0),
-	}
-}
+type optionsHandler struct{}
 
-func (o *optionsHandler) addMethod(method string) *optionsHandler {
-	o.methods = append(o.methods, method)
-	return o
-}
-
-func (o *optionsHandler) build() *handler {
-	allowMethods := "OPTIONS"
-	for _, m := range o.methods {
-		allowMethods += ", " + m
-	}
+func (o *optionsHandler) Build(allowMethods string) router.Handler {
 	return newHandler(reflect.ValueOf(func() *response.Response {
 		return response.New("").
 			Headers(response.Headers{
 				"Allow": allowMethods,
 			})
 	}))
+}
+
+// Method implements router.Handler
+func (h *handler) Method() string {
+	return h.method
+}
+
+// Routes implements router.Handler
+func (h *handler) Routes() []string {
+	return h.routes
+}
+
+// WildcardIndex implements router.Handler
+func (h *handler) WildcardIndex(i int) error {
+	h.matchedPathIndex = i
+	return nil
 }
