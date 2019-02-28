@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"bytes"
 	"net/http"
 	"reflect"
 
@@ -17,7 +16,6 @@ type handler struct {
 	guards       []*context.UserContext
 	userContexts []*context.UserContext
 
-	matchedPath      string
 	matchedPathIndex int
 }
 
@@ -88,15 +86,6 @@ func (h *handler) verify(reqURL []string, r *http.Request) error {
 	return nil
 }
 
-func (h *handler) addMatchedPathValueIntoContext(paths ...string) {
-	path := bytes.NewBuffer([]byte(``))
-	for _, v := range paths {
-		path.WriteString(v)
-		path.WriteRune('/')
-	}
-	h.matchedPath = path.String()[:path.Len()-1]
-}
-
 func (h *handler) getContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
 	return h.fillByCachedUserContexts(h.userContexts, reqURL, req)
 }
@@ -116,7 +105,6 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 				reqURL,
 				userContext.RouteParams,
 				h.matchedPathIndex,
-				h.matchedPath,
 			),
 			newQueryFiller(userContext.QueryParams, req.URL.Query()),
 		}

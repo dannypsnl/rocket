@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -17,7 +18,6 @@ type (
 		routeParams      map[int]int
 		reqURL           []string
 		matchedPathIndex int
-		matchedPath      string
 	}
 	queryFiller struct {
 		queryParams map[string]int
@@ -40,13 +40,12 @@ type (
 	}
 )
 
-func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int) filler {
 	return &routeFiller{
 		routes:           routes,
 		routeParams:      routeParams,
 		reqURL:           reqURL,
 		matchedPathIndex: matchedPathIndex,
-		matchedPath:      matchedPath,
 	}
 }
 
@@ -92,8 +91,17 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 	}
 	if r.matchedPathIndex != -1 {
 		i := r.routeParams[r.matchedPathIndex]
+		paths := r.reqURL[r.matchedPathIndex:]
+		path := bytes.NewBuffer([]byte(``))
+		for _, v := range paths {
+			path.WriteString(v)
+			path.WriteRune('/')
+		}
 		ctx.Elem().Field(i).
-			Set(reflect.ValueOf(r.matchedPath))
+			Set(reflect.ValueOf(
+				// remove last `/`
+				path.String()[:path.Len()-1],
+			))
 	}
 	return nil
 }
