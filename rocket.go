@@ -72,7 +72,7 @@ func Ignite(port string) *Rocket {
 
 // ServeHTTP is prepare for http server trait, so that you could use `*rocket.Rocket` as `http.Handler`
 func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	reqURL := splitBySlash(r.URL.Path)
+	reqURL := router.SplitBySlash(r.URL.Path)
 
 	for _, f := range rk.listOfFairing {
 		r = f.OnRequest(r)

@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"strings"
 )
 
 type Route struct {
@@ -29,7 +30,7 @@ type OptionsHandler interface {
 
 type Handler interface {
 	Method() string
-	Routes() []string
+	Route() string
 	WildcardIndex(int) error // maybe we should fall failed while we emit a wildcard index onto a handler don't do it?
 }
 
@@ -56,8 +57,18 @@ func (r *Route) prepareWildcardRoute() {
 
 var PanicDuplicateRoute = errors.New("duplicate route")
 
+func SplitBySlash(routeStr string) []string {
+	route := make([]string, 0)
+	for _, r := range strings.Split(strings.Trim(routeStr, "/"), "/") {
+		if r != "" {
+			route = append(route, r)
+		}
+	}
+	return route
+}
+
 func (root *Route) AddHandler(h Handler) error {
-	fullRoute := h.Routes()
+	fullRoute := SplitBySlash(h.Route())
 	curRoute := root
 	for i, r := range fullRoute {
 		if r[0] == ':' {

@@ -11,6 +11,7 @@ import (
 )
 
 type handler struct {
+	route  string
 	routes []string
 	do     reflect.Value // do should return response for HTTP writer
 	method string
@@ -157,8 +158,8 @@ func (h *handler) Method() string {
 }
 
 // Routes implements router.Handler
-func (h *handler) Routes() []string {
-	return h.routes
+func (h *handler) Route() string {
+	return h.route
 }
 
 // WildcardIndex implements router.Handler

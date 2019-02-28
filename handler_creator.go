@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dannypsnl/rocket/internal/context"
+	"github.com/dannypsnl/rocket/router"
 )
 
 func handlerByMethod(route *string, do interface{}, method string) *handler {
@@ -11,7 +12,8 @@ func handlerByMethod(route *string, do interface{}, method string) *handler {
 	h := newHandler(handlerDo)
 	h.method = method
 
-	h.routes = splitBySlash(*route)
+	h.route = *route
+	h.routes = router.SplitBySlash(*route)
 
 	handlerFuncT := reflect.TypeOf(do)
 	h.userContexts = make([]*context.UserContext, handlerFuncT.NumIn())

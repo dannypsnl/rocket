@@ -80,7 +80,7 @@ func TestRouting(t *testing.T) {
 				method, route := splitRuleToMethodRoute(requestRoute)
 				h := &handler{
 					method: method,
-					routes: splitBySlash(route),
+					route:  route,
 				}
 				err := r.AddHandler(h)
 				require.NoError(t, err)
@@ -88,8 +88,8 @@ func TestRouting(t *testing.T) {
 
 			for requestRoute, matchedRoute := range testCase.requestRouteMapToMatchedRoute {
 				method, route := splitRuleToMethodRoute(requestRoute)
-				h := r.GetHandler(splitBySlash(route), method)
-				if len(splitBySlash(matchedRoute)) > 0 && splitBySlash(matchedRoute)[0] == matchedRoute {
+				h := r.GetHandler(router.SplitBySlash(route), method)
+				if len(router.SplitBySlash(matchedRoute)) > 0 && router.SplitBySlash(matchedRoute)[0] == matchedRoute {
 					if h != nil {
 						// method not allow
 						require.Equal(t, matchedRoute, h.(*handler).message)
@@ -98,21 +98,11 @@ func TestRouting(t *testing.T) {
 						require.Equal(t, nil, h)
 					}
 				} else if h != nil {
-					require.Equal(t, matchedRoute, "/"+strings.Join(h.Routes(), "/"))
+					require.Equal(t, matchedRoute, h.Route())
 				}
 			}
 		})
 	}
-}
-
-func splitBySlash(routeStr string) []string {
-	route := make([]string, 0)
-	for _, r := range strings.Split(strings.Trim(routeStr, "/"), "/") {
-		if r != "" {
-			route = append(route, r)
-		}
-	}
-	return route
 }
 
 func splitRuleToMethodRoute(rule string) (method string, route string) {
@@ -136,15 +126,15 @@ func (o *optionsHandler) Build(allowMethods string) router.Handler {
 
 type handler struct {
 	method  string
-	routes  []string
+	route   string
 	message string
 }
 
 func (h *handler) Method() string {
 	return h.method
 }
-func (h *handler) Routes() []string {
-	return h.routes
+func (h *handler) Route() string {
+	return h.route
 }
 func (h *handler) WildcardIndex(i int) error {
 	return nil
