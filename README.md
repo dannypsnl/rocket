@@ -42,11 +42,18 @@ type User struct {
 	Age int `route:"age"`
 }
 
-var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
+func hello (u *User) string {
 	return fmt.Sprintf(
 		"Hello, %s.\nYour age is %d.",
 		u.Name, u.Age)
 })
+
+// use
+rocket.Ignite(":8080").
+	Mount(
+		rocket.Get("/name/:name/age/:age", hello),
+	).
+	Launch()
 ```
 
 - First argument of handler creator is a route string can have variant part.
@@ -70,15 +77,17 @@ var hello = rocket.Get("/name/:name/age/:age", func(u *User) string {
 
 ```go
 rocket.Ignite(":8080"). // Setting port
-	Mount("/", index, static).
-	Mount("/hello", hello).
+	Mount(
+		rocket.Get("/", index),
+		rocket.Get("/static/*path", static),
+		rocket.Get("/hello", hello),
+	).
 	Launch() // Start Serve
 ```
 
 - func Ignite get a string to describe port.
 - Launch start the server.
-- **Mount** receive a base route and a handler that exactly handle route. You can emit 1 to N handlers in one `Mount`
-	**Note**: Base route can't put parameters part. That is illegal route.
+- **Mount** receive handlers that exactly handle route. You can emit 1 to N handlers in one `Mount`
 
 #### Fairing(experimental release)
 
@@ -134,8 +143,9 @@ func (u *User) VerifyRequest() error {
 	return rocket.AuthError("not allowed")
 }
 
-var handler = rocket.Get("/user_data", func() string {
-    // return data if pass `VerifyRequest`
-}).
-    Guard(&User{})
+rocket.Ignite(":8080").
+	Mount(
+		rocket.Get("/user_data", handler).Guard(&User{}),
+	).
+	Launch()
 ```
