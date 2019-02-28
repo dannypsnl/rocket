@@ -88,7 +88,7 @@ func TestRouting(t *testing.T) {
 				case "POST":
 					handler = rocket.Post(route, handleFunc)
 				}
-				rk.Mount("/", handler)
+				rk.Mount(handler)
 			}
 			ts := httptest.NewServer(rk)
 			defer ts.Close()
