@@ -3,7 +3,6 @@ package rocket
 import (
 	"errors"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -16,15 +15,6 @@ func splitBySlash(routeStr string) []string {
 		}
 	}
 	return route
-}
-
-func verifyBase(route string) bool {
-	r, _ := regexp.Compile(".*?[:*].*?")
-	// Contains : part will Match, it can be on a Base Route
-	if r.MatchString(route) {
-		panic("Base route can not contain dynamic route.")
-	}
-	return true
 }
 
 var (
