@@ -1,7 +1,6 @@
 package rocket
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -92,15 +91,26 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 	if r.matchedPathIndex != -1 {
 		i := r.routeParams[r.matchedPathIndex]
 		paths := r.reqURL[r.matchedPathIndex:]
-		path := bytes.NewBuffer([]byte(``))
-		for _, v := range paths {
-			path.WriteString(v)
-			path.WriteRune('/')
+
+		lenOfPath := len(paths[0])
+		for _, p := range paths[1:] {
+			lenOfPath += len(p) + 1
 		}
+		path := make([]byte, lenOfPath)
+		lastOne := len(paths) - 1
+		index := 0
+		for _, v := range paths[:lastOne] {
+			copy(path[index:], []byte(v))
+			index += len(v)
+			copy(path[index:], []byte{'/'})
+			index++
+		}
+		v := paths[lastOne]
+		copy(path[index:], []byte(v))
+
 		ctx.Elem().Field(i).
 			Set(reflect.ValueOf(
-				// remove last `/`
-				path.String()[:path.Len()-1],
+				string(path),
 			))
 	}
 	return nil
