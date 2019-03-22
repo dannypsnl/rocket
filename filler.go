@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+
+	"github.com/dannypsnl/rocket/internal/filepath"
 )
 
 type (
@@ -89,28 +91,10 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 		field.Set(v)
 	}
 	if r.matchedPathIndex != -1 {
-		i := r.routeParams[r.matchedPathIndex]
-		paths := r.reqURL[r.matchedPathIndex:]
-
-		lenOfPath := len(paths[0])
-		for _, p := range paths[1:] {
-			lenOfPath += len(p) + 1
-		}
-		path := make([]byte, lenOfPath)
-		lastOne := len(paths) - 1
-		index := 0
-		for _, v := range paths[:lastOne] {
-			copy(path[index:], []byte(v))
-			index += len(v)
-			copy(path[index:], []byte{'/'})
-			index++
-		}
-		v := paths[lastOne]
-		copy(path[index:], []byte(v))
-
-		ctx.Elem().Field(i).
+		fieldOffset := r.routeParams[r.matchedPathIndex]
+		ctx.Elem().Field(fieldOffset).
 			Set(reflect.ValueOf(
-				string(path),
+				filepath.Join(r.reqURL[r.matchedPathIndex:]...),
 			))
 	}
 	return nil
