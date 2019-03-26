@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+
+	"github.com/dannypsnl/rocket/internal/filepath"
 )
 
 type (
@@ -17,7 +19,6 @@ type (
 		routeParams      map[int]int
 		reqURL           []string
 		matchedPathIndex int
-		matchedPath      string
 	}
 	queryFiller struct {
 		queryParams map[string]int
@@ -40,13 +41,12 @@ type (
 	}
 )
 
-func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int, matchedPath string) filler {
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int) filler {
 	return &routeFiller{
 		routes:           routes,
 		routeParams:      routeParams,
 		reqURL:           reqURL,
 		matchedPathIndex: matchedPathIndex,
-		matchedPath:      matchedPath,
 	}
 }
 
@@ -91,9 +91,11 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 		field.Set(v)
 	}
 	if r.matchedPathIndex != -1 {
-		i := r.routeParams[r.matchedPathIndex]
-		ctx.Elem().Field(i).
-			Set(reflect.ValueOf(r.matchedPath))
+		fieldOffset := r.routeParams[r.matchedPathIndex]
+		ctx.Elem().Field(fieldOffset).
+			Set(reflect.ValueOf(
+				filepath.Join(r.reqURL[r.matchedPathIndex:]...),
+			))
 	}
 	return nil
 }

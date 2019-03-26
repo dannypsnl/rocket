@@ -18,8 +18,8 @@
       
       <guid>http://dannypsnl.github.io/rocket/quick_start/minimum_example/</guid>
       <description>Before you write down any code. You need to import the package.
-import ( &amp;quot;github.com/dannypsnl/rocket&amp;quot; )  With Rocket, you will create a lots of handler, here is a basic handler with user-defined context.
-type User struct { Name string `route:&amp;quot;name&amp;quot;` Age uint64 `route:&amp;quot;age&amp;quot;` } var hello = rocket.Get(&amp;quot;/:name/:age&amp;quot;, func(u *User) string { return &amp;quot;Hello &amp;quot; + u.Name + &amp;quot;, your age is &amp;quot; + strconv.FormatUint(u.Age, 10) })  How to let it work?</description>
+import ( &amp;quot;github.com/dannypsnl/rocket&amp;quot; )  With Rocket, you will create a lots of handler function, here is a basic handler function with user-defined context.
+type User struct { Name string `route:&amp;quot;name&amp;quot;` Age uint64 `route:&amp;quot;age&amp;quot;` } func hello(u *User) string { return &amp;quot;Hello &amp;quot; + u.Name + &amp;quot;, your age is &amp;quot; + strconv.FormatUint(u.Age, 10) }  How to let it work?</description>
     </item>
     
   </channel>

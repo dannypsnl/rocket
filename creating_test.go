@@ -58,7 +58,7 @@ func TestDuplicatedRoute(t *testing.T) {
 		}
 	}()
 	Ignite(":8080").
-		Mount("/", hello, hello)
+		Mount(hello, hello)
 }
 
 func TestDuplicateRoutePanic(t *testing.T) {
@@ -72,5 +72,5 @@ func TestDuplicateRoutePanic(t *testing.T) {
 		root2 = Get("/", func() string { return "" })
 	)
 	Ignite(":80888").
-		Mount("/", root1, root2)
+		Mount(root1, root2)
 }

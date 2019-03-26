@@ -21,8 +21,8 @@
 rocket.Ignite(&amp;quot;:8080&amp;quot;)  We use the same pattern as Go native http package.
 So I think it won&amp;rsquo;t be to hard to notice :8080 means listen port 8080.
 Then we will use Mount mounts some handlers.
-rocket.Ignite(&amp;quot;:8080&amp;quot;). Mount(&amp;quot;/&amp;quot;, handler)  The first argument of Mount is base route. This is a leading route for following handlers mounted under this route.
-For example, if base route is &amp;quot;/base&amp;quot;, route of handler is &amp;quot;/hello&amp;quot;, the final route is &amp;quot;/base/hello&amp;quot;</description>
+rocket.Ignite(&amp;quot;:8080&amp;quot;). Mount(handler)  The thing you should know is you can mount several handlers at one Mount call. For example:
+rocket.Ignite(&amp;quot;:8080&amp;quot;). Mount(handler1, handler2) // and below  And the important thing is we high recommended you writing like:</description>
     </item>
     
     <item>
@@ -33,8 +33,7 @@ For example, if base route is &amp;quot;/base&amp;quot;, route of handler is &am
       <guid>http://dannypsnl.github.io/rocket/documents/handler_and_context/</guid>
       <description>Rocket&amp;rsquo;s handler contains two parts.
  variant route handle function  Basically, we have the creator for handler. It uses like:
-var h = rocket.Get(&amp;quot;/hello&amp;quot;, func() string { return &amp;quot;&amp;quot; })  Now we have a handler variable h, it contains a variant route &amp;quot;/hello&amp;quot;, the second argument of Get is it&amp;rsquo;s handle function. When request path matches this route, the response is handle function&amp;rsquo;s response.
-We have following creator mapping to HTTP method currently.</description>
+func handler() string { return &amp;quot;&amp;quot; } // In `Mount` rocket.Get(&amp;quot;/hello&amp;quot;, handler)  Now we have a handler function handler, and we can use a route &amp;quot;/hello and handler to create a new Rocket&amp;rsquo;s handler. When request path matches this route, the response is response of handler function.</description>
     </item>
     
     <item>
@@ -81,8 +80,8 @@ type User struct { Authorization *string `header:&amp;quot;Authorization&amp;quo
       
       <guid>http://dannypsnl.github.io/rocket/quick_start/minimum_example/</guid>
       <description>Before you write down any code. You need to import the package.
-import ( &amp;quot;github.com/dannypsnl/rocket&amp;quot; )  With Rocket, you will create a lots of handler, here is a basic handler with user-defined context.
-type User struct { Name string `route:&amp;quot;name&amp;quot;` Age uint64 `route:&amp;quot;age&amp;quot;` } var hello = rocket.Get(&amp;quot;/:name/:age&amp;quot;, func(u *User) string { return &amp;quot;Hello &amp;quot; + u.Name + &amp;quot;, your age is &amp;quot; + strconv.FormatUint(u.Age, 10) })  How to let it work?</description>
+import ( &amp;quot;github.com/dannypsnl/rocket&amp;quot; )  With Rocket, you will create a lots of handler function, here is a basic handler function with user-defined context.
+type User struct { Name string `route:&amp;quot;name&amp;quot;` Age uint64 `route:&amp;quot;age&amp;quot;` } func hello(u *User) string { return &amp;quot;Hello &amp;quot; + u.Name + &amp;quot;, your age is &amp;quot; + strconv.FormatUint(u.Age, 10) }  How to let it work?</description>
     </item>
     
   </channel>

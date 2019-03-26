@@ -49,73 +49,75 @@ type RouteWithJSON struct {
 	JField string `json:"json_field"`
 }
 
-var (
-	homePage = rocket.Get("/", func() response.Html {
-		return `
+func homePage() response.Html {
+	return `
 		<h1>Title</h1>
 		<p>Hello, World</p>
 		`
-	})
-	filesAndRoute = rocket.Get("/file/:var/*filename", func(fs *FilesAndRoute) string {
-		return fs.V + "/" + fs.FileName
-	})
-	staticFiles = rocket.Get("/static/*filename", func(fs *Files) string {
-		return fs.FileName
-	})
-	routeWithJSON = rocket.Get("route_with_json/:field", func(r *RouteWithJSON) string {
-		return r.Field + r.Query + r.JField
-	})
-	forPost = rocket.Post("/post", func(f *ForPost) response.Json {
-		return `{"value": "response"}`
-	})
-	forPatch = rocket.Patch("/patch", func(f *ForPatch) string {
-		return f.Val
-	})
-	user = rocket.Get("/name/:name/", func(u *User) string {
-		return u.Name
-	})
-	query = rocket.Get("/query", func(u *Article) string {
-		return u.ID
-	})
-	endWithSlash = rocket.Get("/end-with-slash/", func() string {
-		return "you found me"
-	})
-	deleteCookie = rocket.Delete("/cookies", func() *response.Response {
-		return response.New(``).Cookies(
-			cookie.Forget("set"),
-		)
-	})
-	customResponseForHeader = rocket.Get("/", func() *response.Response {
-		body := response.Json(`{"msg": "welcome"}`)
-		return response.New(body).Headers(
-			response.Headers{
-				"Access-Control-Allow-Origin": "*",
-			},
-		)
-	})
-	optionalFieldHandler = rocket.Get("/optional/", func(optionalContext *OptionalContext) string {
-		if optionalContext.A == nil {
-			return "a is nil"
-		}
-		return "a is " + *optionalContext.A
-	})
-)
+}
+func staticFiles(fs *Files) string {
+	return fs.FileName
+}
+func user(u *User) string {
+	return u.Name
+}
+func testQuery(u *Article) string {
+	return u.ID
+}
+func filesAndRoute(fs *FilesAndRoute) string {
+	return fs.V + "/" + fs.FileName
+}
+func routeWithJSON(r *RouteWithJSON) string {
+	return r.Field + r.Query + r.JField
+}
+func testPatch(f *ForPatch) string {
+	return f.Val
+}
+func optionalFieldHandler(optionalContext *OptionalContext) string {
+	if optionalContext.A == nil {
+		return "a is nil"
+	}
+	return "a is " + *optionalContext.A
+}
+func testPost(f *ForPost) response.Json {
+	return `{"value": "response"}`
+}
+func endWithSlash() string {
+	return "you found me"
+}
+func deleteCookie() *response.Response {
+	return response.New(``).Cookies(
+		cookie.Forget("set"),
+	)
+}
+func customResponseForHeader() *response.Response {
+	body := response.Json(`{"msg": "welcome"}`)
+	return response.New(body).Headers(
+		response.Headers{
+			"Access-Control-Allow-Origin": "*",
+		},
+	)
+}
+
+var ()
 
 func TestServer(t *testing.T) {
 	rk := rocket.Ignite(":8080").
-		Mount("/", homePage, staticFiles, filesAndRoute).
-		Mount("/users", user).
-		Mount("/test",
-			query,
-			endWithSlash,
-			forPatch,
-			forPost,
-			deleteCookie,
-			routeWithJSON,
-			filesAndRoute,
-			optionalFieldHandler,
+		Mount(
+			rocket.Get("/", homePage),
+			rocket.Get("/static/*filename", staticFiles),
+			rocket.Get("/file/:var/*filename", filesAndRoute),
+			rocket.Get("/users/name/:name/", user),
+			rocket.Get("/test/query", testQuery),
+			rocket.Get("/test/end-with-slash/", endWithSlash),
+			rocket.Patch("/test/patch", testPatch),
+			rocket.Post("/test/post", testPost),
+			rocket.Delete("/test/cookies", deleteCookie),
+			rocket.Get("/test/route_with_json/:field", routeWithJSON),
+			rocket.Get("/test/file/:var/*filename", filesAndRoute),
+			rocket.Get("/test/optional/", optionalFieldHandler),
+			rocket.Get("/custom-response-header", customResponseForHeader),
 		).
-		Mount("/custom-response-header", customResponseForHeader).
 		Default(func() response.Html {
 			return "<h1>Page Not Found</h1>"
 		})
@@ -254,7 +256,7 @@ func TestServer(t *testing.T) {
 			AuthorID  int    `route:"user_id"`
 		}
 		rk := rocket.Ignite(":8081").
-			Mount("/users/", rocket.Post("/:user_id/articles/:article_id", func(user *User, article *Article) *response.Response {
+			Mount(rocket.Post("/users/:user_id/articles/:article_id", func(user *User, article *Article) *response.Response {
 				resp := response.New("")
 				if user.Age != 18 {
 					resp.Status(400)

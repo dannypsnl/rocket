@@ -45,15 +45,15 @@ func (r *Route) prepareWildcardRoute() {
 
 const PanicDuplicateRoute = "Duplicate Route"
 
-func (root *Route) addHandler(baseRoute []string, h *handler) {
-	fullRoute := append(baseRoute, h.routes...)
+func (root *Route) addHandler(h *handler) {
+	fullRoute := h.routes
 	curRoute := root
 	for i, r := range fullRoute {
 		if r[0] == ':' {
 			curRoute = curRoute.mustGetVariableRoute()
 			continue
 		} else if r[0] == '*' {
-			h.matchedPathIndex = i - len(baseRoute)
+			h.matchedPathIndex = i
 			curRoute.prepareWildcardRoute()
 			if _, ok := curRoute.wildcardMethodHandlers[h.method]; ok {
 				panic(PanicDuplicateRoute)
@@ -108,8 +108,6 @@ func (r *Route) getHandler(requestUrl []string, method string) *handler {
 	}
 	if r.wildcardMethodHandlers != nil {
 		if h, hasWildcardRouteHandler := r.wildcardMethodHandlers[method]; hasWildcardRouteHandler {
-			// TODO: this make handler depends on router work as its expected, should think about how to reverse their relationship
-			h.addMatchedPathValueIntoContext(requestUrl...)
 			return h
 		}
 		return responseNotAllowed(method)

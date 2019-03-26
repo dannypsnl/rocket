@@ -29,6 +29,10 @@ func (u *User) GetAge() (age uint64) {
 	return u.Age
 }
 
+func getUser(u *User) string {
+	return fmt.Sprintf("User %s age is %d", u.Name, u.GetAge())
+}
+
 func main() {
 	defer db.Close()
 
@@ -36,8 +40,8 @@ func main() {
 	db.Create(&User{Name: "Danny", Age: 21})
 
 	rocket.Ignite(":8080").
-		Mount("/user", rocket.Get("/:name", func(u *User) string {
-			return fmt.Sprintf("User %s age is %d", u.Name, u.GetAge())
-		})).
+		Mount(
+			rocket.Get("/user/:name", getUser),
+		).
 		Launch()
 }

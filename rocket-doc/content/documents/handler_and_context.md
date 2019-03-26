@@ -12,10 +12,13 @@ Rocket's handler contains two parts.
 
 Basically, we have the creator for handler. It uses like:
 ```go
-var h = rocket.Get("/hello", func() string { return "" })
+func handler() string { return "" }
+// In `Mount`
+rocket.Get("/hello", handler)
 ```
 
-Now we have a handler variable `h`, it contains a variant route `"/hello"`, the second argument of `Get` is it's handle function. When request path matches this route, the response is handle function's response.
+Now we have a handler function `handler`, and we can use a route `"/hello` and `handler` to create a new Rocket's handler.
+When request path matches this route, the response is response of handler function.
 
 We have following creator mapping to HTTP method currently.
 
@@ -113,7 +116,7 @@ type (
 )
 
 // ignore all errors
-var kubernetesProxy = rocket.Get("namespaces/:namespace/:kind", func(c *CheckWatch, r *Resource) response.Json {
+func kubernetesProxy(c *CheckWatch, r *Resource) response.Json {
     opts := &metav1.ListOptions{}
     if c.IsWatch != nil && *c.IsWatch {
         return response.Stream(func(w http.ResponseWriter) {
@@ -147,10 +150,12 @@ var kubernetesProxy = rocket.Get("namespaces/:namespace/:kind", func(c *CheckWat
         Into(result)
     data, err := json.Marshal(result)
     return response.Json(data)
-})
+}
 
 rocket.
     // ignore
-    Mount("/api/v1", kubernetesProxy).
+    Mount(
+        rocket.Get("/api/v1/namespaces/:namespace/:kind", kubernetesProxy),
+    ).
     Launch()
 ```

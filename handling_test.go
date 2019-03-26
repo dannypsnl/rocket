@@ -18,7 +18,7 @@ var (
 
 func TestOptionsMethod(t *testing.T) {
 	rk := rocket.Ignite(":8081").
-		Mount("/", forTestHandler)
+		Mount(forTestHandler)
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
 	e := httpexpect.New(t, ts.URL)
@@ -49,7 +49,7 @@ func TestRecorder(t *testing.T) {
 
 	rk := rocket.Ignite(":9090").
 		Attach(recorder).
-		Mount("/", rocket.Get("/", func() string { return "home" }))
+		Mount(rocket.Get("/", func() string { return "home" }))
 
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
@@ -67,7 +67,7 @@ type AccessCookie struct {
 
 func TestGetCookieByUserDefinedContext(t *testing.T) {
 	rk := rocket.Ignite("").
-		Mount("/", rocket.Get("/", func(cookie *AccessCookie) string {
+		Mount(rocket.Get("/", func(cookie *AccessCookie) string {
 			if cookie.Token == nil {
 				return "token is nil"
 			}
@@ -89,7 +89,7 @@ type AccessHeader struct {
 
 func TestGetHeaderByUserDefinedContext(t *testing.T) {
 	rk := rocket.Ignite("").
-		Mount("/", rocket.Get("/", func(header *AccessHeader) string {
+		Mount(rocket.Get("/", func(header *AccessHeader) string {
 			return header.Auth
 		}))
 

@@ -11,17 +11,17 @@ import (
 )
 ```
 
-With Rocket, you will create a lots of handler,
-here is a basic handler with user-defined context.
+With Rocket, you will create a lots of handler function,
+here is a basic handler function with user-defined context.
 
 ```go
 type User struct {
     Name string `route:"name"`
     Age  uint64 `route:"age"`
 }
-var hello = rocket.Get("/:name/:age", func(u *User) string {
+func hello(u *User) string {
     return "Hello " + u.Name + ", your age is " + strconv.FormatUint(u.Age, 10)
-})
+}
 ```
 
 How to let it work?
@@ -30,7 +30,10 @@ How to let it work?
 // main.go
 func main() {
     rocket.Ignite(":8080").
-        Mount("/user", hello).
+        Mount(
+            // put `hello` under a path `/user/:name/:age`, where `:name` and `:age` are variant parameters
+            rocket.Get("/user/:name/:age", hello),
+        ).
         Launch()
 }
 ```

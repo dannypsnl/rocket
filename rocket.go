@@ -20,16 +20,11 @@ type Rocket struct {
 }
 
 // Mount add handler into our service.
-func (rk *Rocket) Mount(routeStr string, h *handler, hs ...*handler) *Rocket {
-	verifyBase(routeStr)
-
-	route := splitBySlash(routeStr)
-	rk.router.addHandler(route, h)
-
+func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
+	rk.router.addHandler(h)
 	for _, h := range hs {
-		rk.router.addHandler(route, h)
+		rk.router.addHandler(h)
 	}
-
 	return rk
 }
 
