@@ -47,10 +47,11 @@ func (r *Route) mustGetVariableRoute() *Route {
 	}
 	return r.variableRoute
 }
-func (r *Route) prepareWildcardRoute() {
+func (r *Route) mustGetWildcardRoute() map[string]Handler {
 	if r.wildcardMethodHandlers == nil {
 		r.wildcardMethodHandlers = make(map[string]Handler)
 	}
+	return r.wildcardMethodHandlers
 }
 
 var PanicDuplicateRoute = errors.New("duplicate route")
@@ -77,11 +78,11 @@ func (root *Route) AddHandler(method, route string, h Handler) error {
 			if err != nil {
 				return err
 			}
-			curRoute.prepareWildcardRoute()
-			if _, sameRouteExisted := curRoute.wildcardMethodHandlers[method]; sameRouteExisted {
+			wildcard := curRoute.mustGetWildcardRoute()
+			if _, routeExisted := wildcard[method]; routeExisted {
 				return PanicDuplicateRoute
 			}
-			curRoute.addHandlerOn(method, curRoute.wildcardMethodHandlers, h)
+			curRoute.addHandlerOn(method, wildcard, h)
 			return nil
 		} else if _, ok := curRoute.children[r]; !ok {
 			curRoute.children[r] = New(root.optionHandler, root.notAllowHandler)
