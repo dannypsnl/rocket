@@ -152,8 +152,7 @@ func (o *optionsHandler) Build(allowMethods string) router.Handler {
 	}))
 }
 
-// Routes implements router.Handler
-func (h *handler) Route() string {
+func (h *handler) getRoute() string {
 	return h.route
 }
 

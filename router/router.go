@@ -29,7 +29,6 @@ type OptionsHandler interface {
 }
 
 type Handler interface {
-	Route() string
 	WildcardIndex(int) error // maybe we should fall failed while we emit a wildcard index onto a handler don't do it?
 }
 
@@ -66,8 +65,8 @@ func SplitBySlash(routeStr string) []string {
 	return route
 }
 
-func (root *Route) AddHandler(method string, h Handler) error {
-	fullRoute := SplitBySlash(h.Route())
+func (root *Route) AddHandler(method, route string, h Handler) error {
+	fullRoute := SplitBySlash(route)
 	curRoute := root
 	for i, r := range fullRoute {
 		if r[0] == ':' {

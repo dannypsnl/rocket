@@ -81,7 +81,7 @@ func TestRouting(t *testing.T) {
 				h := &handler{
 					route: route,
 				}
-				err := r.AddHandler(method, h)
+				err := r.AddHandler(method, route, h)
 				require.NoError(t, err)
 			}
 
@@ -97,7 +97,7 @@ func TestRouting(t *testing.T) {
 						require.Equal(t, nil, h)
 					}
 				} else if h != nil {
-					require.Equal(t, matchedRoute, h.Route())
+					require.Equal(t, matchedRoute, h.(*handler).route)
 				}
 			}
 		})
@@ -128,9 +128,6 @@ type handler struct {
 	message string
 }
 
-func (h *handler) Route() string {
-	return h.route
-}
 func (h *handler) WildcardIndex(i int) error {
 	return nil
 }
