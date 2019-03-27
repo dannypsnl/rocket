@@ -19,13 +19,13 @@ type handler struct {
 	guards       []*context.UserContext
 	userContexts []*context.UserContext
 
-	matchedPathIndex int
+	wildcardIndex int
 }
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do:               do,
-		matchedPathIndex: -1,
+		do:            do,
+		wildcardIndex: -1,
 	}
 }
 
@@ -107,7 +107,7 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 				h.routes,
 				reqURL,
 				userContext.RouteParams,
-				h.matchedPathIndex,
+				h.wildcardIndex,
 			),
 			newQueryFiller(userContext.QueryParams, req.URL.Query()),
 		}
@@ -158,6 +158,6 @@ func (h *handler) getRoute() string {
 
 // WildcardIndex implements router.Handler
 func (h *handler) WildcardIndex(i int) error {
-	h.matchedPathIndex = i
+	h.wildcardIndex = i
 	return nil
 }
