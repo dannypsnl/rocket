@@ -29,7 +29,6 @@ type OptionsHandler interface {
 }
 
 type Handler interface {
-	Method() string
 	Route() string
 	WildcardIndex(int) error // maybe we should fall failed while we emit a wildcard index onto a handler don't do it?
 }
@@ -67,7 +66,7 @@ func SplitBySlash(routeStr string) []string {
 	return route
 }
 
-func (root *Route) AddHandler(h Handler) error {
+func (root *Route) AddHandler(method string, h Handler) error {
 	fullRoute := SplitBySlash(h.Route())
 	curRoute := root
 	for i, r := range fullRoute {
@@ -80,10 +79,10 @@ func (root *Route) AddHandler(h Handler) error {
 				return err
 			}
 			curRoute.prepareWildcardRoute()
-			if _, sameRouteExisted := curRoute.wildcardMethodHandlers[h.Method()]; sameRouteExisted {
+			if _, sameRouteExisted := curRoute.wildcardMethodHandlers[method]; sameRouteExisted {
 				return PanicDuplicateRoute
 			}
-			curRoute.addHandlerOn(curRoute.wildcardMethodHandlers, h)
+			curRoute.addHandlerOn(method, curRoute.wildcardMethodHandlers, h)
 			return nil
 		} else if _, ok := curRoute.children[r]; !ok {
 			curRoute.children[r] = New(root.optionHandler, root.notAllowHandler)
@@ -91,20 +90,20 @@ func (root *Route) AddHandler(h Handler) error {
 		curRoute = curRoute.children[r]
 	}
 
-	if _, sameRouteExisted := curRoute.methodHandlers[h.Method()]; sameRouteExisted {
+	if _, sameRouteExisted := curRoute.methodHandlers[method]; sameRouteExisted {
 		return PanicDuplicateRoute
 	}
-	curRoute.addHandlerOn(curRoute.methodHandlers, h)
+	curRoute.addHandlerOn(method, curRoute.methodHandlers, h)
 	return nil
 }
 
-func (r *Route) addHandlerOn(m map[string]Handler, h Handler) {
+func (r *Route) addHandlerOn(method string, m map[string]Handler, h Handler) {
 	if r.optionsHandlerBuilder == nil {
 		r.optionsHandlerBuilder = newOptionsHandler()
 	}
-	r.optionsHandlerBuilder.addMethod(h.Method())
+	r.optionsHandlerBuilder.addMethod(method)
 	m["OPTIONS"] = r.optionHandler.Build(r.optionsHandlerBuilder.build())
-	m[h.Method()] = h
+	m[method] = h
 	r.ownHandler = true
 }
 

@@ -22,12 +22,12 @@ type Rocket struct {
 
 // Mount add handler into our service.
 func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
-	err := rk.router.AddHandler(h)
+	err := rk.router.AddHandler(h.method, h)
 	if err != nil {
 		panic(err)
 	}
 	for _, h := range hs {
-		err := rk.router.AddHandler(h)
+		err := rk.router.AddHandler(h.method, h)
 		if err != nil {
 			panic(err)
 		}

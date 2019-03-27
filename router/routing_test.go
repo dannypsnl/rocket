@@ -79,10 +79,9 @@ func TestRouting(t *testing.T) {
 			for _, requestRoute := range testCase.routes {
 				method, route := splitRuleToMethodRoute(requestRoute)
 				h := &handler{
-					method: method,
-					route:  route,
+					route: route,
 				}
-				err := r.AddHandler(h)
+				err := r.AddHandler(method, h)
 				require.NoError(t, err)
 			}
 
@@ -125,14 +124,10 @@ func (o *optionsHandler) Build(allowMethods string) router.Handler {
 }
 
 type handler struct {
-	method  string
 	route   string
 	message string
 }
 
-func (h *handler) Method() string {
-	return h.method
-}
 func (h *handler) Route() string {
 	return h.route
 }
