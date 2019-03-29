@@ -61,7 +61,7 @@ func Ignite(port string) *Rocket {
 		port: port,
 		router: router.New(
 			&optionsHandler{},
-			notAllowHandler,
+			createNotAllowHandler,
 		),
 		listOfFairing: make([]fairing.Interface, 0),
 		defaultHandler: reflect.ValueOf(func() string {

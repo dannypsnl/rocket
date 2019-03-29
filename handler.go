@@ -135,7 +135,7 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 
 const ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
 
-func notAllowHandler(method string) router.Handler {
+func createNotAllowHandler(method string) router.Handler {
 	return newHandler(reflect.ValueOf(func() *response.Response {
 		return response.New(fmt.Sprintf(ErrorMessageForMethodNotAllowed, method)).Status(http.StatusMethodNotAllowed)
 	}))
