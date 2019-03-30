@@ -4,18 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
-	"strings"
 )
-
-func splitBySlash(routeStr string) []string {
-	route := make([]string, 0)
-	for _, r := range strings.Split(strings.Trim(routeStr, "/"), "/") {
-		if r != "" {
-			route = append(route, r)
-		}
-	}
-	return route
-}
 
 var (
 	invalidType = errors.New("invalid type")

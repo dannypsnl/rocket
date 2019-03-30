@@ -15,10 +15,10 @@ type (
 		fill(ctx reflect.Value) error
 	}
 	routeFiller struct {
-		routes           []string
-		routeParams      map[int]int
-		reqURL           []string
-		matchedPathIndex int
+		routes                    []string
+		routeParams               map[int]int
+		reqURL                    []string
+		wildcardIndexInSplitRoute int
 	}
 	queryFiller struct {
 		queryParams map[string]int
@@ -41,12 +41,12 @@ type (
 	}
 )
 
-func newRouteFiller(routes, reqURL []string, routeParams map[int]int, matchedPathIndex int) filler {
+func newRouteFiller(routes, reqURL []string, routeParams map[int]int, wildcardIndex int) filler {
 	return &routeFiller{
-		routes:           routes,
-		routeParams:      routeParams,
-		reqURL:           reqURL,
-		matchedPathIndex: matchedPathIndex,
+		routes:                    routes,
+		routeParams:               routeParams,
+		reqURL:                    reqURL,
+		wildcardIndexInSplitRoute: wildcardIndex,
 	}
 }
 
@@ -90,11 +90,11 @@ func (r *routeFiller) fill(ctx reflect.Value) error {
 		}
 		field.Set(v)
 	}
-	if r.matchedPathIndex != -1 {
-		fieldOffset := r.routeParams[r.matchedPathIndex]
+	if r.wildcardIndexInSplitRoute != -1 {
+		fieldOffset := r.routeParams[r.wildcardIndexInSplitRoute]
 		ctx.Elem().Field(fieldOffset).
 			Set(reflect.ValueOf(
-				filepath.Join(r.reqURL[r.matchedPathIndex:]...),
+				filepath.Join(r.reqURL[r.wildcardIndexInSplitRoute:]...),
 			))
 	}
 	return nil

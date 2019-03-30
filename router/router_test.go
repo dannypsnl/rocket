@@ -1,13 +1,13 @@
-package rocket_test
+package router_test
 
 import (
-	"net/http/httptest"
+	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/router"
 
-	"github.com/gavv/httpexpect"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRouting(t *testing.T) {
@@ -68,35 +68,37 @@ func TestRouting(t *testing.T) {
 				"GET;/b/c":    "/*wildcard",
 				"GET;/a/b/c":  "/*wildcard",
 				"POST;/a/b/c": "request resource does not support http method 'POST'",
+				"POST;/a":     "request resource does not support http method 'POST'",
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			rk := rocket.Ignite("")
-			for _, route := range testCase.routes {
-				handler := rocket.Get("/", func() string { return "wrong" })
-				method, route := splitRuleToMethodRoute(route)
-				handleFunc := func(response string) func() string {
-					return func() string { return response }
-				}(route)
-
-				switch method {
-				case "GET":
-					handler = rocket.Get(route, handleFunc)
-				case "POST":
-					handler = rocket.Post(route, handleFunc)
+			r := router.New(&optionsHandler{}, notAllowHandler)
+			for _, requestRoute := range testCase.routes {
+				method, route := splitRuleToMethodRoute(requestRoute)
+				h := &handler{
+					route: route,
 				}
-				rk.Mount(handler)
+				err := r.AddHandler(method, route, h)
+				require.NoError(t, err)
 			}
-			ts := httptest.NewServer(rk)
-			defer ts.Close()
 
-			e := httpexpect.New(t, ts.URL)
 			for requestRoute, matchedRoute := range testCase.requestRouteMapToMatchedRoute {
 				method, route := splitRuleToMethodRoute(requestRoute)
-				e.Request(method, route).Expect().Body().Equal(matchedRoute)
+				h := r.GetHandler(router.SplitBySlash(route), method)
+				if len(router.SplitBySlash(matchedRoute)) > 0 && router.SplitBySlash(matchedRoute)[0] == matchedRoute {
+					if h != nil {
+						// method not allow
+						require.Equal(t, matchedRoute, h.(*handler).message)
+					} else {
+						// page not found
+						require.Equal(t, nil, h)
+					}
+				} else if h != nil {
+					require.Equal(t, matchedRoute, h.(*handler).route)
+				}
 			}
 		})
 	}
@@ -108,3 +110,22 @@ func splitRuleToMethodRoute(rule string) (method string, route string) {
 	route = ss[1]
 	return
 }
+
+func notAllowHandler(method string) router.Handler {
+	return &handler{
+		message: fmt.Sprintf("request resource does not support http method '%s'", method),
+	}
+}
+
+type optionsHandler struct{}
+
+func (o *optionsHandler) Build(allowMethods string) router.Handler {
+	return nil
+}
+
+type handler struct {
+	route   string
+	message string
+}
+
+func (h *handler) WildcardIndex(i int) {}

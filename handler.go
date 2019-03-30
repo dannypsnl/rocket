@@ -1,14 +1,17 @@
 package rocket
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 
 	"github.com/dannypsnl/rocket/internal/context"
 	"github.com/dannypsnl/rocket/response"
+	"github.com/dannypsnl/rocket/router"
 )
 
 type handler struct {
+	route  string
 	routes []string
 	do     reflect.Value // do should return response for HTTP writer
 	method string
@@ -16,13 +19,13 @@ type handler struct {
 	guards       []*context.UserContext
 	userContexts []*context.UserContext
 
-	matchedPathIndex int
+	wildcardIndex int
 }
 
 func newHandler(do reflect.Value) *handler {
 	return &handler{
-		do:               do,
-		matchedPathIndex: -1,
+		do:            do,
+		wildcardIndex: -1,
 	}
 }
 
@@ -104,7 +107,7 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 				h.routes,
 				reqURL,
 				userContext.RouteParams,
-				h.matchedPathIndex,
+				h.wildcardIndex,
 			),
 			newQueryFiller(userContext.QueryParams, req.URL.Query()),
 		}
@@ -130,30 +133,30 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 	return userContexts, nil
 }
 
-type optionsHandler struct {
-	methods []string
+const ErrorMessageForMethodNotAllowed = "request resource does not support http method '%s'"
+
+func createNotAllowHandler(method string) router.Handler {
+	return newHandler(reflect.ValueOf(func() *response.Response {
+		return response.New(fmt.Sprintf(ErrorMessageForMethodNotAllowed, method)).Status(http.StatusMethodNotAllowed)
+	}))
 }
 
-func newOptionsHandler() *optionsHandler {
-	return &optionsHandler{
-		methods: make([]string, 0),
-	}
-}
+type optionsHandler struct{}
 
-func (o *optionsHandler) addMethod(method string) *optionsHandler {
-	o.methods = append(o.methods, method)
-	return o
-}
-
-func (o *optionsHandler) build() *handler {
-	allowMethods := "OPTIONS"
-	for _, m := range o.methods {
-		allowMethods += ", " + m
-	}
+func (o *optionsHandler) Build(allowMethods string) router.Handler {
 	return newHandler(reflect.ValueOf(func() *response.Response {
 		return response.New("").
 			Headers(response.Headers{
 				"Allow": allowMethods,
 			})
 	}))
+}
+
+func (h *handler) getRoute() string {
+	return h.route
+}
+
+// WildcardIndex implements router.Handler
+func (h *handler) WildcardIndex(i int) {
+	h.wildcardIndex = i
 }
