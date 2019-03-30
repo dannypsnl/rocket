@@ -157,7 +157,6 @@ func (h *handler) getRoute() string {
 }
 
 // WildcardIndex implements router.Handler
-func (h *handler) WildcardIndex(i int) error {
+func (h *handler) WildcardIndex(i int) {
 	h.wildcardIndex = i
-	return nil
 }

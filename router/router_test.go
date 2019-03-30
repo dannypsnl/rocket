@@ -128,6 +128,4 @@ type handler struct {
 	message string
 }
 
-func (h *handler) WildcardIndex(i int) error {
-	return nil
-}
+func (h *handler) WildcardIndex(i int) {}

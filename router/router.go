@@ -29,7 +29,7 @@ type OptionsHandler interface {
 }
 
 type Handler interface {
-	WildcardIndex(int) error // maybe we should fall failed while we emit a wildcard index onto a handler don't do it?
+	WildcardIndex(int)
 }
 
 func New(optionsHandler OptionsHandler, notAllowHandler func(method string) Handler) *Route {
@@ -74,10 +74,7 @@ func (root *Route) AddHandler(method, route string, h Handler) error {
 			curRoute = curRoute.mustGetVariableRoute()
 			continue
 		} else if r[0] == '*' {
-			err := h.WildcardIndex(i)
-			if err != nil {
-				return err
-			}
+			h.WildcardIndex(i)
 			wildcard := curRoute.mustGetWildcardRoute()
 			if _, routeExisted := wildcard[method]; routeExisted {
 				return PanicDuplicateRoute
