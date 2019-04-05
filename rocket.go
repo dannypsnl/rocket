@@ -51,6 +51,11 @@ func (rk *Rocket) Default(do interface{}) *Rocket {
 
 // Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
+	for _, f := range rk.listOfFairing {
+		f.OnLaunch(&fairing.Meta{
+			Port: rk.port,
+		})
+	}
 	http.HandleFunc("/", rk.ServeHTTP)
 	log.Fatal(http.ListenAndServe(rk.port, nil))
 }
