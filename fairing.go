@@ -1,4 +1,4 @@
-package fairing
+package rocket
 
 import (
 	"net/http"
@@ -6,21 +6,15 @@ import (
 	"github.com/dannypsnl/rocket/response"
 )
 
-// Meta is created for fairing OnLaunch
-type Meta struct {
-	// Port is the serve port of rocket server
-	Port string
-}
-
-// Interface specify the method that fairing could implement
-type Interface interface {
+// FairingInterface specify the method that fairing could implement
+type FairingInterface interface {
 	OnRequest(*http.Request) *http.Request
 	OnResponse(*response.Response) *response.Response
 	// OnLaunch would let you could get the metadata of rocket server
 	//
 	// NOTE: only work when you using `Launch()` to start server
 	// won't work while you use rocket as HTTP handler
-	OnLaunch(*Meta)
+	OnLaunch(*Rocket)
 }
 
 // Fairing provides default implement for your fairing by embedded it into your fairing type,
@@ -33,4 +27,4 @@ func (f Fairing) OnRequest(req *http.Request) *http.Request {
 func (f Fairing) OnResponse(resp *response.Response) *response.Response {
 	return resp
 }
-func (f Fairing) OnLaunch(*Meta) {}
+func (f Fairing) OnLaunch(*Rocket) {}
