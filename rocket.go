@@ -13,7 +13,7 @@ import (
 type Rocket struct {
 	port          string
 	router        *router.Route
-	listOfFairing []FairingInterface
+	listOfFairing []fairingInterface
 
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
@@ -35,7 +35,7 @@ func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
 }
 
 // Attach add fairing to lifecycle for each request and response
-func (rk *Rocket) Attach(f FairingInterface) *Rocket {
+func (rk *Rocket) Attach(f fairingInterface) *Rocket {
 	rk.listOfFairing = append(rk.listOfFairing, f)
 	return rk
 }
@@ -65,7 +65,7 @@ func Ignite(port string) *Rocket {
 			&optionsHandler{},
 			createNotAllowHandler,
 		),
-		listOfFairing: make([]FairingInterface, 0),
+		listOfFairing: make([]fairingInterface, 0),
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),

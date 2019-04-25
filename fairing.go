@@ -6,8 +6,8 @@ import (
 	"github.com/dannypsnl/rocket/response"
 )
 
-// FairingInterface specify the method that fairing could implement
-type FairingInterface interface {
+// fairingInterface specify the method that fairing could implement
+type fairingInterface interface {
 	OnRequest(*http.Request) *http.Request
 	OnResponse(*response.Response) *response.Response
 	// OnLaunch would let you could get the metadata of rocket server
