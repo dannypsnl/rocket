@@ -97,12 +97,12 @@ rocket.Ignite(":8080"). // Setting port
 	import (
 		"net/http"
 
+		"github.com/dannypsnl/rocket"
 		"github.com/dannypsnl/rocket/response"
-		"github.com/dannypsnl/rocket/fairing"
 	)
 
 	type Logger struct {
-		fairing.Fairing
+		rocket.Fairing
 	}
 	func (l *Logger) OnRequest(r *http.Request) *http.Request {
 		log.Printf("request: %#v\n", r)

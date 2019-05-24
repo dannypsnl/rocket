@@ -1,5 +1,7 @@
 ## Latest
 
+- remove subpackage `fairing`
+	`fairing.Fairing` ~> `rocket.Fairing`
 - remove base route from design, NOTE: it's a big break change
 
 	New style example:
