@@ -1,5 +1,17 @@
 ## Latest
 
+- add `OnLaunch` fairing
+	```go
+	type YourFairing struct {
+		rocket.Fairing
+	}
+
+	func (f *YourFairing) OnLaunch(r *rocket.Rocket) {
+		// get rocket structure info at launch time
+	}
+	```
+- remove subpackage `fairing`
+	`fairing.Fairing` ~> `rocket.Fairing`
 - remove base route from design, NOTE: it's a big break change
 
 	New style example:

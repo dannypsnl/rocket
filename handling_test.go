@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
-	"github.com/dannypsnl/rocket/fairing"
 
 	"github.com/dannypsnl/assert"
 	"github.com/gavv/httpexpect"
@@ -30,7 +29,7 @@ func TestOptionsMethod(t *testing.T) {
 }
 
 type Recorder struct {
-	fairing.Fairing
+	rocket.Fairing
 
 	RecordRequestURL []string
 }
