@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.54.0" />
+    <meta name="generator" content="Hugo 0.55.6" />
     <meta name="description" content="">
 
 
@@ -12,19 +12,19 @@
     <title>Fairing :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1558668964" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1558668964" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1551372881" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1558668964" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1551372881"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1558668964"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1551372881"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1558668964"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1558668964"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1558668964"></script>
 
     
   </div>
@@ -360,7 +360,7 @@
 <p>But we still need some hooks to record some data or modifying the input/output for certain purpose, to keep this ability, we made fairing, this is how it looks like:</p>
 
 <pre><code class="language-go">type Logger struct {
-    fairing.Fairing
+    rocket.Fairing
 }
 
 func (l *Logger) OnRequest(r *http.Request) *http.Request {
@@ -392,7 +392,7 @@ rocket.Ignite(&quot;:8080&quot;).
 
 <p>then we can use the fairing implementor by using <code>Attach</code> method to emit it. We can call <code>Attach</code> several times, but carefully with it since it could modify request and response!</p>
 
-<p>Why embedded <code>fairing.Fairing</code>? It would provide default behavior for <code>OnRequest</code> and <code>OnResponse</code> if you didn&rsquo;t provide one, so it&rsquo;s a good practice to embedded since we could add more fairing methods into it.</p>
+<p>Why embedded <code>rocket.Fairing</code>? It would provide default behavior for <code>OnRequest</code> and <code>OnResponse</code> if you didn&rsquo;t provide one, so it&rsquo;s a good practice to embedded since we could add more fairing methods into it.</p>
 
 
 <footer class=" footline" >
@@ -587,20 +587,20 @@ rocket.Ignite(&quot;:8080&quot;).
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1551372881"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1551372881"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1551372881"></script>
-    <script src="/rocket/js/jquery.sticky.js?1551372881"></script>
-    <script src="/rocket/js/featherlight.min.js?1551372881"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1551372881"></script>
-    <script src="/rocket/js/highlight.pack.js?1551372881"></script>
+    <script src="/rocket/js/clipboard.min.js?1558668964"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1558668964"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1558668964"></script>
+    <script src="/rocket/js/jquery.sticky.js?1558668964"></script>
+    <script src="/rocket/js/featherlight.min.js?1558668964"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1558668964"></script>
+    <script src="/rocket/js/highlight.pack.js?1558668964"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1551372881"></script>
-    <script src="/rocket/js/learn.js?1551372881"></script>
-    <script src="/rocket/js/hugo-learn.js?1551372881"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1558668964"></script>
+    <script src="/rocket/js/learn.js?1558668964"></script>
+    <script src="/rocket/js/hugo-learn.js?1558668964"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1551372881" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1551372881"></script>
+    <link href="/rocket/mermaid/mermaid.css?1558668964" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1558668964"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

@@ -10,7 +10,7 @@ What's fairing? It's an abstraction to avoid over-using the middleware.
 But we still need some hooks to record some data or modifying the input/output for certain purpose, to keep this ability, we made fairing, this is how it looks like:
 ```go
 type Logger struct {
-    fairing.Fairing
+    rocket.Fairing
 }
 
 func (l *Logger) OnRequest(r *http.Request) *http.Request {
@@ -40,4 +40,4 @@ We can see some points, first, we can implement two kinds of fairing callbacks
 
 then we can use the fairing implementor by using `Attach` method to emit it. We can call `Attach` several times, but carefully with it since it could modify request and response!
 
-Why embedded `fairing.Fairing`? It would provide default behavior for `OnRequest` and `OnResponse` if you didn't provide one, so it's a good practice to embedded since we could add more fairing methods into it.
+Why embedded `rocket.Fairing`? It would provide default behavior for `OnRequest` and `OnResponse` if you didn't provide one, so it's a good practice to embedded since we could add more fairing methods into it.
