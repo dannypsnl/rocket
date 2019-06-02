@@ -1,8 +1,9 @@
 package response
 
 import (
-	"github.com/dannypsnl/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupHeaderContentType(t *testing.T) {
@@ -22,7 +23,6 @@ func TestSetupHeaderContentType(t *testing.T) {
 
 func assertContentType(t *testing.T, response interface{}, expectedContentType string) {
 	t.Helper()
-	assert := assert.NewTester(t)
 	actualContentType := contentTypeOf(response)
-	assert.Eq(actualContentType, expectedContentType)
+	assert.Equal(t, expectedContentType, actualContentType)
 }

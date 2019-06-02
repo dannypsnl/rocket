@@ -5,7 +5,7 @@ import (
 
 	"github.com/dannypsnl/rocket/router"
 
-	"github.com/dannypsnl/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 type (
@@ -42,10 +42,9 @@ func TestHandlerCreatorHttpMethod(t *testing.T) {
 
 func testMethod(t *testing.T, method string, handlerCreator func(route string, do interface{}) *handler) {
 	t.Helper()
-	assert := assert.NewTester(t)
 	t.Run(method, func(t *testing.T) {
 		h := handlerCreator("/", func() {})
-		assert.Eq(method, h.method)
+		assert.Equal(t, h.method, method)
 	})
 }
 

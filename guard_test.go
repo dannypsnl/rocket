@@ -7,9 +7,8 @@ import (
 
 	"github.com/dannypsnl/rocket"
 
-	asserter "github.com/dannypsnl/assert"
-
 	"github.com/gavv/httpexpect"
+	"github.com/stretchr/testify/assert"
 )
 
 type headerGuard struct {
@@ -68,10 +67,8 @@ func TestGuard(t *testing.T) {
 }
 
 func TestVerifyError(t *testing.T) {
-	assert := asserter.NewTester(t)
-
 	err := rocket.AuthError("auth failed")
-	assert.Eq(err.Status(), http.StatusForbidden)
+	assert.Equal(t, http.StatusForbidden, err.Status())
 	err = rocket.ValidateError("validate failed")
-	assert.Eq(err.Status(), http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, err.Status())
 }

@@ -7,8 +7,8 @@ import (
 
 	"github.com/dannypsnl/rocket"
 
-	"github.com/dannypsnl/assert"
 	"github.com/gavv/httpexpect"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -40,8 +40,6 @@ func (r *Recorder) OnRequest(req *http.Request) *http.Request {
 }
 
 func TestRecorder(t *testing.T) {
-	assert := assert.NewTester(t)
-
 	recorder := &Recorder{
 		RecordRequestURL: make([]string, 0),
 	}
@@ -57,7 +55,7 @@ func TestRecorder(t *testing.T) {
 	e.GET("/").
 		Expect().Status(http.StatusOK)
 
-	assert.Eq(recorder.RecordRequestURL[0], "/")
+	assert.Equal(t, "/", recorder.RecordRequestURL[0])
 }
 
 type AccessCookie struct {
