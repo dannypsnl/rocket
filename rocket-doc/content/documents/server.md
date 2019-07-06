@@ -59,3 +59,14 @@ rocket.Ignite(":8080").
 ```
 
 Call `Launch` will start our server, now you can use any HTTP client to see `localhost:8080`
+
+#### Additional API
+
+`EnableHTTPs`, we can create a https server by calling `EnableHTTPs`.
+```go
+rocket.Ignite(":8080").
+	EnableHTTPs("cert.pem", "key.pem").
+	Launch()
+```
+
+Parameters are same as `func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error`.

@@ -12,19 +12,19 @@
     <title>Server :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1558669659" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1558669659" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1562420407" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1558669659" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1562420407" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1558669659"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1562420407"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1558669659"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1558669659"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1562420407"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1562420407"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1558669659"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1562420407"></script>
 
     
   </div>
@@ -337,7 +337,20 @@
                 
                     <div class="progress">
     <div class="wrapper">
-
+<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#additional-api">Additional API</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
     </div>
 </div>
 
@@ -353,6 +366,8 @@
           
 
         
+
+
 
 
 <p>To create a server, we have to start from <code>Ignite</code>.</p>
@@ -410,6 +425,17 @@ Then you will see the browser render respnose as HTML</p>
 </code></pre>
 
 <p>Call <code>Launch</code> will start our server, now you can use any HTTP client to see <code>localhost:8080</code></p>
+
+<h4 id="additional-api">Additional API</h4>
+
+<p><code>EnableHTTPs</code>, we can create a https server by calling <code>EnableHTTPs</code>.</p>
+
+<pre><code class="language-go">rocket.Ignite(&quot;:8080&quot;).
+	EnableHTTPs(&quot;cert.pem&quot;, &quot;key.pem&quot;).
+	Launch()
+</code></pre>
+
+<p>Parameters are same as <code>func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error</code>.</p>
 
 
 <footer class=" footline" >
@@ -601,20 +627,20 @@ Then you will see the browser render respnose as HTML</p>
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1558669659"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1558669659"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1558669659"></script>
-    <script src="/rocket/js/jquery.sticky.js?1558669659"></script>
-    <script src="/rocket/js/featherlight.min.js?1558669659"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1558669659"></script>
-    <script src="/rocket/js/highlight.pack.js?1558669659"></script>
+    <script src="/rocket/js/clipboard.min.js?1562420407"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1562420407"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1562420407"></script>
+    <script src="/rocket/js/jquery.sticky.js?1562420407"></script>
+    <script src="/rocket/js/featherlight.min.js?1562420407"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1562420407"></script>
+    <script src="/rocket/js/highlight.pack.js?1562420407"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1558669659"></script>
-    <script src="/rocket/js/learn.js?1558669659"></script>
-    <script src="/rocket/js/hugo-learn.js?1558669659"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1562420407"></script>
+    <script src="/rocket/js/learn.js?1562420407"></script>
+    <script src="/rocket/js/hugo-learn.js?1562420407"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1558669659" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1558669659"></script>
+    <link href="/rocket/mermaid/mermaid.css?1562420407" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1562420407"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
