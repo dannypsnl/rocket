@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/dannypsnl/rocket/router"
@@ -8,10 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type (
-	TestContext struct {
-	}
-)
+type TestContext struct{}
 
 func TestRootRouteWithUserDefinedContextWontPanic(t *testing.T) {
 	if r := recover(); r != nil {
@@ -43,7 +41,7 @@ func TestHandlerCreatorHttpMethod(t *testing.T) {
 func testMethod(t *testing.T, method string, handlerCreator func(route string, do interface{}) *handler) {
 	t.Helper()
 	t.Run(method, func(t *testing.T) {
-		h := handlerCreator("/", func() {})
+		h := handlerCreator("/", func() string { return "" })
 		assert.Equal(t, h.method, method)
 	})
 }
@@ -74,4 +72,13 @@ func TestDuplicateRoutePanic(t *testing.T) {
 	)
 	Ignite("").
 		Mount(root1, root2)
+}
+
+func TestVoidHandlingFunctionShouldBeRejected(t *testing.T) {
+	defer func() {
+		if r := recover(); !strings.Contains(r.(string), "handling function should be non-void function but got") {
+			t.Error("panic message is wrong or didn't panic")
+		}
+	}()
+	Get("/", func() {})
 }

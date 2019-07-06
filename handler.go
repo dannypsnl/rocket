@@ -23,6 +23,9 @@ type handler struct {
 }
 
 func newHandler(do reflect.Value) *handler {
+	if do.Type().NumOut() <= 0 {
+		panic(fmt.Sprintf("handling function should be non-void function but got: %s", do.Type()))
+	}
 	return &handler{
 		do:            do,
 		wildcardIndex: -1,
