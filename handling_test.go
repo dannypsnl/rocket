@@ -149,3 +149,22 @@ func TestGetHeaderByUserDefinedContext(t *testing.T) {
 		Expect().Status(http.StatusOK).
 		Body().Equal("Bear jwt.token.lalala")
 }
+
+type RequestContext struct {
+	Request *http.Request `http:"request"`
+}
+
+func TestHTTPInvalidResourceShouldBeRejected(t *testing.T) {
+	rk := rocket.Ignite("").
+		Mount(rocket.Get("/path", func(req *RequestContext) string {
+			return req.Request.URL.Path
+		}))
+
+	ts := httptest.NewServer(rk)
+	defer ts.Close()
+	e := httpexpect.New(t, ts.URL)
+
+	e.GET("/path").
+		Expect().Status(http.StatusOK).
+		Body().Equal("/path")
+}

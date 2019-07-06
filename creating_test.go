@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 
@@ -81,4 +82,20 @@ func TestVoidHandlingFunctionShouldBeRejected(t *testing.T) {
 		}
 	}()
 	Get("/", func() {})
+}
+
+type RequestContext struct {
+	// content-type is not valid resource in http tag, so would cause panic
+	Request *http.Request `http:"content-type"`
+}
+
+func TestHTTPInvalidResourceShouldBeRejected(t *testing.T) {
+	defer func() {
+		if r := recover(); !strings.Contains(r.(string), "unknown resource be required in http tag") {
+			t.Error("panic message is wrong or didn't panic")
+		}
+	}()
+	Get("/", func(c *RequestContext) string {
+		return c.Request.URL.Path
+	})
 }

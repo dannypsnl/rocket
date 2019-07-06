@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 )
@@ -14,7 +15,12 @@ type UserContext struct {
 	// `cookie:"token"`, would store "token" as key, field index as value
 	CookiesParams map[string]int
 	// `header:"Content-Type"`, would store "Content-Type" as key, field index as value
-	HeaderParams      map[string]int
+	HeaderParams map[string]int
+	// `http:"request"` would take request
+	// http tag is limited, can only take what we allow at here:
+	//
+	// - request
+	HttpParams        map[string]int
 	ExpectJSONRequest bool
 }
 
@@ -26,6 +32,7 @@ func NewUserContext() *UserContext {
 		QueryParams:       make(map[string]int),
 		CookiesParams:     make(map[string]int),
 		HeaderParams:      make(map[string]int),
+		HttpParams:        make(map[string]int),
 		ExpectJSONRequest: false,
 	}
 }
@@ -58,6 +65,15 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		if ok {
 			ctx.HeaderParams[key] = i
 		}
+		key, ok = tagOfField.Lookup("http")
+		if ok {
+			switch key {
+			case "request":
+			default:
+				panic(fmt.Sprintf("unknown resource be required in http tag: `%s`", key))
+			}
+			ctx.HttpParams[key] = i
+		}
 		_, ok = tagOfField.Lookup("json")
 		if !ctx.ExpectJSONRequest && ok {
 			ctx.ExpectJSONRequest = ok
@@ -83,4 +99,8 @@ func (ctx *UserContext) ExpectCookies() bool {
 
 func (ctx *UserContext) ExpectHeader() bool {
 	return len(ctx.HeaderParams) > 0
+}
+
+func (ctx *UserContext) ExpectHTTP() bool {
+	return len(ctx.HttpParams) > 0
 }
