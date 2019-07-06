@@ -39,6 +39,10 @@ type (
 		formParams map[string]int
 		form       url.Values
 	}
+	httpFiller struct {
+		httpParams map[string]int
+		req        *http.Request
+	}
 )
 
 func newRouteFiller(routes, reqURL []string, routeParams map[int]int, wildcardIndex int) filler {
@@ -77,6 +81,13 @@ func newJSONFiller(body io.Reader) filler {
 
 func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
+}
+
+func newHTTPFiller(httpParams map[string]int, req *http.Request) filler {
+	return &httpFiller{
+		httpParams: httpParams,
+		req:        req,
+	}
 }
 
 func (r *routeFiller) fill(ctx reflect.Value) error {
@@ -162,6 +173,14 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 			}
 			field.Set(value)
 		}
+	}
+	return nil
+}
+
+func (h *httpFiller) fill(ctx reflect.Value) error {
+	for _, fieldIndex := range h.httpParams {
+		field := ctx.Elem().Field(fieldIndex)
+		field.Set(reflect.ValueOf(h.req))
 	}
 	return nil
 }

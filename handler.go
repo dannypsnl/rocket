@@ -125,6 +125,9 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 		if userContext.ExpectHeader() {
 			basicChain = append(basicChain, newHeaderFiller(userContext.HeaderParams, req.Header))
 		}
+		if userContext.ExpectHTTP() {
+			basicChain = append(basicChain, newHTTPFiller(userContext.HttpParams, req))
+		}
 		ctx := reflect.New(userContext.ContextType)
 		for _, filler := range basicChain {
 			if err := filler.fill(ctx); err != nil {
