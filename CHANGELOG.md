@@ -1,5 +1,12 @@
 ## Latest
 
+- (#165) add directly access to `*http.Request`
+	```go
+	type RequestContext struct {
+		Request *http.Request `http:"request"`
+	}
+	rocket.Get("/", func(c *RequestContext) string { return c.Request.URL.Path })
+	```
 - add `EnableHTTPs` method for creating HTTPs allowed server
 	```go
 	rocket.Ignite(":443").
