@@ -1,5 +1,11 @@
 ## Latest
 
+- add `EnableHTTPs` method for creating HTTPs allowed server
+	```go
+	rocket.Ignite(":443").
+		EnableHTTPs("cert.pem", "key.pem").
+		Launch()
+	```
 - add `OnLaunch` fairing
 	```go
 	type YourFairing struct {
