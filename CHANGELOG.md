@@ -6,7 +6,7 @@
 		EnableHTTPs("cert.pem", "key.pem").
 		Launch()
 	```
-- fix(#183): reject void function as handler
+- (#183) fix: reject void function as handler
 - add `OnLaunch` fairing
 	```go
 	type YourFairing struct {
