@@ -126,7 +126,6 @@ Here is an easy example:
 ```go
 import (
 	"errors"
-	"net/http"
 
 	"github.com/dannypsnl/rocket"
 )
