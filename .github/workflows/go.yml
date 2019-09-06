@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: [macOS-10.14, windows-2016, ubuntu-latest]
     steps:
     - name: Set up Go 1.12
       uses: actions/setup-go@v1
