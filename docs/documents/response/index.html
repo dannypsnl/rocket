@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.54.0" />
+    <meta name="generator" content="Hugo 0.55.6" />
     <meta name="description" content="">
 
 
@@ -12,19 +12,19 @@
     <title>Response :: Rocket</title>
 
     
-    <link href="/rocket/css/nucleus.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/fontawesome-all.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/hybrid.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/featherlight.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/perfect-scrollbar.min.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/auto-complete.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/theme.css?1551372881" rel="stylesheet">
-    <link href="/rocket/css/hugo-theme.css?1551372881" rel="stylesheet">
+    <link href="/rocket/css/nucleus.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/fontawesome-all.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/hybrid.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/featherlight.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/perfect-scrollbar.min.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/auto-complete.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/theme.css?1562420407" rel="stylesheet">
+    <link href="/rocket/css/hugo-theme.css?1562420407" rel="stylesheet">
     
-      <link href="/rocket/css/theme-red.css?1551372881" rel="stylesheet">
+      <link href="/rocket/css/theme-red.css?1562420407" rel="stylesheet">
     
 
-    <script src="/rocket/js/jquery-2.x.min.js?1551372881"></script>
+    <script src="/rocket/js/jquery-2.x.min.js?1562420407"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -69,14 +69,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/rocket/js/lunr.min.js?1551372881"></script>
-<script type="text/javascript" src="/rocket/js/auto-complete.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/lunr.min.js?1562420407"></script>
+<script type="text/javascript" src="/rocket/js/auto-complete.js?1562420407"></script>
 <script type="text/javascript">
     
         var baseurl = "http:\/\/dannypsnl.github.io\/rocket";
     
 </script>
-<script type="text/javascript" src="/rocket/js/search.js?1551372881"></script>
+<script type="text/javascript" src="/rocket/js/search.js?1562420407"></script>
 
     
   </div>
@@ -376,16 +376,19 @@
 
 <ul>
 <li><code>response.Html</code>, return <code>text/html</code></li>
-<li><code>response.Json</code>, return <code>application/json</code>
-<code>go
-func() response.Json {
+
+<li><p><code>response.Json</code>, return <code>application/json</code></p>
+
+<pre><code class="language-go">func() response.Json {
     return `
     {
         &quot;just&quot;: &quot;a json&quot;
     }
     `
 }
-</code></li>
+</code></pre>
+
+<ul>
 <li><code>string</code>, return <code>text/plain</code></li>
 </ul>
 
@@ -394,12 +397,13 @@ func() response.Json {
 <pre><code class="language-go">import &quot;github.com/dannypsnl/rocket/response&quot;
 
 func() *response.Response {
-    html := response.Html(`
-        &lt;h1&gt;Title&lt;/h1&gt;
-    `)
-    return response.New(html)
+html := response.Html(`
+    &lt;h1&gt;Title&lt;/h1&gt;
+`)
+return response.New(html)
 }
-</code></pre>
+</code></pre></li>
+</ul>
 
 <p>As you can see, you can keep your awesome response type feature with <code>Response</code></p>
 
@@ -409,9 +413,11 @@ func() *response.Response {
 <li><p><code>New</code>, accept a response type of rocket</p>
 
 <pre><code class="language-go">response.New(&quot;what your user get&quot;)
-</code></pre></li>
+</code></pre>
 
-<li><p><code>Stream</code>, create a streamable responder by allowing you keep writing data into <code>http.ResponseWriter</code></p>
+<ul>
+<li><code>Stream</code>, create a streamable responder by allowing you keep writing data into <code>http.ResponseWriter</code></li>
+</ul>
 
 <pre><code class="language-go">response.Stream(func(w http.ResponseWriter) (keep bool) {
     _, err := w.Write([]byte(`hello\n`))
@@ -434,9 +440,11 @@ and somehow we found this is really useful so we keep this ability in rocket</p>
 <pre><code class="language-go">response.New(&quot;&quot;).Headers(response.Headers{
     &quot;Access-Control-Allow-Origin&quot;: &quot;*&quot;,
 })
-</code></pre></li>
+</code></pre>
 
-<li><p><code>Cookies</code>, accept a cookie list</p>
+<ul>
+<li><code>Cookies</code>, accept a cookie list</li>
+</ul>
 
 <pre><code class="language-go">response.New(&quot;&quot;).Cookies(
     cookie.New(&quot;a&quot;, &quot;cookie&quot;).
@@ -450,9 +458,11 @@ and somehow we found this is really useful so we keep this ability in rocket</p>
 
 <pre><code class="language-go">response.New(&quot;Bas request&quot;).
     Status(http.StatusBadRequest)
-</code></pre></li>
+</code></pre>
 
-<li><p><code>ContentType</code>, let you modify content-type of response easier(compare to setting <strong>header</strong> directly)</p>
+<ul>
+<li><code>ContentType</code>, let you modify content-type of response easier(compare to setting <strong>header</strong> directly)</li>
+</ul>
 
 <pre><code class="language-go">response.Stream(func(w http.ResponseWriter) bool {
     // ignore
@@ -654,20 +664,20 @@ and somehow we found this is really useful so we keep this ability in rocket</p>
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/rocket/js/clipboard.min.js?1551372881"></script>
-    <script src="/rocket/js/perfect-scrollbar.min.js?1551372881"></script>
-    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1551372881"></script>
-    <script src="/rocket/js/jquery.sticky.js?1551372881"></script>
-    <script src="/rocket/js/featherlight.min.js?1551372881"></script>
-    <script src="/rocket/js/html5shiv-printshiv.min.js?1551372881"></script>
-    <script src="/rocket/js/highlight.pack.js?1551372881"></script>
+    <script src="/rocket/js/clipboard.min.js?1562420407"></script>
+    <script src="/rocket/js/perfect-scrollbar.min.js?1562420407"></script>
+    <script src="/rocket/js/perfect-scrollbar.jquery.min.js?1562420407"></script>
+    <script src="/rocket/js/jquery.sticky.js?1562420407"></script>
+    <script src="/rocket/js/featherlight.min.js?1562420407"></script>
+    <script src="/rocket/js/html5shiv-printshiv.min.js?1562420407"></script>
+    <script src="/rocket/js/highlight.pack.js?1562420407"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/rocket/js/modernizr.custom.71422.js?1551372881"></script>
-    <script src="/rocket/js/learn.js?1551372881"></script>
-    <script src="/rocket/js/hugo-learn.js?1551372881"></script>
+    <script src="/rocket/js/modernizr.custom.71422.js?1562420407"></script>
+    <script src="/rocket/js/learn.js?1562420407"></script>
+    <script src="/rocket/js/hugo-learn.js?1562420407"></script>
 
-    <link href="/rocket/mermaid/mermaid.css?1551372881" type="text/css" rel="stylesheet" />
-    <script src="/rocket/mermaid/mermaid.js?1551372881"></script>
+    <link href="/rocket/mermaid/mermaid.css?1562420407" type="text/css" rel="stylesheet" />
+    <script src="/rocket/mermaid/mermaid.js?1562420407"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

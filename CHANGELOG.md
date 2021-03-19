@@ -1,5 +1,31 @@
 ## Latest
 
+- (#165) add directly access to `*http.Request`
+	```go
+	type RequestContext struct {
+		Request *http.Request `http:"request"`
+	}
+	rocket.Get("/", func(c *RequestContext) string { return c.Request.URL.Path })
+	```
+- add `EnableHTTPs` method for creating HTTPs allowed server
+	```go
+	rocket.Ignite(":443").
+		EnableHTTPs("cert.pem", "key.pem").
+		Launch()
+	```
+- (#183) fix: reject void function as handler
+- add `OnLaunch` fairing
+	```go
+	type YourFairing struct {
+		rocket.Fairing
+	}
+
+	func (f *YourFairing) OnLaunch(r *rocket.Rocket) {
+		// get rocket structure info at launch time
+	}
+	```
+- remove subpackage `fairing`
+	`fairing.Fairing` ~> `rocket.Fairing`
 - remove base route from design, NOTE: it's a big break change
 
 	New style example:

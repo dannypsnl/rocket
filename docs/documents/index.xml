@@ -48,7 +48,8 @@ Warning: Don&amp;rsquo;t use *response.Response cross goroutine, it&amp;rsquo;s 
 For example, response.Html
 func() response.Html { return `&amp;lt;h1&amp;gt;Title&amp;lt;/h1&amp;gt;` }  Then your response when with header Content-Type is text/html
 Currently we have:
- response.Html, return text/html response.Json, return application/json go func() response.</description>
+ response.Html, return text/html response.Json, return application/json
+func() response.</description>
     </item>
     
     <item>
@@ -59,7 +60,7 @@ Currently we have:
       <guid>http://dannypsnl.github.io/rocket/documents/fairing/</guid>
       <description>What&amp;rsquo;s fairing? It&amp;rsquo;s an abstraction to avoid over-using the middleware.
 But we still need some hooks to record some data or modifying the input/output for certain purpose, to keep this ability, we made fairing, this is how it looks like:
-type Logger struct { fairing.Fairing } func (l *Logger) OnRequest(r *http.Request) *http.Request { log.Printf(&amp;quot;request: %#v\n&amp;quot;, r) return r } func (l *Logger) OnResponse(r *response.Response) *response.Response { log.Printf(&amp;quot;response: %#v\n&amp;quot;, r) return r } // in main function or entrypoint rocket.</description>
+type Logger struct { rocket.Fairing } func (l *Logger) OnRequest(r *http.Request) *http.Request { log.Printf(&amp;quot;request: %#v\n&amp;quot;, r) return r } func (l *Logger) OnResponse(r *response.Response) *response.Response { log.Printf(&amp;quot;response: %#v\n&amp;quot;, r) return r } // in main function or entrypoint rocket.</description>
     </item>
     
     <item>

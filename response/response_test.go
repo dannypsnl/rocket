@@ -7,9 +7,9 @@ import (
 
 	"github.com/dannypsnl/rocket/cookie"
 	"github.com/dannypsnl/rocket/response"
-	"github.com/gavv/httpexpect"
 
-	asserter "github.com/dannypsnl/assert"
+	"github.com/gavv/httpexpect"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRespAsHTTPHandler(t *testing.T) {
@@ -76,8 +76,6 @@ func (w *fakeWriteCounter) Write([]byte) (int, error) {
 func (w *fakeWriteCounter) WriteHeader(statusCode int) {}
 
 func TestHTTPStreaming(t *testing.T) {
-	assert := asserter.NewTester(t)
-
 	testCases := []struct {
 		name               string
 		expectedWriteTimes int
@@ -104,7 +102,7 @@ func TestHTTPStreaming(t *testing.T) {
 			w := &fakeWriteCounter{count: 0}
 			res := response.Stream(testCase.streamFunc)
 			res.ServeHTTP(w, &http.Request{})
-			assert.Eq(w.count, testCase.expectedWriteTimes)
+			assert.Equal(t, testCase.expectedWriteTimes, w.count)
 		})
 	}
 }

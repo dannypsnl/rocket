@@ -1,17 +1,16 @@
 package rocket
 
 import (
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/dannypsnl/rocket/router"
 
-	"github.com/dannypsnl/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-type (
-	TestContext struct {
-	}
-)
+type TestContext struct{}
 
 func TestRootRouteWithUserDefinedContextWontPanic(t *testing.T) {
 	if r := recover(); r != nil {
@@ -42,10 +41,9 @@ func TestHandlerCreatorHttpMethod(t *testing.T) {
 
 func testMethod(t *testing.T, method string, handlerCreator func(route string, do interface{}) *handler) {
 	t.Helper()
-	assert := assert.NewTester(t)
 	t.Run(method, func(t *testing.T) {
-		h := handlerCreator("/", func() {})
-		assert.Eq(method, h.method)
+		h := handlerCreator("/", func() string { return "" })
+		assert.Equal(t, h.method, method)
 	})
 }
 
@@ -75,4 +73,29 @@ func TestDuplicateRoutePanic(t *testing.T) {
 	)
 	Ignite("").
 		Mount(root1, root2)
+}
+
+func TestVoidHandlingFunctionShouldBeRejected(t *testing.T) {
+	defer func() {
+		if r := recover(); !strings.Contains(r.(string), "handling function should be non-void function but got") {
+			t.Error("panic message is wrong or didn't panic")
+		}
+	}()
+	Get("/", func() {})
+}
+
+type RequestContext struct {
+	// content-type is not valid resource in http tag, so would cause panic
+	Request *http.Request `http:"content-type"`
+}
+
+func TestHTTPInvalidResourceShouldBeRejected(t *testing.T) {
+	defer func() {
+		if r := recover(); !strings.Contains(r.(string), "unknown resource be required in http tag") {
+			t.Error("panic message is wrong or didn't panic")
+		}
+	}()
+	Get("/", func(c *RequestContext) string {
+		return c.Request.URL.Path
+	})
 }

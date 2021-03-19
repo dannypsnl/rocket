@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dannypsnl/assert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseParameter(t *testing.T) {
-	assert := assert.NewTester(t)
 	testCases := []struct {
 		name          string
 		paramStr      string
@@ -89,8 +89,8 @@ func TestParseParameter(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			v, err := parseParameter(reflect.TypeOf(testCase.expectedValue), testCase.paramStr)
-			assert.Eq(err, nil)
-			assert.Eq(v.Interface(), testCase.expectedValue)
+			require.NoError(t, err)
+			assert.Equal(t, testCase.expectedValue, v.Interface())
 		})
 	}
 }

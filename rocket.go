@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/dannypsnl/rocket/fairing"
 	"github.com/dannypsnl/rocket/response"
 	"github.com/dannypsnl/rocket/router"
 )
@@ -14,8 +13,13 @@ import (
 type Rocket struct {
 	port          string
 	router        *router.Route
-	listOfFairing []fairing.Interface
+	listOfFairing []fairingInterface
 
+	allowTLS bool
+	// TLS
+	certFile string
+	keyFile  string
+	// cache layer
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
 }
@@ -36,7 +40,7 @@ func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
 }
 
 // Attach add fairing to lifecycle for each request and response
-func (rk *Rocket) Attach(f fairing.Interface) *Rocket {
+func (rk *Rocket) Attach(f fairingInterface) *Rocket {
 	rk.listOfFairing = append(rk.listOfFairing, f)
 	return rk
 }
@@ -51,8 +55,18 @@ func (rk *Rocket) Default(do interface{}) *Rocket {
 
 // Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
+	for _, f := range rk.listOfFairing {
+		f.OnLaunch(rk)
+	}
 	http.HandleFunc("/", rk.ServeHTTP)
-	log.Fatal(http.ListenAndServe(rk.port, nil))
+	server := &http.Server{Addr: rk.port, Handler: rk}
+	defer server.Close()
+	switch {
+	case rk.allowTLS:
+		log.Fatal(server.ListenAndServeTLS(rk.certFile, rk.keyFile))
+	default:
+		log.Fatal(server.ListenAndServe())
+	}
 }
 
 // Ignite initial service by port. The format following native HTTP library `:port_number`
@@ -63,11 +77,20 @@ func Ignite(port string) *Rocket {
 			&optionsHandler{},
 			createNotAllowHandler,
 		),
-		listOfFairing: make([]fairing.Interface, 0),
+		listOfFairing: make([]fairingInterface, 0),
+		allowTLS:      false,
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
 	}
+}
+
+// EnableHTTPs would get certFile and keyFile to enable HTTPs
+func (rk *Rocket) EnableHTTPs(certFile, keyFile string) *Rocket {
+	rk.certFile = certFile
+	rk.keyFile = keyFile
+	rk.allowTLS = true
+	return rk
 }
 
 // ServeHTTP is prepare for http server trait, so that you could use `*rocket.Rocket` as `http.Handler`
