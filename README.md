@@ -88,7 +88,7 @@ rocket.Ignite(":8080"). // Setting port
 - Launch start the server.
 - **Mount** receive handlers that exactly handle route. You can emit 1 to N handlers in one `Mount`
 
-#### Fairing(experimental release)
+#### Fairing
 
 - **OnResponse** and **OnRequest**
     An easy approach:
