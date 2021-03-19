@@ -50,7 +50,6 @@ func hello (u *User) string {
 // use
 rocket.Ignite(":8080").
     Mount(
-        "/",
         rocket.Get("/name/:name/age/:age", hello),
     ).
     Launch()
@@ -78,7 +77,6 @@ rocket.Ignite(":8080").
 ```go
 rocket.Ignite(":8080"). // Setting port
     Mount(
-        "/",
         rocket.Get("/", index),
         rocket.Get("/static/*path", static),
         rocket.Get("/hello", hello),
@@ -145,7 +143,6 @@ func (u *User) VerifyRequest() error {
 
 rocket.Ignite(":8080").
     Mount(
-        "/",
         rocket.Get("/user_data", handler).Guard(&User{}),
     ).
     Launch()
