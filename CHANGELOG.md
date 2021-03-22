@@ -1,4 +1,6 @@
-## Latest
+## Latest(v1)
+
+- (#172) improve MIME type detection
 
 ## v0.14.0
 

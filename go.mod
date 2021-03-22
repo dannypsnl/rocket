@@ -6,6 +6,7 @@ require (
 	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.2.0
 	github.com/gavv/httpexpect v0.0.0-20180803094507-bdde30871313
 	github.com/gavv/monotime v0.0.0-20171021193802-6f8212e8d10d // indirect
 	github.com/google/go-querystring v1.0.0 // indirect

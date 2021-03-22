@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
+
+	"github.com/gabriel-vasile/mimetype"
 )
 
 // File would create a response for file resource by provided filepath
@@ -19,17 +20,5 @@ func File(filepath string) *Response {
 		return New("").Status(http.StatusUnprocessableEntity)
 	}
 	resp := New(string(b))
-	fileSuffix := filepath[strings.LastIndexByte(filepath, '.')+1:]
-	return resp.ContentType(defaultSuffixMapToContentTypes[fileSuffix])
-}
-
-var defaultSuffixMapToContentTypes = map[string]string{
-	"html": "text/html",
-	"css":  "text/css",
-	"js":   "application/javascript",
-	"json": "application/json",
-	"xml":  "application/xml",
-	"gif":  "image/gif",
-	"png":  "image/png",
-	"jpeg": "image/jpeg",
+	return resp.ContentType(mimetype.Detect(b).String())
 }
