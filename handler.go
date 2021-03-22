@@ -103,7 +103,10 @@ func (h *handler) getGuards(reqURL []string, req *http.Request) ([]reflect.Value
 func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqURL []string, req *http.Request) ([]reflect.Value, error) {
 	userContexts := make([]reflect.Value, len(contexts))
 
-	req.ParseForm()
+	err := req.ParseForm()
+	if err != nil {
+		return nil, err
+	}
 	for i, userContext := range contexts {
 		basicChain := []filler{
 			newRouteFiller(
