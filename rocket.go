@@ -24,10 +24,9 @@ type Rocket struct {
 	defaultResp    *response.Response
 }
 
-// Mount add handler into our service.
-func (rk *Rocket) Mount(h *handler, hs ...*handler) *Rocket {
-	rk.router.AddHandler(h.method, h.getRoute(), h)
-	for _, h := range hs {
+// Mount add handlers into our service.
+func (rk *Rocket) Mount(handlers ...*handler) *Rocket {
+	for _, h := range handlers {
 		rk.router.AddHandler(h.method, h.getRoute(), h)
 	}
 	return rk
