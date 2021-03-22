@@ -71,10 +71,11 @@ func (root *Route) AddHandler(method, route string, h Handler) {
 	fullRoute := SplitBySlash(route)
 	curRoute := root
 	for i, r := range fullRoute {
-		if r[0] == ':' {
+		switch r[0] {
+		case ':':
 			curRoute = curRoute.mustGetVariableRoute()
 			continue
-		} else if r[0] == '*' {
+		case '*':
 			h.WildcardIndex(i)
 			wildcard := curRoute.mustGetWildcardRoute()
 			if _, routeExisted := wildcard[method]; routeExisted {
@@ -82,8 +83,10 @@ func (root *Route) AddHandler(method, route string, h Handler) {
 			}
 			curRoute.addHandlerOn(method, wildcard, h)
 			return
-		} else if _, ok := curRoute.children[r]; !ok {
-			curRoute.children[r] = New(root.optionHandler, root.notAllowHandler)
+		default:
+			if _, ok := curRoute.children[r]; !ok {
+				curRoute.children[r] = New(root.optionHandler, root.notAllowHandler)
+			}
 		}
 		curRoute = curRoute.children[r]
 	}

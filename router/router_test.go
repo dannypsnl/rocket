@@ -63,12 +63,12 @@ func TestRouting(t *testing.T) {
 				"GET;/*wildcard",
 			},
 			requestRouteMapToMatchedRoute: map[string]string{
-				"GET;/a":      "/a",
-				"GET;/b":      "/*wildcard",
-				"GET;/b/c":    "/*wildcard",
-				"GET;/a/b/c":  "/*wildcard",
-				"POST;/a/b/c": "request resource does not support http method 'POST'",
-				"POST;/a":     "request resource does not support http method 'POST'",
+				"GET;/a":                    "/a",
+				"GET;/b":                    "/*wildcard",
+				"GET;/b/c":                  "/*wildcard",
+				"GET;/a/b/c/d/e/d/das/cast": "/*wildcard",
+				"POST;/a/b/c":               "request resource does not support http method 'POST'",
+				"POST;/a":                   "request resource does not support http method 'POST'",
 			},
 		},
 	}
