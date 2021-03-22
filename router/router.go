@@ -66,7 +66,8 @@ func SplitBySlash(routeStr string) []string {
 	return route
 }
 
-func (root *Route) AddHandler(method, route string, h Handler) error {
+// AddHandler bind method+route with handler, notice that it would just panic when get duplicate route
+func (root *Route) AddHandler(method, route string, h Handler) {
 	fullRoute := SplitBySlash(route)
 	curRoute := root
 	for i, r := range fullRoute {
@@ -77,10 +78,10 @@ func (root *Route) AddHandler(method, route string, h Handler) error {
 			h.WildcardIndex(i)
 			wildcard := curRoute.mustGetWildcardRoute()
 			if _, routeExisted := wildcard[method]; routeExisted {
-				return PanicDuplicateRoute
+				panic(PanicDuplicateRoute)
 			}
 			curRoute.addHandlerOn(method, wildcard, h)
-			return nil
+			return
 		} else if _, ok := curRoute.children[r]; !ok {
 			curRoute.children[r] = New(root.optionHandler, root.notAllowHandler)
 		}
@@ -88,10 +89,9 @@ func (root *Route) AddHandler(method, route string, h Handler) error {
 	}
 
 	if _, sameRouteExisted := curRoute.methodHandlers[method]; sameRouteExisted {
-		return PanicDuplicateRoute
+		panic(PanicDuplicateRoute)
 	}
 	curRoute.addHandlerOn(method, curRoute.methodHandlers, h)
-	return nil
 }
 
 func (r *Route) addHandlerOn(method string, m map[string]Handler, h Handler) {

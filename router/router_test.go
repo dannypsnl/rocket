@@ -81,8 +81,7 @@ func TestRouting(t *testing.T) {
 				h := &handler{
 					route: route,
 				}
-				err := r.AddHandler(method, route, h)
-				require.NoError(t, err)
+				r.AddHandler(method, route, h)
 			}
 
 			for requestRoute, matchedRoute := range testCase.requestRouteMapToMatchedRoute {
