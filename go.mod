@@ -1,5 +1,7 @@
 module github.com/dannypsnl/rocket
 
+go 1.16
+
 require (
 	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -10,8 +12,6 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
-	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/moul/http2curl v0.0.0-20170919181001-9ac6cf4d929b // indirect
@@ -31,5 +31,4 @@ require (
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	golang.org/x/net v0.0.0-20181106065722-10aee1819953
 	golang.org/x/sys v0.0.0-20181106073832-7155702f2d47 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
