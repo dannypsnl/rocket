@@ -28,7 +28,7 @@ import (
 #### Create Handler
 
 ```go
-package example
+package main
 
 import (
     "fmt"
@@ -45,14 +45,15 @@ func hello (u *User) string {
     return fmt.Sprintf(
         "Hello, %s.\nYour age is %d.",
         u.Name, u.Age)
-})
+}
 
-// use
-rocket.Ignite(":8080").
-    Mount(
-        rocket.Get("/name/:name/age/:age", hello),
-    ).
-    Launch()
+func main() {
+	rocket.Ignite(":8080").
+        Mount(
+            rocket.Get("/name/:name/age/:age", hello),
+        ).
+        Launch()
+}
 ```
 
 - First argument of handler creator is a route string can have variant part.
@@ -86,14 +87,17 @@ rocket.Ignite(":8080"). // Setting port
 
 - func Ignite get a string to describe port.
 - Launch start the server.
-- **Mount** receive handlers that exactly handle route. You can emit 1 to N handlers in one `Mount`
+- **Mount** receive handlers that exactly handle route. You can emit 0 to N handlers in one `Mount`
 
 #### Fairing
 
 - **OnResponse** and **OnRequest**
     An easy approach:
     ```go
+    package example
+
     import (
+        "log"
         "net/http"
 
         "github.com/dannypsnl/rocket"
@@ -111,39 +115,44 @@ rocket.Ignite(":8080"). // Setting port
         log.Printf("response: %#v\n", r)
         return r
     }
-    rocket.Ignite(":6060").
-        // Use Attach to emit, you can call Attach multiple time, but carefully at modify data, that might cause problem
-        Attach(&Logger{}).
-        // Mount(...)
-        Launch()
+    func main()  {
+        rocket.Ignite(":6060").
+            // Use Attach to emit, you can call Attach multiple time, but carefully at modify data, that might cause problem
+            Attach(&Logger{}).
+            // Mount(...)
+            Launch()
+    }
     ```
 
 #### Guard
 
 Guard should be implemented by your **UserDefinedContext**.
 Here is an easy example:
-```go
-import (
-    "errors"
 
-    "github.com/dannypsnl/rocket"
+```go
+package main
+
+import (
+	"github.com/dannypsnl/rocket"
 )
 
 type User struct {
-    Auth *string `header:"Authorization"`
+	Auth *string `header:"Authorization"`
 }
 
 func (u *User) VerifyRequest() error {
-    // Assuming we have a JWT verify helper function
-    if verifyAuthByJWT(u.Auth) {
-        return nil
-    }
-    return rocket.AuthError("not allowed")
+	// Assuming we have a JWT verify helper function
+	if verifyAuthByJWT(u.Auth) {
+		return nil
+	}
+	return rocket.AuthError("not allowed")
 }
 
-rocket.Ignite(":8080").
-    Mount(
-        rocket.Get("/user_data", handler).Guard(&User{}),
-    ).
-    Launch()
+func main() {
+	rocket.Ignite(":8080").
+		Mount(
+			rocket.Get("/user_data", handler).Guard(&User{}),
+		).
+		Launch()
+}
 ```
