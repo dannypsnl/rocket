@@ -22,13 +22,12 @@ jobs:
           path: |
             ~/.racket
           key: ${{ runner.os }}-primes
-      - uses: actions/setup-go@v2
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
         with:
-          go-version: ^1.15
-        id: go
-      - name: Build
-        run: |
-          cd rocket-doc; hugo
+          hugo-version: '0.79.1'
+      - name: Build Doc
+        run: cd rocket-doc; hugo --minify
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
