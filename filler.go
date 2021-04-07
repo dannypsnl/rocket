@@ -3,7 +3,6 @@ package rocket
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -194,30 +193,21 @@ func (m *multiFormFiller) fill(ctx reflect.Value) error {
 		return err
 	}
 	for k, idx := range m.multiFormParams {
-		v := ""
+		field := ctx.Elem().Field(idx)
 		if m.paramIsFile[k] {
 			file, _, err := m.req.FormFile(k)
 			if err != nil {
 				return err
 			}
-			fileBytes, err := ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-			v = string(fileBytes)
-			err = file.Close()
-			if err != nil {
-				return err
-			}
+			field.Set(reflect.ValueOf(file))
 		} else {
-			v = m.req.FormValue(k)
+			v := m.req.FormValue(k)
+			value, err := parseParameter(field.Type(), string(v))
+			if err != nil {
+				return err
+			}
+			field.Set(value)
 		}
-		field := ctx.Elem().Field(idx)
-		value, err := parseParameter(field.Type(), v)
-		if err != nil {
-			return err
-		}
-		field.Set(value)
 	}
 	return nil
 }

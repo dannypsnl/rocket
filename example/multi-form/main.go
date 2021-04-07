@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 
 	"github.com/dannypsnl/rocket"
@@ -31,8 +32,7 @@ func home() response.Html {
 }
 
 type File struct {
-	// limit to 10MB
-	Text string `multiform:"file" file:"yes"`
+	ReadCloser io.ReadCloser `multiform:"file" file:"yes"`
 }
 
 func upload(f *File) response.Html {
@@ -40,7 +40,11 @@ func upload(f *File) response.Html {
 	if err != nil {
 		return failPage()
 	}
-	_, err = file.WriteString(f.Text)
+	_, err = file.ReadFrom(f.ReadCloser)
+	if err != nil {
+		return failPage()
+	}
+	err = f.ReadCloser.Close()
 	if err != nil {
 		return failPage()
 	}
