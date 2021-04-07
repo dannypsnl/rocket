@@ -2,13 +2,13 @@ name: Go
 on:
   push:
     branches:
-    - master
+    - '*'
     paths:
     - '**.yml'
     - '**.go'
   pull_request:
     branches:
-    - master
+    - '*'
     paths:
     - '**.yml'
     - '**.go'
