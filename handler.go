@@ -64,6 +64,8 @@ type handler struct {
 	userContexts []*context.UserContext
 
 	wildcardIndex int
+	// get config
+	rocket *Rocket
 }
 
 func newHandler(do reflect.Value) *handler {
@@ -164,7 +166,7 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 		if userContext.ExpectJSONRequest {
 			basicChain = append(basicChain, newJSONFiller(req.Body))
 		} else if userContext.ExpectMultiFormsRequest {
-			basicChain = append(basicChain, newMultiFormFiller(userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
+			basicChain = append(basicChain, newMultiFormFiller(h.rocket.SizeLimit, userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
 		} else {
 			basicChain = append(basicChain, newFormFiller(userContext.FormParams, req.Form))
 		}

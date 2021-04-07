@@ -43,6 +43,7 @@ type (
 		req             *http.Request
 		multiFormParams map[string]int
 		paramIsFile     map[string]bool
+		limit           int64
 	}
 	httpFiller struct {
 		httpParams map[string]int
@@ -88,8 +89,8 @@ func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
 }
 
-func newMultiFormFiller(multiFormParams map[string]int, paramIsFile map[string]bool, req *http.Request) filler {
-	return &multiFormFiller{multiFormParams: multiFormParams, paramIsFile: paramIsFile, req: req}
+func newMultiFormFiller(limit int64, multiFormParams map[string]int, paramIsFile map[string]bool, req *http.Request) filler {
+	return &multiFormFiller{limit: limit, multiFormParams: multiFormParams, paramIsFile: paramIsFile, req: req}
 }
 
 func newHTTPFiller(httpParams map[string]int, req *http.Request) filler {
@@ -187,8 +188,7 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 }
 
 func (m *multiFormFiller) fill(ctx reflect.Value) error {
-	// size default limit: 10MB
-	err := m.req.ParseMultipartForm(10 << 20)
+	err := m.req.ParseMultipartForm(m.limit << 20)
 	if err != nil {
 		return err
 	}
