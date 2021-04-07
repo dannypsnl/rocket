@@ -14,3 +14,7 @@ require (
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 )
+
+replace (
+	github.com/dannypsnl/rocket v1.0.0 => ../
+)
