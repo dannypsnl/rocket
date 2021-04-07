@@ -3,6 +3,7 @@ package rocket
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -38,6 +39,10 @@ type (
 	formFiller struct {
 		formParams map[string]int
 		form       url.Values
+	}
+	multiFormFiller struct {
+		req             *http.Request
+		multiFormParams map[string]int
 	}
 	httpFiller struct {
 		httpParams map[string]int
@@ -81,6 +86,10 @@ func newJSONFiller(body io.Reader) filler {
 
 func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
+}
+
+func newMultiFormFiller(multiFormParams map[string]int, req *http.Request) filler {
+	return &multiFormFiller{multiFormParams: multiFormParams, req: req}
 }
 
 func newHTTPFiller(httpParams map[string]int, req *http.Request) filler {
@@ -172,6 +181,31 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 				return err
 			}
 			field.Set(value)
+		}
+	}
+	return nil
+}
+
+func (m *multiFormFiller) fill(ctx reflect.Value) error {
+	for k, idx := range m.multiFormParams {
+		file, _, err := m.req.FormFile(k)
+		if err != nil {
+			return err
+		}
+		fileBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+		print(k)
+		field := ctx.Elem().Field(idx)
+		value, err := parseParameter(field.Type(), string(fileBytes))
+		if err != nil {
+			return err
+		}
+		field.Set(value)
+		err = file.Close()
+		if err != nil {
+			return err
 		}
 	}
 	return nil

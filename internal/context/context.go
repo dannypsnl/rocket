@@ -7,11 +7,12 @@ import (
 )
 
 type UserContext struct {
-	ContextType reflect.Type
-	IsHeaders   bool
-	RouteParams map[int]int
-	FormParams  map[string]int
-	QueryParams map[string]int
+	ContextType     reflect.Type
+	IsHeaders       bool
+	RouteParams     map[int]int
+	FormParams      map[string]int
+	MultiFormParams map[string]int
+	QueryParams     map[string]int
 	// `cookie:"token"`, would store "token" as key, field index as value
 	CookiesParams map[string]int
 	// `header:"Content-Type"`, would store "Content-Type" as key, field index as value
@@ -29,6 +30,7 @@ func NewUserContext() *UserContext {
 		IsHeaders:         false,
 		RouteParams:       make(map[int]int),
 		FormParams:        make(map[string]int),
+		MultiFormParams:   make(map[string]int),
 		QueryParams:       make(map[string]int),
 		CookiesParams:     make(map[string]int),
 		HeaderParams:      make(map[string]int),
@@ -49,6 +51,10 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		key, ok = tagOfField.Lookup("form")
 		if ok {
 			ctx.FormParams[key] = i
+		}
+		key, ok = tagOfField.Lookup("multiform")
+		if ok {
+			ctx.MultiFormParams[key] = i
 		}
 		key, ok = tagOfField.Lookup("query")
 		if ok {
@@ -74,6 +80,7 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 			}
 			ctx.HttpParams[key] = i
 		}
+		// we found json tag, then must expect a JSON request
 		_, ok = tagOfField.Lookup("json")
 		if !ctx.ExpectJSONRequest && ok {
 			ctx.ExpectJSONRequest = ok
