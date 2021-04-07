@@ -82,7 +82,7 @@ But just `route`? Nope, we also have:
 - `query:"key"` for request path `/path/to/route?key=value`
 - `form:"key"` for FORM request
 - `multiform:"key"` for multiple forms request
-- `multiform:"key" file:"yes"` for multiple forms request and it's file
+- `multiform:"key" file:"yes"` for multiple forms request, and it's a file. In this case, the type of field must be `io.ReadCloser`.
 - `json:"key"` for request body is JSON(here has some problem, we can also handle GET method just need JSON body,
   this is a bug, it should only work with POST, PUT, PATCH with application/json)
 - `header:"key"`, to getting header like `Content-Type`, `Authorization`
