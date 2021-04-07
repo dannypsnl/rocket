@@ -40,7 +40,7 @@ Next is handling **Not Found: 404**, we use `Default` to handle this.
 ```go
 rocket.Ignite(":8080").
     // some mounts
-    Default(func() rocket.Html {
+    Default(func() response.Html {
         return `<h1>Page Not Found</h1>`
     })
 ```
@@ -48,7 +48,7 @@ rocket.Ignite(":8080").
 Then when rocket can't find any route in router, it will use this function's response.
 This is optional, so you can omit it, we have default for default, lol.
 
-p.s. `rocket.Html` is response magic in rocket, it will set header `Content-Type` as `text/html`.
+p.s. `response.Html` is response magic in rocket, it will set header `Content-Type` as `text/html`.
 Then you will see the browser render respnose as HTML
 
 Final, we start our server.
