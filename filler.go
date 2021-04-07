@@ -196,7 +196,6 @@ func (m *multiFormFiller) fill(ctx reflect.Value) error {
 		if err != nil {
 			return err
 		}
-		print(k)
 		field := ctx.Elem().Field(idx)
 		value, err := parseParameter(field.Type(), string(fileBytes))
 		if err != nil {
