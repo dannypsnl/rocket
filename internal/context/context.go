@@ -58,8 +58,8 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		if ok {
 			ctx.MultiFormParams[key] = i
 			// means this is a file
-			_, ok = tagOfField.Lookup("file")
-			if ok {
+			v, ok := tagOfField.Lookup("file")
+			if ok && v == "yes" {
 				ctx.MultiFormParamsIsFile[key] = true
 			}
 		}
