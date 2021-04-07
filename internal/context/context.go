@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 )
 
 type UserContext struct {
-	ContextType                  reflect.Type
-	IsHeaders                    bool
-	RouteParams                  map[int]int
-	FormParams                   map[string]int
-	MultiFormParams              map[string]int
-	MultiFormParamsFileSizeLimit map[string]int64
-	QueryParams                  map[string]int
+	ContextType           reflect.Type
+	IsHeaders             bool
+	RouteParams           map[int]int
+	FormParams            map[string]int
+	MultiFormParams       map[string]int
+	MultiFormParamsIsFile map[string]bool
+	QueryParams           map[string]int
 	// `cookie:"token"`, would store "token" as key, field index as value
 	CookiesParams map[string]int
 	// `header:"Content-Type"`, would store "Content-Type" as key, field index as value
@@ -29,16 +28,16 @@ type UserContext struct {
 
 func NewUserContext() *UserContext {
 	return &UserContext{
-		IsHeaders:                    false,
-		RouteParams:                  make(map[int]int),
-		FormParams:                   make(map[string]int),
-		MultiFormParams:              make(map[string]int),
-		MultiFormParamsFileSizeLimit: make(map[string]int64),
-		QueryParams:                  make(map[string]int),
-		CookiesParams:                make(map[string]int),
-		HeaderParams:                 make(map[string]int),
-		HttpParams:                   make(map[string]int),
-		ExpectJSONRequest:            false,
+		IsHeaders:             false,
+		RouteParams:           make(map[int]int),
+		FormParams:            make(map[string]int),
+		MultiFormParams:       make(map[string]int),
+		MultiFormParamsIsFile: make(map[string]bool),
+		QueryParams:           make(map[string]int),
+		CookiesParams:         make(map[string]int),
+		HeaderParams:          make(map[string]int),
+		HttpParams:            make(map[string]int),
+		ExpectJSONRequest:     false,
 	}
 }
 
@@ -58,13 +57,10 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 		key, ok = tagOfField.Lookup("multiform")
 		if ok {
 			ctx.MultiFormParams[key] = i
-			val, ok := tagOfField.Lookup("limit")
+			// means this is a file
+			_, ok = tagOfField.Lookup("file")
 			if ok {
-				v, err := strconv.ParseInt(val, 10, 64)
-				if err != nil {
-					panic("invalid limit of size, should be an positive integer")
-				}
-				ctx.MultiFormParamsFileSizeLimit[key] = v
+				ctx.MultiFormParamsIsFile[key] = true
 			}
 		}
 		key, ok = tagOfField.Lookup("query")

@@ -32,7 +32,7 @@ func home() response.Html {
 
 type File struct {
 	// limit to 10MB
-	Text string `multiform:"file" limit:"10"`
+	Text string `multiform:"file" file:"yes"`
 }
 
 func upload(f *File) response.Html {

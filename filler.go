@@ -43,7 +43,7 @@ type (
 	multiFormFiller struct {
 		req             *http.Request
 		multiFormParams map[string]int
-		limit           map[string]int64
+		paramIsFile     map[string]bool
 	}
 	httpFiller struct {
 		httpParams map[string]int
@@ -89,8 +89,8 @@ func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
 }
 
-func newMultiFormFiller(multiFormParams map[string]int, limit map[string]int64, req *http.Request) filler {
-	return &multiFormFiller{multiFormParams: multiFormParams, limit: limit, req: req}
+func newMultiFormFiller(multiFormParams map[string]int, paramIsFile map[string]bool, req *http.Request) filler {
+	return &multiFormFiller{multiFormParams: multiFormParams, paramIsFile: paramIsFile, req: req}
 }
 
 func newHTTPFiller(httpParams map[string]int, req *http.Request) filler {
@@ -188,30 +188,36 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 }
 
 func (m *multiFormFiller) fill(ctx reflect.Value) error {
+	// size default limit: 10MB
+	err := m.req.ParseMultipartForm(10 << 20)
+	if err != nil {
+		return err
+	}
 	for k, idx := range m.multiFormParams {
-		// left shift 20 offset means MB
-		err := m.req.ParseMultipartForm(int64(m.limit[k]) << 20)
-		if err != nil {
-			return err
-		}
-		file, _, err := m.req.FormFile(k)
-		if err != nil {
-			return err
-		}
-		fileBytes, err := ioutil.ReadAll(file)
-		if err != nil {
-			return err
+		v := ""
+		if m.paramIsFile[k] {
+			file, _, err := m.req.FormFile(k)
+			if err != nil {
+				return err
+			}
+			fileBytes, err := ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+			v = string(fileBytes)
+			err = file.Close()
+			if err != nil {
+				return err
+			}
+		} else {
+			v = m.req.FormValue(k)
 		}
 		field := ctx.Elem().Field(idx)
-		value, err := parseParameter(field.Type(), string(fileBytes))
+		value, err := parseParameter(field.Type(), v)
 		if err != nil {
 			return err
 		}
 		field.Set(value)
-		err = file.Close()
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
