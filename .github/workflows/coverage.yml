@@ -1,4 +1,16 @@
-on: [ 'push', 'pull_request' ]
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - '**.yml'
+    - '**.go'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - '**.yml'
+    - '**.go'
 
 jobs:
   coverage:

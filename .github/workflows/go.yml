@@ -3,11 +3,18 @@ on:
   push:
     branches:
     - master
+    paths:
+    - '**.yml'
+    - '**.go'
   pull_request:
     branches:
     - master
+    paths:
+    - '**.yml'
+    - '**.go'
   schedule:
   - cron: 0 0 * * *
+
 jobs:
   build:
     name: Build
