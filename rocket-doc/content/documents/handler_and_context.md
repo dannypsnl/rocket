@@ -13,9 +13,18 @@ Rocket's handler contains two parts.
 Basically, we have the creator for handler. It uses like:
 
 ```go
+package example
+
+import (
+	"github.com/dannypsnl/rocket"
+)
+
 func handler() string { return "" }
-// In `Mount`
-rocket.Get("/hello", handler)
+
+func main() {
+	// In `Mount`
+    rocket.Get("/hello", handler)
+}
 ```
 
 Now we have a handler function `handler`, and we can use a route `"/hello` and `handler` to create a new Rocket's handler.
@@ -34,6 +43,8 @@ Now you already know how to create handler has different method. Let's look the 
 So the question is, how to have one in rocket?
 
 ```go
+package example
+
 type User struct {
     Name string `route:"name"`
     Age  uint64 `route:"age"`
@@ -43,9 +54,18 @@ type User struct {
 Don't be surprised, that's all, and then we use the type you create as parameter of your handle function
 
 ```go
-rocket.Get("/:name/:age", func(u *User) string {
-    return "Hello " + u.Name + ", your age is " + strconv.FormatUint(u.Age, 10)
-})
+package example
+
+import (
+    "github.com/dannypsnl/rocket"
+)
+
+func main() {
+	// In `Mount`
+    rocket.Get("/:name/:age", func (u *User) string {
+        return "Hello " + u.Name + ", your age is " + strconv.FormatUint(u.Age, 10)
+    })
+}
 ```
 
 Ok, we know how to use the field of context, but where is it came from?
@@ -70,6 +90,8 @@ But just `route`? Nope, we also have:
   e.g.
 
   ```go
+  package example
+
   import "net/http"
 
   type UserToken struct {
