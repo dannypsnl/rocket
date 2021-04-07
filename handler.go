@@ -163,9 +163,10 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 		}
 		if userContext.ExpectJSONRequest {
 			basicChain = append(basicChain, newJSONFiller(req.Body))
+		} else if userContext.ExpectMultiFormsRequest {
+			basicChain = append(basicChain, newMultiFormFiller(userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
 		} else {
 			basicChain = append(basicChain, newFormFiller(userContext.FormParams, req.Form))
-			basicChain = append(basicChain, newMultiFormFiller(userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
 		}
 		if userContext.ExpectCookies() {
 			basicChain = append(basicChain, newCookiesFiller(userContext.CookiesParams, req))

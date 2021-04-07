@@ -22,22 +22,24 @@ type UserContext struct {
 	// http tag is limited, can only take what we allow at here:
 	//
 	// - request
-	HttpParams        map[string]int
-	ExpectJSONRequest bool
+	HttpParams              map[string]int
+	ExpectJSONRequest       bool
+	ExpectMultiFormsRequest bool
 }
 
 func NewUserContext() *UserContext {
 	return &UserContext{
-		IsHeaders:             false,
-		RouteParams:           make(map[int]int),
-		FormParams:            make(map[string]int),
-		MultiFormParams:       make(map[string]int),
-		MultiFormParamsIsFile: make(map[string]bool),
-		QueryParams:           make(map[string]int),
-		CookiesParams:         make(map[string]int),
-		HeaderParams:          make(map[string]int),
-		HttpParams:            make(map[string]int),
-		ExpectJSONRequest:     false,
+		IsHeaders:               false,
+		RouteParams:             make(map[int]int),
+		FormParams:              make(map[string]int),
+		MultiFormParams:         make(map[string]int),
+		MultiFormParamsIsFile:   make(map[string]bool),
+		QueryParams:             make(map[string]int),
+		CookiesParams:           make(map[string]int),
+		HeaderParams:            make(map[string]int),
+		HttpParams:              make(map[string]int),
+		ExpectJSONRequest:       false,
+		ExpectMultiFormsRequest: false,
 	}
 }
 
@@ -61,6 +63,9 @@ func (ctx *UserContext) CacheParamsOffset(contextT reflect.Type, routes []string
 			v, ok := tagOfField.Lookup("file")
 			if ok && v == "yes" {
 				ctx.MultiFormParamsIsFile[key] = true
+			}
+			if !ctx.ExpectMultiFormsRequest {
+				ctx.ExpectMultiFormsRequest = true
 			}
 		}
 		key, ok = tagOfField.Lookup("query")
