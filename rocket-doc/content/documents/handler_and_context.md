@@ -1,5 +1,5 @@
 ---
-title: "Handler & Context"
+title: "Request handler & Context"
 date: 2018-09-25T21:33:47+08:00
 weight: 8
 draft: false
@@ -11,10 +11,20 @@ Rocket's handler contains two parts.
 - handle function
 
 Basically, we have the creator for handler. It uses like:
+
 ```go
+package example
+
+import (
+	"github.com/dannypsnl/rocket"
+)
+
 func handler() string { return "" }
-// In `Mount`
-rocket.Get("/hello", handler)
+
+func main() {
+	// In `Mount`
+    rocket.Get("/hello", handler)
+}
 ```
 
 Now we have a handler function `handler`, and we can use a route `"/hello` and `handler` to create a new Rocket's handler.
@@ -31,7 +41,10 @@ We have following creator mapping to HTTP method currently.
 Now you already know how to create handler has different method. Let's look the most interesting feature of rocket **User-defined Context**
 
 So the question is, how to have one in rocket?
+
 ```go
+package example
+
 type User struct {
     Name string `route:"name"`
     Age  uint64 `route:"age"`
@@ -39,10 +52,20 @@ type User struct {
 ```
 
 Don't be surprised, that's all, and then we use the type you create as parameter of your handle function
+
 ```go
-rocket.Get("/:name/:age", func(u *User) string {
-    return "Hello " + u.Name + ", your age is " + strconv.FormatUint(u.Age, 10)
-})
+package example
+
+import (
+    "github.com/dannypsnl/rocket"
+)
+
+func main() {
+	// In `Mount`
+    rocket.Get("/:name/:age", func (u *User) string {
+        return "Hello " + u.Name + ", your age is " + strconv.FormatUint(u.Age, 10)
+    })
+}
 ```
 
 Ok, we know how to use the field of context, but where is it came from?
@@ -58,28 +81,35 @@ But just `route`? Nope, we also have:
 
 - `query:"key"` for request path `/path/to/route?key=value`
 - `form:"key"` for FORM request
+- `multiform:"key"` for multiple forms request
+- `multiform:"key" file:"yes"` for multiple forms request, and it's a file. In this case, the type of field must be `io.ReadCloser`.
 - `json:"key"` for request body is JSON(here has some problem, we can also handle GET method just need JSON body,
-    this is a bug, it should only work with POST, PUT, PATCH with application/json)
+  this is a bug, it should only work with POST, PUT, PATCH with application/json)
 - `header:"key"`, to getting header like `Content-Type`, `Authorization`
 - `cookie:"key"`, a very important fact of cookie tag is it only accept you use `*http.Cookie` as field type,
-    e.g.
-    ```go
-    import "net/http"
+  e.g.
 
-    type UserToken struct {
-        token *http.Cookie `cookie:"token"`
-    }
-    ```
-    and it would get the most matched cookie, so avoid using duplicate cookie name in your application would be better,
-    another important thing is if no cookie matched, this tag won't follow the optional contract,
-    so don't use cookie tag in a general purpose context would help you avoid __Bad Request__
+  ```go
+  package example
+
+  import "net/http"
+
+  type UserToken struct {
+      token *http.Cookie `cookie:"token"`
+  }
+  ```
+
+  and it would get the most matched cookie, so avoid using duplicate cookie name in your application would be better,
+  another important thing is if no cookie matched, this tag won't follow the optional contract,
+  so don't use cookie tag in a general purpose context would help you avoid **Bad Request**
 
 #### Optional field
 
-We still have one thing haven't been mentioned, __optional field__, just like its name,
+We still have one thing haven't been mentioned, **optional field**, just like its name,
 it allowed you omit the field and won't cause **HTTP Status Code: 400**.
 
 Example context definition:
+
 ```go
 type Transaction struct {
     Amount   uint64 `form:"amount"`
@@ -93,6 +123,7 @@ At here, the field `Canceled` would be `nil` if you didn't give it a value.
 
 Multiple contexts allows you put more than one contexs in your handler function,
 this make you can reuse more contexts, for example, here is a proxy of kubernetes List API:
+
 ```go
 import (
     "net/http"

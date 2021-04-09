@@ -22,6 +22,9 @@ type Rocket struct {
 	// cache layer
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
+
+	// MultiFormBodySizeLimit decide the multiple forms value size
+	MultiFormBodySizeLimit int64
 }
 
 // Mount add handlers into our service.
@@ -75,6 +78,8 @@ func Ignite(port string) *Rocket {
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
 		}),
+		// default limit: 10MB
+		MultiFormBodySizeLimit: 10,
 	}
 }
 
@@ -98,6 +103,7 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hand := rk.router.GetHandler(reqURL, r.Method)
 	var resp *response.Response
 	if h, ok := hand.(*handler); ok && h != nil {
+		h.rocket = rk
 		resp = h.handle(reqURL, r)
 	} else {
 		resp = rk.defaultResponse()

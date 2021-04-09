@@ -39,6 +39,12 @@ type (
 		formParams map[string]int
 		form       url.Values
 	}
+	multiFormFiller struct {
+		req             *http.Request
+		multiFormParams map[string]int
+		paramIsFile     map[string]bool
+		limit           int64
+	}
 	httpFiller struct {
 		httpParams map[string]int
 		req        *http.Request
@@ -81,6 +87,10 @@ func newJSONFiller(body io.Reader) filler {
 
 func newFormFiller(formParams map[string]int, form url.Values) filler {
 	return &formFiller{formParams: formParams, form: form}
+}
+
+func newMultiFormFiller(limit int64, multiFormParams map[string]int, paramIsFile map[string]bool, req *http.Request) filler {
+	return &multiFormFiller{limit: limit, multiFormParams: multiFormParams, paramIsFile: paramIsFile, req: req}
 }
 
 func newHTTPFiller(httpParams map[string]int, req *http.Request) filler {
@@ -168,6 +178,31 @@ func (f *formFiller) fill(ctx reflect.Value) error {
 			field := ctx.Elem().Field(idx)
 			p := v[0]
 			value, err := parseParameter(field.Type(), p)
+			if err != nil {
+				return err
+			}
+			field.Set(value)
+		}
+	}
+	return nil
+}
+
+func (m *multiFormFiller) fill(ctx reflect.Value) error {
+	err := m.req.ParseMultipartForm(m.limit << 20)
+	if err != nil {
+		return err
+	}
+	for k, idx := range m.multiFormParams {
+		field := ctx.Elem().Field(idx)
+		if m.paramIsFile[k] {
+			file, _, err := m.req.FormFile(k)
+			if err != nil {
+				return err
+			}
+			field.Set(reflect.ValueOf(file))
+		} else {
+			v := m.req.FormValue(k)
+			value, err := parseParameter(field.Type(), string(v))
 			if err != nil {
 				return err
 			}
