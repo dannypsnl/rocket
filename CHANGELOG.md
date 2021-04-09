@@ -2,6 +2,13 @@
 
 - (#194) supports multiple forms
 
+  ```go
+  type RequestContext struct {
+    Normal string `multiform:"name"`
+  	File io.ReadCloser `multiform:"file" file:"yes"`
+  }
+  ```
+
 ## v1.0.0
 
 - (#172) improve MIME type detection
