@@ -166,7 +166,7 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 		if userContext.ExpectJSONRequest {
 			basicChain = append(basicChain, newJSONFiller(req.Body))
 		} else if userContext.ExpectMultiFormsRequest {
-			basicChain = append(basicChain, newMultiFormFiller(h.rocket.SizeLimit, userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
+			basicChain = append(basicChain, newMultiFormFiller(h.rocket.MultiFormBodySizeLimit, userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
 		} else {
 			basicChain = append(basicChain, newFormFiller(userContext.FormParams, req.Form))
 		}

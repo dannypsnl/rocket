@@ -51,7 +51,7 @@ We can see some points, first, we can implement two kinds of fairing callbacks
   package example
 
   func (c *Configurator) OnLaunch(r *rocket.Rocket) {
-      r.SizeLimit = 20 // 20 MB
+      r.MultiFormBodySizeLimit = 20 // 20 MB
   }
   ```
 

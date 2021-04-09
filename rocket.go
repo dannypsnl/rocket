@@ -23,8 +23,8 @@ type Rocket struct {
 	defaultHandler reflect.Value
 	defaultResp    *response.Response
 
-	// SizeLimit decide the multiple forms value size
-	SizeLimit int64
+	// MultiFormBodySizeLimit decide the multiple forms value size
+	MultiFormBodySizeLimit int64
 }
 
 // Mount add handlers into our service.
@@ -79,7 +79,7 @@ func Ignite(port string) *Rocket {
 			return "page not found"
 		}),
 		// default limit: 10MB
-		SizeLimit: 10,
+		MultiFormBodySizeLimit: 10,
 	}
 }
 
