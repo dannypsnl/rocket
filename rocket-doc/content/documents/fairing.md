@@ -58,7 +58,3 @@ We can see some points, first, we can implement two kinds of fairing callbacks
 then we can use the fairing implementor by using `Attach` method to emit it. We can call `Attach` several times, but carefully with it since it could modify request and response!
 
 Why embedded `rocket.Fairing`? It would provide default behavior for `OnRequest` and `OnResponse` if you didn't provide one, so it's a good practice to embedded since we could add more fairing methods into it.
-
-```
-
-```
