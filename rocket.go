@@ -27,17 +27,43 @@ type Rocket struct {
 	MultiFormBodySizeLimit int64
 }
 
-// Mount add handlers into our service.
-func (rk *Rocket) Mount(handlers ...*handler) *Rocket {
-	for _, h := range handlers {
-		rk.router.AddHandler(h.method, h.getRoute(), h)
+// Ignite initial service by port. The format following native HTTP library `:port_number`
+func Ignite(port string) *Rocket {
+	return &Rocket{
+		port: port,
+		router: router.New(
+			&optionsHandler{},
+			createNotAllowHandler,
+		),
+		listOfFairing: make([]fairingInterface, 0),
+		allowTLS:      false,
+		defaultHandler: reflect.ValueOf(func() string {
+			return "page not found"
+		}),
+		// default limit: 10MB
+		MultiFormBodySizeLimit: 10,
 	}
-	return rk
 }
 
 // Attach add fairing to lifecycle for each request and response
 func (rk *Rocket) Attach(f fairingInterface) *Rocket {
 	rk.listOfFairing = append(rk.listOfFairing, f)
+	return rk
+}
+
+// EnableHTTPs would get certFile and keyFile to enable HTTPs
+func (rk *Rocket) EnableHTTPs(certFile, keyFile string) *Rocket {
+	rk.certFile = certFile
+	rk.keyFile = keyFile
+	rk.allowTLS = true
+	return rk
+}
+
+// Mount add handlers into our service.
+func (rk *Rocket) Mount(handlers ...*handler) *Rocket {
+	for _, h := range handlers {
+		rk.router.AddHandler(h.method, h.getRoute(), h)
+	}
 	return rk
 }
 
@@ -63,32 +89,6 @@ func (rk *Rocket) Launch() {
 	default:
 		log.Fatal(server.ListenAndServe())
 	}
-}
-
-// Ignite initial service by port. The format following native HTTP library `:port_number`
-func Ignite(port string) *Rocket {
-	return &Rocket{
-		port: port,
-		router: router.New(
-			&optionsHandler{},
-			createNotAllowHandler,
-		),
-		listOfFairing: make([]fairingInterface, 0),
-		allowTLS:      false,
-		defaultHandler: reflect.ValueOf(func() string {
-			return "page not found"
-		}),
-		// default limit: 10MB
-		MultiFormBodySizeLimit: 10,
-	}
-}
-
-// EnableHTTPs would get certFile and keyFile to enable HTTPs
-func (rk *Rocket) EnableHTTPs(certFile, keyFile string) *Rocket {
-	rk.certFile = certFile
-	rk.keyFile = keyFile
-	rk.allowTLS = true
-	return rk
 }
 
 // ServeHTTP is prepare for http server trait, so that you could use `*rocket.Rocket` as `http.Handler`
