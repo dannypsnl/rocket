@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// httpFiller put the whole http.Request into provided context
 type httpFiller struct {
 	httpParams map[string]int
 	req        *http.Request
