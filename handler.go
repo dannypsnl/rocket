@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/dannypsnl/rocket/internal/context"
+	"github.com/dannypsnl/rocket/internal/filler"
 	"github.com/dannypsnl/rocket/response"
 	"github.com/dannypsnl/rocket/router"
 )
@@ -154,34 +155,34 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 		return nil, err
 	}
 	for i, userContext := range contexts {
-		basicChain := []filler{
-			newRouteFiller(
+		basicChain := []filler.Filler{
+			filler.NewRouteFiller(
 				h.routes,
 				reqURL,
 				userContext.RouteParams,
 				h.wildcardIndex,
 			),
-			newQueryFiller(userContext.QueryParams, req.URL.Query()),
+			filler.NewQueryFiller(userContext.QueryParams, req.URL.Query()),
 		}
 		if userContext.ExpectJSONRequest {
-			basicChain = append(basicChain, newJSONFiller(req.Body))
+			basicChain = append(basicChain, filler.NewJSONFiller(req.Body))
 		} else if userContext.ExpectMultiFormsRequest {
-			basicChain = append(basicChain, newMultiFormFiller(h.rocket.MultiFormBodySizeLimit, userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
+			basicChain = append(basicChain, filler.NewMultiFormFiller(h.rocket.MultiFormBodySizeLimit, userContext.MultiFormParams, userContext.MultiFormParamsIsFile, req))
 		} else {
-			basicChain = append(basicChain, newFormFiller(userContext.FormParams, req.Form))
+			basicChain = append(basicChain, filler.NewFormFiller(userContext.FormParams, req.Form))
 		}
 		if userContext.ExpectCookies() {
-			basicChain = append(basicChain, newCookiesFiller(userContext.CookiesParams, req))
+			basicChain = append(basicChain, filler.NewCookiesFiller(userContext.CookiesParams, req))
 		}
 		if userContext.ExpectHeader() {
-			basicChain = append(basicChain, newHeaderFiller(userContext.HeaderParams, req.Header))
+			basicChain = append(basicChain, filler.NewHeaderFiller(userContext.HeaderParams, req.Header))
 		}
 		if userContext.ExpectHTTP() {
-			basicChain = append(basicChain, newHTTPFiller(userContext.HttpParams, req))
+			basicChain = append(basicChain, filler.NewHTTPFiller(userContext.HttpParams, req))
 		}
 		ctx := reflect.New(userContext.ContextType)
 		for _, filler := range basicChain {
-			if err := filler.fill(ctx); err != nil {
+			if err := filler.Fill(ctx); err != nil {
 				return nil, err
 			}
 		}

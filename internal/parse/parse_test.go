@@ -1,4 +1,4 @@
-package rocket
+package parse
 
 import (
 	"reflect"
@@ -88,7 +88,7 @@ func TestParseParameter(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			v, err := parseParameter(reflect.TypeOf(testCase.expectedValue), testCase.paramStr)
+			v, err := ParseParameter(reflect.TypeOf(testCase.expectedValue), testCase.paramStr)
 			require.NoError(t, err)
 			assert.Equal(t, testCase.expectedValue, v.Interface())
 		})

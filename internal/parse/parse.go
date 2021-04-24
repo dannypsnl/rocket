@@ -1,16 +1,11 @@
-package rocket
+package parse
 
 import (
-	"errors"
 	"reflect"
 	"strconv"
 )
 
-var (
-	invalidType = errors.New("invalid type")
-)
-
-func parseParameter(vt reflect.Type, param string) (reflect.Value, error) {
+func ParseParameter(vt reflect.Type, param string) (reflect.Value, error) {
 	switch vt.Kind() {
 	case reflect.Bool:
 		r, _ := strconv.ParseBool(param)
@@ -55,7 +50,7 @@ func parseParameter(vt reflect.Type, param string) (reflect.Value, error) {
 		return reflect.ValueOf(param), nil
 	case reflect.Ptr:
 		// We use pointer represents optional field
-		parsedValue, err := parseParameter(vt.Elem(), param)
+		parsedValue, err := ParseParameter(vt.Elem(), param)
 		if err != nil {
 			return reflect.Zero(vt), err
 		}
