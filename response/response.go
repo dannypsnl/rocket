@@ -2,6 +2,7 @@ package response
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/dannypsnl/rocket/cookie"
@@ -17,7 +18,8 @@ type Response struct {
 	cookies    []*http.Cookie
 	statusCode int
 
-	keepFunc KeepFunc
+	keepFunc     KeepFunc
+	redirectPath string
 }
 
 // Headers helps code be more readable
@@ -82,6 +84,13 @@ func (res *Response) Cookies(cookies ...*cookie.Cookie) *Response {
 	return res
 }
 
+// Redirect returns a response redirect to provided path
+func Redirect(path string) *Response {
+	res := New(nil)
+	res.redirectPath = path
+	return res
+}
+
 func (res *Response) keep(keepFunc KeepFunc) *Response {
 	res.keepFunc = keepFunc
 	return res
@@ -91,7 +100,15 @@ func (res *Response) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res.setHeaders(w)
 	res.setCookie(w)
 	res.setStatusCode(w)
-	fmt.Fprint(w, res.Body)
+	if res.redirectPath != "" {
+		http.Redirect(w, r, res.redirectPath, http.StatusSeeOther)
+	}
+	if res.Body != nil {
+		_, err := fmt.Fprint(w, res.Body)
+		if err != nil {
+			log.Print(err)
+		}
+	}
 	if res.keepFunc != nil {
 		for {
 			select {

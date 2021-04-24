@@ -1,5 +1,9 @@
 ## Latest
 
+- response: redirect
+  ```go
+  response.Redirect("/")
+  ```
 - (#194) supports multiple forms
 
   ```go

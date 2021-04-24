@@ -35,26 +35,27 @@ type File struct {
 	ReadCloser io.ReadCloser `multiform:"file" file:"yes"`
 }
 
-func upload(f *File) response.Html {
+func upload(f *File) *response.Response {
 	file, err := os.Create("temp.jpg")
 	if err != nil {
-		return failPage()
+		return response.Redirect("/fail")
 	}
 	_, err = file.ReadFrom(f.ReadCloser)
 	if err != nil {
-		return failPage()
+		return response.Redirect("/fail")
 	}
 	err = f.ReadCloser.Close()
 	if err != nil {
-		return failPage()
+		return response.Redirect("/fail")
 	}
-	return home()
+	return response.Redirect("/")
 }
 
 func main() {
 	rocket.Ignite(":8080").
 		Mount(
 			rocket.Get("/", home),
+			rocket.Get("/fail", failPage),
 			rocket.Post("upload", upload),
 		).
 		Launch()
