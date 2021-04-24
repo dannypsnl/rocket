@@ -1,6 +1,6 @@
 ## Latest
 
-- response: redirect
+- (#198) response: redirect
   ```go
   response.Redirect("/")
   ```
