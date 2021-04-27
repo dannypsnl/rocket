@@ -9,8 +9,8 @@
 
   ```go
   type RequestContext struct {
-    Normal string `multiform:"name"`
-  	File io.ReadCloser `multiform:"file" file:"yes"`
+      Normal string `multiform:"name"`
+      File io.ReadCloser `multiform:"file" file:"yes"`
   }
   ```
 
