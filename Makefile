@@ -1,7 +1,3 @@
-docs:
-	hugo --source ./rocket-doc --destination docs
-	mv ./rocket-doc/docs .
-
 GO_MOD=GO111MODULE=on
 
 .PHONY: deps test coverage
