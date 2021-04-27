@@ -25,7 +25,7 @@ func main() {
 		Ignite(":8080").
 		Mount(
 			rk.Get("/", homePage),
-			rk.Get("/hello", hello),
+			rk.Get("/hello/:name/:age", hello),
 		).
 		Launch()
 }

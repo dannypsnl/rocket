@@ -56,7 +56,7 @@ func main() {
 		Mount(
 			rocket.Get("/", home),
 			rocket.Get("/fail", failPage),
-			rocket.Post("upload", upload),
+			rocket.Post("/upload", upload),
 		).
 		Launch()
 }
