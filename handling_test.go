@@ -80,7 +80,7 @@ func TestOptionsMethod(t *testing.T) {
 }
 
 type Recorder struct {
-	rocket.Fairing
+	rocket.DefaultFairing
 
 	RecordRequestURL []string
 }

@@ -1,5 +1,6 @@
 ## Latest
 
+- rename `fairingInterface` to `Fairing`, and `Fairing` to `DefaultFairing`
 - (#198) response: redirect
   ```go
   response.Redirect("/")

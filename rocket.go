@@ -13,7 +13,7 @@ import (
 type Rocket struct {
 	port          string
 	router        *router.Route
-	listOfFairing []fairingInterface
+	listOfFairing []Fairing
 
 	allowTLS bool
 	// TLS
@@ -35,7 +35,7 @@ func Ignite(port string) *Rocket {
 			&optionsHandler{},
 			createNotAllowHandler,
 		),
-		listOfFairing: make([]fairingInterface, 0),
+		listOfFairing: make([]Fairing, 0),
 		allowTLS:      false,
 		defaultHandler: reflect.ValueOf(func() string {
 			return "page not found"
@@ -46,7 +46,7 @@ func Ignite(port string) *Rocket {
 }
 
 // Attach add fairing to lifecycle for each request and response
-func (rk *Rocket) Attach(f fairingInterface) *Rocket {
+func (rk *Rocket) Attach(f Fairing) *Rocket {
 	rk.listOfFairing = append(rk.listOfFairing, f)
 	return rk
 }
