@@ -1,6 +1,7 @@
 package rocket
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"reflect"
@@ -11,7 +12,7 @@ import (
 
 // Rocket is our service.
 type Rocket struct {
-	port          string
+	port          int
 	router        *router.Route
 	listOfFairing []Fairing
 
@@ -27,8 +28,8 @@ type Rocket struct {
 	MultiFormBodySizeLimit int64
 }
 
-// Ignite initial service by port. The format following native HTTP library `:port_number`
-func Ignite(port string) *Rocket {
+// Ignite initial service by port.
+func Ignite(port int) *Rocket {
 	return &Rocket{
 		port: port,
 		router: router.New(
@@ -81,7 +82,7 @@ func (rk *Rocket) Launch() {
 		f.OnLaunch(rk)
 	}
 	http.HandleFunc("/", rk.ServeHTTP)
-	server := &http.Server{Addr: rk.port, Handler: rk}
+	server := &http.Server{Addr: fmt.Sprintf(":%d", rk.port), Handler: rk}
 	defer server.Close()
 	switch {
 	case rk.allowTLS:

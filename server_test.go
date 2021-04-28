@@ -102,7 +102,7 @@ func customResponseForHeader() *response.Response {
 var ()
 
 func TestServer(t *testing.T) {
-	rk := rocket.Ignite(":8080").
+	rk := rocket.Ignite(8080).
 		Mount(
 			rocket.Get("/", homePage),
 			rocket.Get("/static/*filename", staticFiles),
@@ -255,7 +255,7 @@ func TestServer(t *testing.T) {
 			CreatedAt string `query:"article_created_at"`
 			AuthorID  int    `route:"user_id"`
 		}
-		rk := rocket.Ignite(":8081").
+		rk := rocket.Ignite(8081).
 			Mount(rocket.Post("/users/:user_id/articles/:article_id", func(user *User, article *Article) *response.Response {
 				resp := response.New("")
 				if user.Age != 18 {
