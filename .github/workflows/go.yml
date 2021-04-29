@@ -16,8 +16,8 @@ on:
   - cron: 0 0 * * *
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
