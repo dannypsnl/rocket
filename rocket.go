@@ -25,6 +25,9 @@ type Rocket struct {
 
 	// MultiFormBodySizeLimit decide the multiple forms value size
 	MultiFormBodySizeLimit int64
+
+	// on close invoke
+	onClose func() error
 }
 
 // Ignite initial service by port. The format following native HTTP library `:port_number`
@@ -75,6 +78,12 @@ func (rk *Rocket) Default(do interface{}) *Rocket {
 	return rk
 }
 
+// OnClose takes a function f and runs it after server closed
+func (rk *Rocket) OnClose(f func() error) *Rocket {
+	rk.onClose = f
+	return rk
+}
+
 // Launch shoot our service.(start server)
 func (rk *Rocket) Launch() {
 	for _, f := range rk.listOfFairing {
@@ -82,7 +91,14 @@ func (rk *Rocket) Launch() {
 	}
 	http.HandleFunc("/", rk.ServeHTTP)
 	server := &http.Server{Addr: rk.port, Handler: rk}
-	defer server.Close()
+	defer func() {
+		if err := server.Close(); err != nil {
+			log.Fatal(err)
+		}
+		if err := rk.onClose(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	switch {
 	case rk.allowTLS:
 		log.Fatal(server.ListenAndServeTLS(rk.certFile, rk.keyFile))

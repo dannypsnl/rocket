@@ -1,5 +1,6 @@
 ## Latest
 
+- (#204) `OnClose` takes a function f and runs it after server closed
 - rename `fairingInterface` to `Fairing`, and `Fairing` to `DefaultFairing`
 - (#198) response: redirect
   ```go
