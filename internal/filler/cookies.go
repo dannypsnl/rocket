@@ -20,10 +20,8 @@ func NewCookiesFiller(cookiesParams map[string]int, req *http.Request) Filler {
 func (c *cookiesFiller) Fill(ctx reflect.Value) error {
 	for key, fieldIndex := range c.cookiesParams {
 		field := ctx.Elem().Field(fieldIndex)
+		// ignore error, user should check if cookie is empty
 		cookie, _ := c.req.Cookie(key)
-		// if err != nil {
-		// 	return err
-		// }
 		field.Set(reflect.ValueOf(cookie))
 	}
 	return nil
