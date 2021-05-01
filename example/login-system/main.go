@@ -91,7 +91,7 @@ func main() {
 		Password: "bbb",
 	})
 
-	rocket.Ignite(":8080").
+	rocket.Ignite(8080).
 		Mount(
 			rocket.Get("/", home),
 			rocket.Post("/login", login),

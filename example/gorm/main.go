@@ -44,7 +44,7 @@ func getUser(u *User) string {
 func main() {
 	defer db.Close()
 
-	rocket.Ignite(":8080").
+	rocket.Ignite(8080).
 		Mount(
 			rocket.Get("/user/:name/:age", setUserAge),
 			rocket.Get("/user/:name", getUser),

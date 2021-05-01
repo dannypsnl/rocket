@@ -1,6 +1,9 @@
 ## Latest
 
-- rename `fairingInterface` to `Fairing`, and `Fairing` to `DefaultFairing`
+- (#205) use `int` as **port**, not `string`
+- API rename
+  - `fairingInterface` -> `Fairing`
+  - `Fairing` -> `DefaultFairing`
 - (#198) response: redirect
   ```go
   response.Redirect("/")

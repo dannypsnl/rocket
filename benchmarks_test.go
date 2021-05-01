@@ -15,7 +15,7 @@ type GetContentType struct {
 
 func BenchmarkRequest(b *testing.B) {
 	b.Run("WithoutUserDefinedContext", func(b *testing.B) {
-		rk := rocket.Ignite(":8080").
+		rk := rocket.Ignite(8080).
 			Mount(rocket.Get("/home", func() string {
 				return "welcome"
 			}))
@@ -26,14 +26,14 @@ func BenchmarkRequest(b *testing.B) {
 			Name string `route:"name"`
 		}
 
-		rk := rocket.Ignite(":8080").
+		rk := rocket.Ignite(8080).
 			Mount(rocket.Get("/hello/:name", func(user *User) string {
 				return "welcome-" + user.Name
 			}))
 		Request(b, rk, "GET", "/hello/kw", nil)
 	})
 	b.Run("WithCustomResponse", func(b *testing.B) {
-		rk := rocket.Ignite(":8080").
+		rk := rocket.Ignite(8080).
 			Mount(rocket.Get("/home", func() *response.Response {
 				return response.New(`welcome-custom-response`).Headers(
 					response.Headers{
@@ -44,7 +44,7 @@ func BenchmarkRequest(b *testing.B) {
 		Request(b, rk, "GET", "/home", nil)
 	})
 	b.Run("WithHeader", func(b *testing.B) {
-		rk := rocket.Ignite(":8080").
+		rk := rocket.Ignite(8080).
 			Mount(rocket.Get("/home", func(header *GetContentType) string {
 				return "Content-Type-is-" + header.ContentType
 			}))

@@ -57,7 +57,7 @@ func TestDuplicatedRoute(t *testing.T) {
 			t.Error("Must panic when route emit duplicated!")
 		}
 	}()
-	Ignite("").
+	Ignite(-1).
 		Mount(hello, hello)
 }
 
@@ -71,7 +71,7 @@ func TestDuplicateRoutePanic(t *testing.T) {
 		root1 = Get("/", func() string { return "" })
 		root2 = Get("/", func() string { return "" })
 	)
-	Ignite("").
+	Ignite(-1).
 		Mount(root1, root2)
 }
 
