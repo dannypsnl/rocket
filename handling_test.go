@@ -16,7 +16,7 @@ import (
 )
 
 func TestHTTPsAndHTTP2(t *testing.T) {
-	rk := rocket.Ignite(":8082").
+	rk := rocket.Ignite(8082).
 		Mount(rocket.Get("/", func() string { return "home" }))
 	ts := httptest.NewUnstartedServer(rk)
 	ts.TLS = &tls.Config{
@@ -67,7 +67,7 @@ var (
 )
 
 func TestOptionsMethod(t *testing.T) {
-	rk := rocket.Ignite(":8081").
+	rk := rocket.Ignite(8081).
 		Mount(forTestHandler)
 	ts := httptest.NewServer(rk)
 	defer ts.Close()
@@ -95,7 +95,7 @@ func TestRecorder(t *testing.T) {
 		RecordRequestURL: make([]string, 0),
 	}
 
-	rk := rocket.Ignite(":9090").
+	rk := rocket.Ignite(9090).
 		Attach(recorder).
 		Mount(rocket.Get("/", func() string { return "home" }))
 
@@ -114,7 +114,7 @@ type AccessCookie struct {
 }
 
 func TestGetCookieByUserDefinedContext(t *testing.T) {
-	rk := rocket.Ignite("").
+	rk := rocket.Ignite(-1).
 		Mount(rocket.Get("/", func(cookie *AccessCookie) string {
 			if cookie.Token == nil {
 				return "token is nil"
@@ -136,7 +136,7 @@ type AccessHeader struct {
 }
 
 func TestGetHeaderByUserDefinedContext(t *testing.T) {
-	rk := rocket.Ignite("").
+	rk := rocket.Ignite(-1).
 		Mount(rocket.Get("/", func(header *AccessHeader) string {
 			return header.Auth
 		}))
@@ -155,7 +155,7 @@ type RequestContext struct {
 }
 
 func TestHTTPInvalidResourceShouldBeRejected(t *testing.T) {
-	rk := rocket.Ignite("").
+	rk := rocket.Ignite(-1).
 		Mount(rocket.Get("/path", func(req *RequestContext) string {
 			return req.Request.URL.Path
 		}))

@@ -29,7 +29,7 @@ How to let it work?
 ```go
 // main.go
 func main() {
-    rocket.Ignite(":8080").
+    rocket.Ignite(8080).
         Mount(
             // put `hello` under a path `/user/:name/:age`, where `:name` and `:age` are variant parameters
             rocket.Get("/user/:name/:age", hello),
@@ -43,6 +43,7 @@ Now execute `go run main.go`, open your browser to `localhost:8080/user/Danny/21
 Then you will see `Hello Danny, your age is 21`.
 
 Or use `curl`:
+
 ```bash
 $ curl localhost:8080/user/Danny/21
 Hello Danny, your age is 21

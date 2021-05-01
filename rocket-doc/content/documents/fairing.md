@@ -25,7 +25,7 @@ func (l *Logger) OnResponse(r *response.Response) *response.Response {
     return r
 }
 // in main function or entrypoint
-rocket.Ignite(":8080").
+rocket.Ignite(8080).
     Attach(&Logger{}).
     // Mount...
     Launch()

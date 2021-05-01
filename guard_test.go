@@ -48,7 +48,7 @@ func TestGuard(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			rk := rocket.Ignite("").
+			rk := rocket.Ignite(-1).
 				Mount(rocket.Get("/", func() string { return "" }).
 					Guard(testCase.guard))
 			ts := httptest.NewServer(rk)

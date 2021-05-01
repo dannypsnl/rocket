@@ -22,7 +22,7 @@ func hello(user *User) string {
 func main() {
 	fmt.Println("GO web rocket!!!")
 	rk.
-		Ignite(":8080").
+		Ignite(8080).
 		Mount(
 			rk.Get("/", homePage),
 			rk.Get("/hello/:name/:age", hello),

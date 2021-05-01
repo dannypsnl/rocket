@@ -52,7 +52,7 @@ func upload(f *File) *response.Response {
 }
 
 func main() {
-	rocket.Ignite(":8080").
+	rocket.Ignite(8080).
 		Mount(
 			rocket.Get("/", home),
 			rocket.Get("/fail", failPage),
