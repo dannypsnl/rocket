@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Guard is an interface that context can implement, when context implement this, context can reject request with a VerifyError.
 type Guard interface {
 	VerifyRequest() error
 }
