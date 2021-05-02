@@ -46,7 +46,7 @@ func TestGuard(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			rk := rocket.Ignite(-1).
-				Mount(rocket.Get("/", func(_ *headerGuard) string { return "" }))
+				Mount(rocket.Get("/", func(*headerGuard) string { return "" }))
 			ts := httptest.NewServer(rk)
 			defer ts.Close()
 			e := httpexpect.New(t, ts.URL)
