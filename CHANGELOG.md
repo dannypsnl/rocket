@@ -1,5 +1,6 @@
 ## Latest
 
+- (#204) `OnClose` takes a function f and runs it after server closed
 - (#205) use `int` as **port**, not `string`
 - API rename
   - `fairingInterface` -> `Fairing`
