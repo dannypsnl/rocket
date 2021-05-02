@@ -77,8 +77,6 @@ func logout() *response.Response {
 }
 
 func main() {
-	defer db.Close()
-
 	db.AutoMigrate(&User{})
 	db.Create(&User{
 		Model:    gorm.Model{},
@@ -97,5 +95,8 @@ func main() {
 			rocket.Post("/login", login),
 			rocket.Post("/logout", logout),
 		).
+		OnClose(func() error {
+			return db.Close()
+		}).
 		Launch()
 }
