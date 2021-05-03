@@ -45,9 +45,9 @@ type UserStatus struct {
 	Logged *http.Cookie `cookie:"logged_user"`
 }
 
-func home(s *UserStatus) response.Html {
+func (s *UserStatus) VerifyRequest() *response.Response {
 	if s.Logged != nil {
-		return response.Html(fmt.Sprintf(`
+		return response.New(response.Html(fmt.Sprintf(`
 <html>
 <body>
 	<h1>%s logged</h1>
@@ -56,8 +56,12 @@ func home(s *UserStatus) response.Html {
 	</form>
 </body>
 </html>
-`, s.Logged.Value))
+`, s.Logged.Value)))
 	}
+	return nil
+}
+
+func home(*UserStatus) response.Html {
 	return `
 <html>
 <body>
