@@ -5,7 +5,7 @@ weight: 11
 draft: false
 ---
 
-A guard is a context that implemented the interface `rocket.Guard`, it rejects a request by returning an error.
+A guard is a context that implemented the interface `rocket.Guard`, it rejects a request by returning a `*response.Response`.
 
 Here is an example:
 
@@ -14,7 +14,7 @@ type User struct {
     Authorization *string `header:"Authorization"`
 }
 
-func (u *User) VerifyRequest() error {
+func (u *User) VerifyRequest() *response.Response {
     // Assuming we have a JWT verify helper function
     if verifyAuthByJWT(u.Auth) {
         return nil
@@ -27,9 +27,8 @@ var handler = rocket.Get("/user_data", func(_ *User) string {
 })
 ```
 
-#### Possible Errors
+#### Error response
 
-- normal error: usually should be returned by helper function in your `VerifyRequest` method, since it would make Status be `500 Internal Server Error`
 - `rocket.AuthError`: should be returned when you believe it's an Authorization error, it would bring `403 Forbidden`
 
   ```go
