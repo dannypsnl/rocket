@@ -28,15 +28,16 @@ type User struct {
 	Password string `form:"password"`
 }
 
-func login(u *User) *response.Response {
-	lookupU := &User{
-		Name:     u.Name,
-		Password: "",
-	}
+func (u *User) VerifyRequest() *response.Response {
+	lookupU := &User{Name: u.Name}
 	db.First(lookupU, "name = ?", lookupU.Name)
-	if u.Password != lookupU.Password {
+	if u.Password != lookupU.Password || lookupU.Password == "" {
 		return response.Redirect("/")
 	}
+	return nil
+}
+
+func login(u *User) *response.Response {
 	return response.Redirect("/").
 		Cookies(cookie.New("logged_user", u.Name))
 }
@@ -46,23 +47,8 @@ type UserStatus struct {
 }
 
 func (s *UserStatus) VerifyRequest() *response.Response {
-	if s.Logged != nil {
-		return response.New(response.Html(fmt.Sprintf(`
-<html>
-<body>
-	<h1>%s logged</h1>
-    <form action="/logout" method="POST" enctype="form-data">
-        <input type="submit" value="logout" name="submit" class="btn btn-success">
-	</form>
-</body>
-</html>
-`, s.Logged.Value)))
-	}
-	return nil
-}
-
-func home(*UserStatus) response.Html {
-	return `
+	if s.Logged == nil {
+		return response.New(response.Html(`
 <html>
 <body>
 	<form action="/login" method="POST" enctype="form-data">
@@ -72,7 +58,22 @@ func home(*UserStatus) response.Html {
 	</form>
 </body>
 </html>
-`
+`))
+	}
+	return nil
+}
+
+func home(s *UserStatus) response.Html {
+	return response.Html(fmt.Sprintf(`
+<html>
+<body>
+	<h1>%s logged</h1>
+    <form action="/logout" method="POST" enctype="form-data">
+        <input type="submit" value="logout" name="submit" class="btn btn-success">
+	</form>
+</body>
+</html>
+`, s.Logged.Value))
 }
 
 func logout() *response.Response {
