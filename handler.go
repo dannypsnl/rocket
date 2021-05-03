@@ -85,15 +85,8 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 			Status(http.StatusBadRequest)
 	}
 
-	if err := h.verify(contexts); err != nil {
-		switch err := err.(type) {
-		case *VerifyError:
-			return response.New(err.Error()).
-				Status(err.Status())
-		default:
-			return response.New(err.Error()).
-				Status(http.StatusInternalServerError)
-		}
+	if resp := h.verify(contexts); resp != nil {
+		return resp
 	}
 
 	resp := h.do.Call(
@@ -108,12 +101,12 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	}
 }
 
-func (h *handler) verify(contexts []reflect.Value) error {
+func (h *handler) verify(contexts []reflect.Value) *response.Response {
 	for _, c := range contexts {
 		switch guard := c.Interface().(type) {
 		case Guard:
-			if err := guard.VerifyRequest(); err != nil {
-				return err
+			if resp := guard.VerifyRequest(); resp != nil {
+				return resp
 			}
 		}
 	}

@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/response"
 
 	"github.com/gavv/httpexpect"
-	"github.com/stretchr/testify/assert"
 )
 
 type headerGuard struct {
 	Auth *string `header:"Auth"`
 }
 
-func (h *headerGuard) VerifyRequest() error {
+func (h *headerGuard) VerifyRequest() *response.Response {
 	if h.Auth != nil && *h.Auth == "user1" {
 		return nil
 	}
@@ -60,11 +60,4 @@ func TestGuard(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestVerifyError(t *testing.T) {
-	err := rocket.AuthError("auth failed")
-	assert.Equal(t, http.StatusForbidden, err.Status())
-	err = rocket.ValidateError("validate failed")
-	assert.Equal(t, http.StatusBadRequest, err.Status())
 }

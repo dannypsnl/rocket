@@ -3,34 +3,20 @@ package rocket
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/dannypsnl/rocket/response"
 )
 
-// Guard is an interface that context can implement, when context implement this, context can reject request with a VerifyError.
+// Guard is an interface that context can implement, when context implement this, context can reject request with a *response.Response.
 type Guard interface {
-	VerifyRequest() error
+	VerifyRequest() *response.Response
 }
 
-type VerifyError struct {
-	status  int
-	message string
+func AuthError(format string, a ...interface{}) *response.Response {
+	return response.New(fmt.Sprintf(format, a...)).
+		Status(http.StatusForbidden)
 }
-
-func AuthError(format string, a ...interface{}) *VerifyError {
-	return &VerifyError{
-		status:  http.StatusForbidden,
-		message: fmt.Sprintf(format, a...),
-	}
-}
-func ValidateError(format string, a ...interface{}) *VerifyError {
-	return &VerifyError{
-		status:  http.StatusBadRequest,
-		message: fmt.Sprintf(format, a...),
-	}
-}
-
-func (v *VerifyError) Status() int {
-	return v.status
-}
-func (v *VerifyError) Error() string {
-	return v.message
+func ValidateError(format string, a ...interface{}) *response.Response {
+	return response.New(fmt.Sprintf(format, a...)).
+		Status(http.StatusBadRequest)
 }
