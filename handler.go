@@ -61,7 +61,6 @@ type handler struct {
 	do     reflect.Value // do should return response for HTTP writer
 	method string
 
-	guards       []*context.UserContext
 	userContexts []*context.UserContext
 
 	wildcardIndex int
@@ -80,23 +79,18 @@ func newHandler(do reflect.Value) *handler {
 }
 
 func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
-	ctx, err := h.getContexts(reqURL, r)
+	contexts, err := h.getFilledContexts(h.userContexts, reqURL, r)
 	if err != nil {
 		return response.New(err.Error()).
 			Status(http.StatusBadRequest)
 	}
 
-	if err := h.verify(reqURL, r); err != nil {
-		if err, ok := err.(*VerifyError); ok {
-			return response.New(err.Error()).
-				Status(err.Status())
-		}
-		return response.New(err.Error()).
-			Status(http.StatusInternalServerError)
+	if resp := h.verify(contexts); resp != nil {
+		return resp
 	}
 
 	resp := h.do.Call(
-		ctx,
+		contexts,
 	)[0].Interface()
 
 	switch v := resp.(type) {
@@ -107,47 +101,19 @@ func (h *handler) handle(reqURL []string, r *http.Request) *response.Response {
 	}
 }
 
-func (h *handler) Guard(guard Guard) *handler {
-	if h.guards == nil {
-		h.guards = make([]*context.UserContext, 0)
-	}
-	contextT := reflect.TypeOf(guard).Elem()
-	h.guards = append(h.guards,
-		context.
-			NewUserContext().
-			CacheParamsOffset(contextT, h.routes),
-	)
-	return h
-}
-
-func (h *handler) verify(reqURL []string, r *http.Request) error {
-	// no guards
-	if h.guards == nil {
-		return nil
-	}
-	ctx, err := h.getGuards(reqURL, r)
-	if err != nil {
-		return err
-	}
-	for _, c := range ctx {
-		// without check since we already do the static checking by method signature
-		guard := c.Interface().(Guard)
-		if err := guard.VerifyRequest(); err != nil {
-			return err
+func (h *handler) verify(contexts []reflect.Value) *response.Response {
+	for _, c := range contexts {
+		switch guard := c.Interface().(type) {
+		case Guard:
+			if resp := guard.VerifyRequest(); resp != nil {
+				return resp
+			}
 		}
 	}
 	return nil
 }
 
-func (h *handler) getContexts(reqURL []string, req *http.Request) ([]reflect.Value, error) {
-	return h.fillByCachedUserContexts(h.userContexts, reqURL, req)
-}
-
-func (h *handler) getGuards(reqURL []string, req *http.Request) ([]reflect.Value, error) {
-	return h.fillByCachedUserContexts(h.guards, reqURL, req)
-}
-
-func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqURL []string, req *http.Request) ([]reflect.Value, error) {
+func (h *handler) getFilledContexts(contexts []*context.UserContext, reqURL []string, req *http.Request) ([]reflect.Value, error) {
 	userContexts := make([]reflect.Value, len(contexts))
 
 	err := req.ParseForm()
@@ -181,8 +147,8 @@ func (h *handler) fillByCachedUserContexts(contexts []*context.UserContext, reqU
 			basicChain = append(basicChain, filler.NewHTTPFiller(userContext.HttpParams, req))
 		}
 		ctx := reflect.New(userContext.ContextType)
-		for _, filler := range basicChain {
-			if err := filler.Fill(ctx); err != nil {
+		for _, f := range basicChain {
+			if err := f.Fill(ctx); err != nil {
 				return nil, err
 			}
 		}

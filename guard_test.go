@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/dannypsnl/rocket"
+	"github.com/dannypsnl/rocket/response"
 
 	"github.com/gavv/httpexpect"
-	"github.com/stretchr/testify/assert"
 )
 
 type headerGuard struct {
 	Auth *string `header:"Auth"`
 }
 
-func (h *headerGuard) VerifyRequest() error {
+func (h *headerGuard) VerifyRequest() *response.Response {
 	if h.Auth != nil && *h.Auth == "user1" {
 		return nil
 	}
@@ -25,13 +25,11 @@ func (h *headerGuard) VerifyRequest() error {
 func TestGuard(t *testing.T) {
 	testCases := []struct {
 		name           string
-		guard          rocket.Guard
 		testFunc       func(*httpexpect.Request)
 		expectedStatus int
 	}{
 		{
-			name:  "valid request would pass guard",
-			guard: &headerGuard{},
+			name: "valid request would pass guard",
 			testFunc: func(r *httpexpect.Request) {
 				r.WithHeader("Auth", "user1").
 					Expect().
@@ -41,7 +39,6 @@ func TestGuard(t *testing.T) {
 		},
 		{
 			name:           "invalid request won't pass guard",
-			guard:          &headerGuard{},
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -49,8 +46,7 @@ func TestGuard(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			rk := rocket.Ignite(-1).
-				Mount(rocket.Get("/", func() string { return "" }).
-					Guard(testCase.guard))
+				Mount(rocket.Get("/", func(*headerGuard) string { return "" }))
 			ts := httptest.NewServer(rk)
 			defer ts.Close()
 			e := httpexpect.New(t, ts.URL)
@@ -64,11 +60,4 @@ func TestGuard(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestVerifyError(t *testing.T) {
-	err := rocket.AuthError("auth failed")
-	assert.Equal(t, http.StatusForbidden, err.Status())
-	err = rocket.ValidateError("validate failed")
-	assert.Equal(t, http.StatusBadRequest, err.Status())
 }
