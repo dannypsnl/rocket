@@ -1,5 +1,10 @@
 ## Latest
 
+- provide constants in response for content type hint
+    - `response.ContentTypeHTML`
+    - `response.ContentTypeJSON`
+    - `response.ContentTypeTextPlain`
+
 ## v1.1.0
 
 - (#210) Let guard be a context implements `rocket.Guard`

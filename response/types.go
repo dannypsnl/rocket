@@ -20,3 +20,9 @@ func contentTypeOf(response interface{}) string {
 		return "text/plain"
 	}
 }
+
+const (
+	ContentTypeHTML      = "text/html"
+	ContentTypeJSON      = "application/json"
+	ContentTypeTextPlain = "text/plain"
+)
