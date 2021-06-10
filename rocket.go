@@ -12,7 +12,7 @@ import (
 
 // Rocket is our service.
 type Rocket struct {
-	port          int
+	addr          string
 	router        *router.Route
 	listOfFairing []Fairing
 
@@ -34,7 +34,7 @@ type Rocket struct {
 // Ignite initial service by port.
 func Ignite(port int) *Rocket {
 	return &Rocket{
-		port: port,
+		addr: fmt.Sprintf(":%d", port),
 		router: router.New(
 			&optionsHandler{},
 			createNotAllowHandler,
@@ -90,7 +90,7 @@ func (rk *Rocket) Launch() {
 	for _, f := range rk.listOfFairing {
 		f.OnLaunch(rk)
 	}
-	server := &http.Server{Addr: fmt.Sprintf(":%d", rk.port), Handler: rk}
+	server := &http.Server{Addr: rk.addr, Handler: rk}
 	defer func() {
 		if err := server.Close(); err != nil {
 			log.Fatal(err)
