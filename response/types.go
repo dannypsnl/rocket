@@ -1,5 +1,9 @@
 package response
 
+import (
+	"github.com/dannypsnl/rocket/response/content_type"
+)
+
 type (
 	// Html is a mark for text is HTML
 	// return "Content-Type": "text/html"
@@ -11,16 +15,10 @@ type (
 func contentTypeOf(response interface{}) string {
 	switch response.(type) {
 	case Html:
-		return ContentTypeHTML
+		return content_type.HTML
 	case Json:
-		return ContentTypeJSON
+		return content_type.JSON
 	default:
-		return ContentTypeTextPlain
+		return content_type.TextPlain
 	}
 }
-
-const (
-	ContentTypeHTML      = "text/html"
-	ContentTypeJSON      = "application/json"
-	ContentTypeTextPlain = "text/plain"
-)

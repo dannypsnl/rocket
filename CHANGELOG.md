@@ -1,9 +1,9 @@
 ## Latest
 
-- provide constants in response for content type hint
-    - `response.ContentTypeHTML`
-    - `response.ContentTypeJSON`
-    - `response.ContentTypeTextPlain`
+- provide constants in response for content type hint: `"github.com/dannypsnl/rocket/response/content_type"`
+    - `content_type.HTML`
+    - `content_type.JSON`
+    - `content_type.TextPlain`
 
 ## v1.1.0
 

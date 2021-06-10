@@ -3,6 +3,8 @@ package response
 import (
 	"testing"
 
+	"github.com/dannypsnl/rocket/response/content_type"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,9 +13,9 @@ func TestSetupHeaderContentType(t *testing.T) {
 		resp        interface{}
 		contentType string
 	}{
-		{Html(""), ContentTypeHTML},
-		{Json(""), ContentTypeJSON},
-		{"", ContentTypeTextPlain},
+		{Html(""), content_type.HTML},
+		{Json(""), content_type.JSON},
+		{"", content_type.TextPlain},
 	}
 
 	for _, testCase := range testCases {
