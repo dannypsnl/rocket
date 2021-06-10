@@ -11,9 +11,9 @@ func TestSetupHeaderContentType(t *testing.T) {
 		resp        interface{}
 		contentType string
 	}{
-		{Html(""), "text/html"},
-		{Json(""), "application/json"},
-		{"", "text/plain"},
+		{Html(""), ContentTypeHTML},
+		{Json(""), ContentTypeJSON},
+		{"", ContentTypeTextPlain},
 	}
 
 	for _, testCase := range testCases {

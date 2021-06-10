@@ -11,13 +11,11 @@ type (
 func contentTypeOf(response interface{}) string {
 	switch response.(type) {
 	case Html:
-		return "text/html"
+		return ContentTypeHTML
 	case Json:
-		return "application/json"
-	case string:
-		return "text/plain"
+		return ContentTypeJSON
 	default:
-		return "text/plain"
+		return ContentTypeTextPlain
 	}
 }
 
