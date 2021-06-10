@@ -12,6 +12,10 @@ Rocket is a web framework inspired by [rocket-rs](https://github.com/SergioBenit
 go get github.com/dannypsnl/rocket
 ```
 
+### Warning
+
+This library won't take care of API break changes.
+
 ### Document
 
 [https://dannypsnl.github.io/rocket](https://dannypsnl.github.io/rocket)
