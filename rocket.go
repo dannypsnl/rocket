@@ -8,11 +8,13 @@ import (
 
 	"github.com/dannypsnl/rocket/response"
 	"github.com/dannypsnl/rocket/router"
+
+	"github.com/gorilla/websocket"
 )
 
 // Rocket is our service.
 type Rocket struct {
-	port          int
+	addr          string
 	router        *router.Route
 	listOfFairing []Fairing
 
@@ -34,7 +36,7 @@ type Rocket struct {
 // Ignite initial service by port.
 func Ignite(port int) *Rocket {
 	return &Rocket{
-		port: port,
+		addr: fmt.Sprintf(":%d", port),
 		router: router.New(
 			&optionsHandler{},
 			createNotAllowHandler,
@@ -90,20 +92,43 @@ func (rk *Rocket) Launch() {
 	for _, f := range rk.listOfFairing {
 		f.OnLaunch(rk)
 	}
-	server := &http.Server{Addr: fmt.Sprintf(":%d", rk.port), Handler: rk}
+	http.HandleFunc("/socket", rk.serveWS)
+	http.HandleFunc("/", rk.ServeHTTP)
 	defer func() {
-		if err := server.Close(); err != nil {
-			log.Fatal(err)
-		}
 		if err := rk.onClose(); err != nil {
 			log.Fatal(err)
 		}
 	}()
 	switch {
 	case rk.allowTLS:
-		log.Fatal(server.ListenAndServeTLS(rk.certFile, rk.keyFile))
+		log.Fatal(http.ListenAndServeTLS(rk.addr, rk.certFile, rk.keyFile, nil))
 	default:
-		log.Fatal(server.ListenAndServe())
+		log.Fatal(http.ListenAndServe(rk.addr, nil))
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func (rk *Rocket) serveWS(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		println(string(p))
+		if err := conn.WriteMessage(messageType, p); err != nil {
+			log.Println(err)
+			return
+		}
 	}
 }
 
