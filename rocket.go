@@ -90,7 +90,6 @@ func (rk *Rocket) Launch() {
 	for _, f := range rk.listOfFairing {
 		f.OnLaunch(rk)
 	}
-	http.HandleFunc("/", rk.ServeHTTP)
 	server := &http.Server{Addr: fmt.Sprintf(":%d", rk.port), Handler: rk}
 	defer func() {
 		if err := server.Close(); err != nil {
