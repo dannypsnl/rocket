@@ -30,6 +30,8 @@ type OptionsHandler interface {
 
 type Handler interface {
 	WildcardIndex(int)
+	GetRoute() string
+	Method() string
 }
 
 func New(optionsHandler OptionsHandler, notAllowHandler func(method string) Handler) *Route {
@@ -67,9 +69,10 @@ func SplitBySlash(routeStr string) []string {
 }
 
 // AddHandler bind method+route with handler, notice that it would just panic when get duplicate route
-func (root *Route) AddHandler(method, route string, h Handler) {
-	fullRoute := SplitBySlash(route)
+func (root *Route) AddHandler(h Handler) {
+	fullRoute := SplitBySlash(h.GetRoute())
 	curRoute := root
+	method := h.Method()
 	for i, r := range fullRoute {
 		switch r[0] {
 		case ':':

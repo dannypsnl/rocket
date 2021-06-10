@@ -24,6 +24,9 @@ func main() {
 	rk.
 		Ignite(8080).
 		Mount(
+			rk.Socket("/socket", func(msg string) {
+				fmt.Printf("recv: %s\n", msg)
+			}),
 			rk.Get("/", homePage),
 			rk.Get("/hello/:name/:age", hello),
 		).

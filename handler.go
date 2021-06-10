@@ -176,11 +176,15 @@ func (o *optionsHandler) Build(allowMethods string) router.Handler {
 	}))
 }
 
-func (h *handler) getRoute() string {
+func (h *handler) GetRoute() string {
 	return h.route
 }
 
 // WildcardIndex implements router.Handler
 func (h *handler) WildcardIndex(i int) {
 	h.wildcardIndex = i
+}
+
+func (h *handler) Method() string {
+	return h.method
 }

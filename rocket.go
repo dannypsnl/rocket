@@ -8,8 +8,6 @@ import (
 
 	"github.com/dannypsnl/rocket/response"
 	"github.com/dannypsnl/rocket/router"
-
-	"github.com/gorilla/websocket"
 )
 
 // Rocket is our service.
@@ -66,9 +64,9 @@ func (rk *Rocket) EnableHTTPs(certFile, keyFile string) *Rocket {
 }
 
 // Mount add handlers into our service.
-func (rk *Rocket) Mount(handlers ...*handler) *Rocket {
+func (rk *Rocket) Mount(handlers ...router.Handler) *Rocket {
 	for _, h := range handlers {
-		rk.router.AddHandler(h.method, h.getRoute(), h)
+		rk.router.AddHandler(h)
 	}
 	return rk
 }
@@ -92,7 +90,6 @@ func (rk *Rocket) Launch() {
 	for _, f := range rk.listOfFairing {
 		f.OnLaunch(rk)
 	}
-	http.HandleFunc("/socket", rk.serveWS)
 	http.HandleFunc("/", rk.ServeHTTP)
 	defer func() {
 		if err := rk.onClose(); err != nil {
@@ -104,31 +101,6 @@ func (rk *Rocket) Launch() {
 		log.Fatal(http.ListenAndServeTLS(rk.addr, rk.certFile, rk.keyFile, nil))
 	default:
 		log.Fatal(http.ListenAndServe(rk.addr, nil))
-	}
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func (rk *Rocket) serveWS(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		println(string(p))
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
-		}
 	}
 }
 
@@ -146,6 +118,9 @@ func (rk *Rocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h, ok := hand.(*handler); ok && h != nil {
 		h.rocket = rk
 		resp = h.handle(reqURL, r)
+	} else if h, ok := hand.(*socket); ok {
+		h.handle(w, r)
+		return
 	} else {
 		resp = rk.defaultResponse()
 	}
