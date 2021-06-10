@@ -63,6 +63,10 @@ Factory functions:
   ```go
   response.Redirect("/")
   ```
+- `File`, create a reponse from file
+  ```go
+  response.File("/path/to/file")
+  ```
 - `Stream`, create a streamable responder by allowing you keep writing data into `http.ResponseWriter`
 
   ```go
